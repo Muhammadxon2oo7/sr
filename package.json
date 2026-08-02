@@ -1,0 +1,29 @@
+{
+  "name": "web",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "dev:demo": "NEXT_PUBLIC_DEMO_MODE=true next dev -p 3002",
+    "build:demo": "NEXT_PUBLIC_DEMO_MODE=true next build"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.71.5",
+    "motion": "^12.43.0",
+    "next": "^15.2.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.3",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.1",
+    "tailwindcss": "^4.1.3",
+    "typescript": "^5.8.3"
+  }
+}
