@@ -15,6 +15,7 @@ import {
   cx,
 } from '@/components/ui';
 import { AnimatedItem, AnimatedList, motion, spring } from '@/components/ui/motion';
+import { IconAlert, IconClients, IconClock, IconPlus } from '@/components/ui/icons';
 import { ClientWizard } from './client-wizard';
 import { ClientSheet } from './client-sheet';
 
@@ -39,12 +40,7 @@ export function ClientsTab({ productionId }: { productionId: string }) {
 
   return (
     <div className="space-y-4 px-4 pb-6 pt-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-[24px] font-bold">Klientlar</h1>
-        <Button size="sm" onClick={() => setWizardOpen(true)}>
-          + Yangi
-        </Button>
-      </div>
+      <h1 className="text-[24px] font-bold">Klientlar</h1>
 
       {/* Ishchi bo'yicha filtr */}
       {(team.data?.length ?? 0) > 0 && (
@@ -64,19 +60,24 @@ export function ClientsTab({ productionId }: { productionId: string }) {
         </div>
       )}
 
+      {/* Filtrdan keyin — yangi klient qo'shish */}
+      <Button size="lg" icon={<IconPlus size={17} />} onClick={() => setWizardOpen(true)}>
+        Yangi klient
+      </Button>
+
       {isLoading ? (
         <LoadingScreen />
       ) : !data || data.length === 0 ? (
         <EmptyState
-          icon="💼"
+          icon={<IconClients size={22} />}
           title={workerId ? 'Bu ishchida klient yo\'q' : 'Hali klient yo\'q'}
           description={
             workerId ? undefined : 'Birinchi klientni qo\'shing va jamoangizga biriktiring.'
           }
           action={
             !workerId && (
-              <Button size="lg" onClick={() => setWizardOpen(true)}>
-                + Yangi klient
+              <Button size="lg" icon={<IconPlus size={17} />} onClick={() => setWizardOpen(true)}>
+                Yangi klient
               </Button>
             )
           }
@@ -90,15 +91,17 @@ export function ClientsTab({ productionId }: { productionId: string }) {
                 left={
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
-                      {c.deadlineStatus === 'overdue' && <span>⚠️</span>}
+                      {c.deadlineStatus === 'overdue' && (
+                        <IconAlert size={15} className="shrink-0 text-danger" />
+                      )}
                       <span className="truncate text-[17px] font-semibold">{c.name}</span>
                       {c.archived && (
-                        <span className="rounded bg-tg-secondary px-1.5 text-[11px] text-tg-hint">
+                        <span className="rounded bg-muted px-1.5 text-[11px] text-fg-muted">
                           arxiv
                         </span>
                       )}
                     </div>
-                    <div className="truncate text-[13px] text-tg-hint">
+                    <div className="truncate text-[13px] text-fg-muted">
                       {c.assignments.map((a) => a.worker.name).join(', ') || 'Ishchi biriktirilmagan'}
                     </div>
                   </div>
@@ -110,40 +113,41 @@ export function ClientsTab({ productionId }: { productionId: string }) {
                     >
                       {money(c.margin)}
                     </div>
-                    <div className="text-[11px] text-tg-hint">foyda</div>
+                    <div className="text-[11px] text-fg-muted">foyda</div>
                   </div>
                 }
               />
 
               <div className="mt-2.5 flex items-center gap-2">
                 <Progress percent={c.progressPercent} />
-                <span className="shrink-0 text-[12px] tabular-nums text-tg-hint">
+                <span className="shrink-0 text-[12px] tabular-nums text-fg-muted">
                   {c.completedUnits}/{c.totalUnits}
                 </span>
               </div>
 
               {/* olingan pul − berish kerak = foyda */}
               <div className="mt-2 flex items-center justify-between text-[12px]">
-                <span className="text-tg-hint">
+                <span className="text-fg-muted">
                   Olingan <b className="text-ok">{money(c.receivedAmount)}</b>
                 </span>
-                <span className="text-tg-hint">
-                  Berish kerak <b className="text-tg-text">{money(c.owedToTeam)}</b>
+                <span className="text-fg-muted">
+                  Berish kerak <b className="text-fg">{money(c.owedToTeam)}</b>
                 </span>
               </div>
 
               {c.nextDeadline && (
                 <div
                   className={cx(
-                    'mt-2 text-[12px]',
+                    'mt-2 flex items-center gap-1.5 text-[12px]',
                     c.deadlineStatus === 'overdue'
                       ? 'text-danger'
                       : c.deadlineStatus === 'today'
                         ? 'text-warn'
-                        : 'text-tg-hint',
+                        : 'text-fg-muted',
                   )}
                 >
-                  ⏰ {deadlineText(c.nextDeadline, c.deadlineStatus)}
+                  <IconClock size={13} />
+                  {deadlineText(c.nextDeadline, c.deadlineStatus)}
                 </div>
               )}
             </Card>
@@ -182,7 +186,7 @@ function FilterChip({
       transition={spring}
       className={cx(
         'relative shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors',
-        active ? 'text-tg-button-text' : 'bg-tg-section text-tg-hint',
+        active ? 'text-primary-fg' : 'bg-surface text-fg-muted',
       )}
     >
       {/* Faol filtr foni bir chipdan ikkinchisiga sirg'aladi */}
@@ -190,7 +194,7 @@ function FilterChip({
         <motion.span
           layoutId="filter-chip"
           transition={spring}
-          className="absolute inset-0 -z-10 rounded-full bg-tg-button"
+          className="absolute inset-0 -z-10 rounded-full bg-primary"
         />
       )}
       {children}

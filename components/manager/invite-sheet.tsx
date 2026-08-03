@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { copyText, haptic, openLink } from '@/lib/telegram';
+import { copyText, haptic, shareToTelegram } from '@/lib/telegram';
 import type { UserSearchResult } from '@/lib/types';
 import {
   Avatar,
+  Badge,
   Button,
   Card,
   EmptyState,
@@ -17,6 +18,7 @@ import {
   cx,
 } from '@/components/ui';
 import { AnimatePresence, AnimatedItem, AnimatedList } from '@/components/ui/motion';
+import { IconCopy, IconSearch, IconSend } from '@/components/ui/icons';
 
 type Mode = 'search' | 'link';
 
@@ -39,11 +41,11 @@ export function InviteSheet({
   return (
     <Sheet open={open} onClose={onClose} title="Jamoaga qo'shish">
       <div className="space-y-4">
-        <div className="flex gap-2 rounded-xl bg-tg-secondary p-1">
+        <div className="flex gap-2 rounded-xl bg-muted p-1">
           {(
             [
-              { key: 'search', label: '🔍 Qidirib taklif qilish' },
-              { key: 'link', label: '🔗 Referal havola' },
+              { key: 'search', label: 'Qidirib taklif' },
+              { key: 'link', label: 'Referal havola' },
             ] as { key: Mode; label: string }[]
           ).map((t) => (
             <button
@@ -51,7 +53,7 @@ export function InviteSheet({
               onClick={() => setMode(t.key)}
               className={cx(
                 'flex-1 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors',
-                mode === t.key ? 'bg-tg-section text-tg-text shadow-sm' : 'text-tg-hint',
+                mode === t.key ? 'bg-surface text-fg shadow-sm' : 'text-fg-muted',
               )}
             >
               {t.label}
@@ -103,7 +105,7 @@ function UserSearch({ productionId }: { productionId: string }) {
 
   return (
     <div className="space-y-3">
-      <p className="text-[14px] text-tg-hint">
+      <p className="text-[14px] text-fg-muted">
         Ishchini ismi yoki @username bo&apos;yicha toping. Taklif yuborilgach, u qabul qilsa
         jamoangizga qo&apos;shiladi.
       </p>
@@ -125,7 +127,7 @@ function UserSearch({ productionId }: { productionId: string }) {
 
       {submitted.trim().length >= 2 && data?.length === 0 && (
         <EmptyState
-          icon="🔍"
+          icon={<IconSearch size={22} />}
           title="Topilmadi"
           description="Bu foydalanuvchi hali botga kirmagan bo'lishi mumkin. Referal havolani yuboring."
         />
@@ -143,7 +145,7 @@ function UserSearch({ productionId }: { productionId: string }) {
                       <Avatar name={u.name} photoUrl={u.photoUrl} />
                       <div className="min-w-0">
                         <div className="truncate text-[15px] font-semibold">{u.name}</div>
-                        <div className="truncate text-[12px] text-tg-hint">
+                        <div className="truncate text-[12px] text-fg-muted">
                           {u.roleLabel}
                           {u.username ? ` · @${u.username}` : ''}
                         </div>
@@ -152,9 +154,9 @@ function UserSearch({ productionId }: { productionId: string }) {
                   }
                   right={
                     u.isMember ? (
-                      <span className="text-[13px] text-ok">Jamoada ✓</span>
+                      <Badge tone="ok">Jamoada</Badge>
                     ) : sent ? (
-                      <span className="text-[13px] text-tg-hint">Yuborildi</span>
+                      <span className="text-[13px] text-fg-muted">Yuborildi</span>
                     ) : (
                       <Button
                         size="sm"
@@ -189,44 +191,48 @@ function ReferralLink({ productionId }: { productionId: string }) {
 
   return (
     <div className="space-y-4">
-      <p className="text-[14px] text-tg-hint">
-        Havolani Telegram kontaktlaringizga yuboring. Havola orqali kirgan ishchi rolini
+      <p className="text-[14px] text-fg-muted">
+        Havolani Telegram kontaktingizga yuboring. Havola orqali kirgan ishchi rolini
         tanlagach <b>to&apos;g&apos;ridan-to&apos;g&apos;ri</b> jamoangizga qo&apos;shiladi —
         tasdiqlash talab qilinmaydi.
       </p>
 
-      <div className="break-all rounded-xl bg-tg-secondary px-3.5 py-3 font-mono text-[13px]">
+      {/* Asosiy amal: Telegram chat tanlash oynasini ochadi */}
+      <Button
+        size="lg"
+        disabled={!link}
+        icon={<IconSend size={17} />}
+        onClick={() => {
+          haptic('light');
+          shareToTelegram(link, 'Jamoamga qo\'shiling');
+        }}
+      >
+        Kontaktga yuborish
+      </Button>
+
+      <div className="flex items-center gap-2">
+        <div className="h-px flex-1 bg-border" />
+        <span className="text-[12px] text-fg-muted">yoki havolani nusxalang</span>
+        <div className="h-px flex-1 bg-border" />
+      </div>
+
+      <div className="break-all rounded-xl bg-muted px-3.5 py-3 font-mono text-[12px]">
         {link || 'Yuklanmoqda…'}
       </div>
 
-      <div className="flex gap-2">
-        <Button
-          size="lg"
-          disabled={!link}
-          onClick={async () => {
-            const ok = await copyText(link);
-            haptic(ok ? 'success' : 'error');
-            setCopied(ok);
-            setTimeout(() => setCopied(false), 2000);
-          }}
-        >
-          {copied ? 'Nusxalandi ✓' : 'Nusxa olish'}
-        </Button>
-        <Button
-          size="lg"
-          variant="secondary"
-          disabled={!link}
-          onClick={() =>
-            openLink(
-              `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(
-                'Jamoamga qo\'shiling',
-              )}`,
-            )
-          }
-        >
-          Kontaktga yuborish
-        </Button>
-      </div>
+      <Button
+        variant="secondary"
+        className="w-full"
+        disabled={!link}
+        onClick={async () => {
+          const ok = await copyText(link);
+          haptic(ok ? 'success' : 'error');
+          setCopied(ok);
+          setTimeout(() => setCopied(false), 2000);
+        }}
+      >
+        {copied ? 'Nusxalandi' : 'Nusxa olish'}
+      </Button>
     </div>
   );
 }

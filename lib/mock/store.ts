@@ -95,11 +95,11 @@ export function displayName(u: { firstName: string; lastName?: string | null; us
 }
 
 const ROLE_LABELS: Record<string, string> = {
-  MANAGER: '🎬 Prodakshn-menejer',
-  VIDEOGRAPHER: '🎥 Videograf',
-  EDITOR: '✂️ Montajyor',
-  DESIGNER: '🎨 Dizayner',
-  OTHER: '➕ Boshqa',
+  MANAGER: 'Prodakshn-menejer',
+  VIDEOGRAPHER: 'Videograf',
+  EDITOR: 'Montajyor',
+  DESIGNER: 'Dizayner',
+  OTHER: 'Boshqa',
 };
 
 export const ROLE_GROUPS: Record<string, string> = {
@@ -117,9 +117,7 @@ export function roleLabel(role: string | null, custom?: string | null): string {
 }
 
 export function roleName(role: string | null, custom?: string | null): string {
-  if (!role) return '—';
-  if (role === 'OTHER' && custom) return custom;
-  return (ROLE_LABELS[role] ?? role).replace(/^\S+\s/, '');
+  return roleLabel(role, custom);
 }
 
 // ── Dedlayn mantiqi (backend bilan bir xil) ───────────────────

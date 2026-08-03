@@ -39,7 +39,7 @@ export function RequestsList({
                 <Avatar name={r.name} photoUrl={r.photoUrl} />
                 <div className="min-w-0">
                   <div className="truncate text-[16px] font-semibold">{r.name}</div>
-                  <div className="truncate text-[13px] text-tg-hint">{r.roleLabel}</div>
+                  <div className="truncate text-[13px] text-fg-muted">{r.roleLabel}</div>
                 </div>
               </div>
             }

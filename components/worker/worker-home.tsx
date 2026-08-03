@@ -18,6 +18,7 @@ import {
   cx,
 } from '@/components/ui';
 import { AnimatedItem, AnimatedList } from '@/components/ui/motion';
+import { IconAlert, IconBell, IconBuilding, IconClock } from '@/components/ui/icons';
 import { FindProduction } from '@/components/onboarding/find-production';
 import { AssignmentDetail } from './assignment-detail';
 import { IncomingInvites } from './incoming-invites';
@@ -40,7 +41,7 @@ export function WorkerHome() {
     <div className="space-y-5 px-4 pb-6 pt-4">
       <div>
         <h1 className="text-[24px] font-bold">Salom, {data.user.name.split(' ')[0]}</h1>
-        <p className="text-[14px] text-tg-hint">{data.user.roleLabel}</p>
+        <p className="text-[14px] text-fg-muted">{data.user.roleLabel}</p>
       </div>
 
       {/* Pul jamlanmasi */}
@@ -64,7 +65,7 @@ export function WorkerHome() {
       {data.pendingRequests.length > 0 && (
         <Card>
           <div className="text-[14px] font-semibold">⏳ Arizalar javob kutmoqda</div>
-          <div className="mt-1 space-y-0.5 text-[13px] text-tg-hint">
+          <div className="mt-1 space-y-0.5 text-[13px] text-fg-muted">
             {data.pendingRequests.map((r) => (
               <div key={r.id}>
                 {r.productionName} (@{r.productionUsername})
@@ -76,7 +77,7 @@ export function WorkerHome() {
 
       {data.groups.length === 0 ? (
         <EmptyState
-          icon="🏢"
+          icon={<IconBuilding size={22} />}
           title="Siz hali agentlikka a'zo emassiz"
           description="Agentlik nomi bo'yicha qidiring yoki menejerdan taklif kuting."
           action={
@@ -98,7 +99,7 @@ export function WorkerHome() {
 
             {g.clients.length === 0 ? (
               <Card>
-                <div className="py-2 text-center text-[14px] text-tg-hint">
+                <div className="py-2 text-center text-[14px] text-fg-muted">
                   Bu prodakshnda sizga hali klient biriktirilmagan
                 </div>
               </Card>
@@ -111,11 +112,15 @@ export function WorkerHome() {
                     left={
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
-                          {c.deadlineStatus === 'overdue' && <span>⚠️</span>}
-                          {c.deadlineStatus === 'today' && <span>🔔</span>}
+                          {c.deadlineStatus === 'overdue' && (
+                            <IconAlert size={15} className="shrink-0 text-danger" />
+                          )}
+                          {c.deadlineStatus === 'today' && (
+                            <IconBell size={15} className="shrink-0 text-warn" />
+                          )}
                           <span className="truncate text-[17px] font-semibold">{c.clientName}</span>
                         </div>
-                        <div className="text-[13px] text-tg-hint">
+                        <div className="text-[13px] text-fg-muted">
                           {c.totalUnits} {c.unitLabel}dan {c.completedUnits}tasi bitdi
                         </div>
                       </div>
@@ -125,7 +130,7 @@ export function WorkerHome() {
                         <div className={cx('text-[16px] font-bold', c.debt > 0 ? 'text-warn' : 'text-ok')}>
                           {money(c.debt)}
                         </div>
-                        <div className="text-[11px] text-tg-hint">to&apos;lanmagan</div>
+                        <div className="text-[11px] text-fg-muted">to&apos;lanmagan</div>
                       </div>
                     }
                   />
@@ -137,16 +142,18 @@ export function WorkerHome() {
                   <div className="mt-2 flex items-center justify-between text-[12px]">
                     <span
                       className={cx(
+                        'flex items-center gap-1.5',
                         c.deadlineStatus === 'overdue'
                           ? 'text-danger'
                           : c.deadlineStatus === 'today'
                             ? 'text-warn'
-                            : 'text-tg-hint',
+                            : 'text-fg-muted',
                       )}
                     >
-                      ⏰ {deadlineText(c.deadlineDate, c.deadlineStatus, c.daysLeft)}
+                      <IconClock size={13} />
+                      {deadlineText(c.deadlineDate, c.deadlineStatus, c.daysLeft)}
                     </span>
-                    <span className="text-tg-hint">
+                    <span className="text-fg-muted">
                       ishlandi {money(c.owedAmount)} · to&apos;landi {money(c.paidAmount)}
                     </span>
                   </div>

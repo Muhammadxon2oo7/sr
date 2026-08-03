@@ -112,28 +112,28 @@ export const DEMO_ACCOUNTS: DemoAccount[] = [
     login: 'menejer',
     password: '1234',
     userId: 'u_aziz',
-    title: '🎬 Menejer',
+    title: 'Menejer',
     subtitle: 'Aziz — Sunrise Studio',
   },
   {
     login: 'montajyor',
     password: '1234',
     userId: 'u_ivan',
-    title: '✂️ Montajyor',
+    title: 'Montajyor',
     subtitle: 'Ivan — 2 ta agentlikda ishlaydi',
   },
   {
     login: 'dizayner',
     password: '1234',
     userId: 'u_malika',
-    title: '🎨 Dizayner',
+    title: 'Dizayner',
     subtitle: 'Malika — taklif kutmoqda',
   },
   {
     login: 'yangi',
     password: '1234',
     userId: 'u_yangi',
-    title: '➕ Yangi foydalanuvchi',
+    title: 'Yangi foydalanuvchi',
     subtitle: 'Rol tanlashdan boshlanadi',
   },
 ];
@@ -283,7 +283,7 @@ export function createSeed(): MockDb {
       deadlineType: 'RECURRING',
       intervalDays: 2,
       startDate: iso(-5),
-      deadlineDate: iso(-1), // muddati o'tgan ⚠️
+      deadlineDate: iso(-1), // muddati o'tgan
       lastCompletedAt: iso(-3),
       createdAt: iso(-45),
     },
@@ -313,7 +313,7 @@ export function createSeed(): MockDb {
       deadlineType: 'ONE_TIME',
       intervalDays: null,
       startDate: null,
-      deadlineDate: iso(0), // bugun 🔔
+      deadlineDate: iso(0), // bugungi dedlayn
       lastCompletedAt: iso(-8),
       createdAt: iso(-25),
     },

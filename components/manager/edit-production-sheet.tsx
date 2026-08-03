@@ -68,7 +68,7 @@ export function EditProductionSheet({
           )}
 
           <div className="flex gap-2">
-            <label className="cursor-pointer rounded-xl bg-tg-secondary px-3.5 py-2 text-[14px] font-medium active:opacity-70">
+            <label className="cursor-pointer rounded-xl bg-muted px-3.5 py-2 text-[14px] font-medium active:opacity-70">
               {uploading ? 'Yuklanmoqda…' : photoUrl ? 'Almashtirish' : 'Rasm tanlash'}
               <input
                 type="file"

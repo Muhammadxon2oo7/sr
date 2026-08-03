@@ -5,7 +5,8 @@ import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { haptic } from '@/lib/telegram';
 import type { ProductionSearchResult } from '@/lib/types';
-import { Avatar, Button, Card, EmptyState, ErrorBanner, Input, Row } from '@/components/ui';
+import { Avatar, Badge, Button, Card, EmptyState, ErrorBanner, Input, Row } from '@/components/ui';
+import { IconSearch } from '@/components/ui/icons';
 
 /** Ishchi havolasiz kirganda: @username orqali qidiruv + ariza (TZ 4.3). */
 export function FindProduction({ onDone }: { onDone?: () => void }) {
@@ -61,7 +62,7 @@ export function FindProduction({ onDone }: { onDone?: () => void }) {
       {error && <ErrorBanner message={error} />}
 
       {results && results.length === 0 && (
-        <EmptyState icon="🔍" title="Hech narsa topilmadi" description="@username'ni tekshirib qayta urinib ko'ring." />
+        <EmptyState icon={<IconSearch size={22} />} title="Hech narsa topilmadi" description="@username'ni tekshirib qayta urinib ko'ring." />
       )}
 
       <div className="space-y-2">
@@ -73,7 +74,7 @@ export function FindProduction({ onDone }: { onDone?: () => void }) {
                   <Avatar name={p.name} photoUrl={p.photoUrl} />
                   <div className="min-w-0">
                     <div className="truncate text-[16px] font-semibold">{p.name}</div>
-                    <div className="truncate text-[13px] text-tg-hint">
+                    <div className="truncate text-[13px] text-fg-muted">
                       @{p.username} · {p.membersCount} a&apos;zo
                     </div>
                   </div>
@@ -81,7 +82,7 @@ export function FindProduction({ onDone }: { onDone?: () => void }) {
               }
               right={
                 sentTo.includes(p.id) ? (
-                  <span className="text-[13px] text-ok">Yuborildi ✓</span>
+                  <Badge tone="ok">Yuborildi</Badge>
                 ) : (
                   <Button size="sm" onClick={() => apply(p.id)}>
                     Ariza

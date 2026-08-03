@@ -36,7 +36,7 @@ export function IncomingInvites() {
   if (!data?.length) return null;
 
   return (
-    <Section title={`📨 Sizni jamoaga taklif qilishmoqda (${data.length})`}>
+    <Section title={`Sizni jamoaga taklif qilishmoqda (${data.length})`}>
       <AnimatedList className="space-y-2">
         <AnimatePresence>
           {data.map((inv) => (
@@ -50,7 +50,7 @@ export function IncomingInvites() {
                         <div className="truncate text-[16px] font-semibold">
                           {inv.production.name}
                         </div>
-                        <div className="truncate text-[12px] text-tg-hint">
+                        <div className="truncate text-[12px] text-fg-muted">
                           @{inv.production.username} · {inv.production.membersCount} a&apos;zo
                         </div>
                       </div>

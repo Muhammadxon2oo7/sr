@@ -18,6 +18,7 @@ import {
   cx,
 } from '@/components/ui';
 import { AnimatedItem, AnimatedList } from '@/components/ui/motion';
+import { IconAlert, IconBell, IconClients } from '@/components/ui/icons';
 import { RequestsList } from './requests-list';
 import { InviteSheet } from './invite-sheet';
 import { ClientWizard } from './client-wizard';
@@ -45,26 +46,6 @@ export function HomeTab({
 
   return (
     <div className="space-y-5 px-4 pb-6 pt-4">
-      {/* Prodakshn kartochkasi */}
-      <Card>
-        <Row
-          left={
-            <div className="flex items-center gap-3">
-              <Avatar name={production.name} photoUrl={production.photoUrl} size={52} />
-              <div className="min-w-0">
-                <div className="truncate text-[19px] font-bold">{production.name}</div>
-                <div className="truncate text-[14px] text-tg-hint">@{production.username}</div>
-              </div>
-            </div>
-          }
-          right={
-            <Button size="sm" variant="secondary" onClick={() => setInviteOpen(true)}>
-              Taklif
-            </Button>
-          }
-        />
-      </Card>
-
       {/* Umumiy ko'rsatkichlar */}
       <Section title="Umumiy">
         <div className="grid grid-cols-2 gap-2">
@@ -77,15 +58,15 @@ export function HomeTab({
             format={money}
             hint={
               stats.teamFullyPaid
-                ? '✓ to\'liq to\'langan'
-                : `${money(stats.debtToTeam)} to\'lanmagan`
+                ? "to'liq to'langan"
+                : `${money(stats.debtToTeam)} to'lanmagan`
             }
             tone={stats.teamFullyPaid ? 'ok' : 'warn'}
           />
         </div>
         <Card className="mt-2">
           <Row
-            left={<span className="text-[14px] text-tg-hint">Foyda</span>}
+            left={<span className="text-[14px] text-fg-muted">Foyda</span>}
             right={
               <span
                 className={cx(
@@ -97,7 +78,7 @@ export function HomeTab({
               </span>
             }
           />
-          <div className="mt-1 text-[12px] text-tg-hint">
+          <div className="mt-1 text-[12px] text-fg-muted">
             {money(stats.receivedFromClients)} olingan − {money(stats.owedToTeam)} jamoaga berish
             kerak
           </div>
@@ -106,16 +87,16 @@ export function HomeTab({
 
       {/* Arizalar */}
       {pendingRequests.length > 0 && (
-        <Section title={`📩 A'zolikka arizalar (${pendingRequests.length})`}>
+        <Section title={`A'zolikka arizalar (${pendingRequests.length})`}>
           <RequestsList requests={pendingRequests} productionId={productionId} />
         </Section>
       )}
 
       {/* Dedlaynlar — eng muhim blok */}
-      <Section title="🔥 Yaqinlashayotgan dedlaynlar">
+      <Section title="Yaqinlashayotgan dedlaynlar">
         {deadlines.length === 0 ? (
           <Card>
-            <div className="py-2 text-center text-[14px] text-tg-hint">
+            <div className="py-2 text-center text-[14px] text-fg-muted">
               Faol dedlaynlar yo&apos;q
             </div>
           </Card>
@@ -128,14 +109,18 @@ export function HomeTab({
                   left={
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        {d.deadlineStatus === 'overdue' && <span>⚠️</span>}
-                        {d.deadlineStatus === 'today' && <span>🔔</span>}
+                        {d.deadlineStatus === 'overdue' && (
+                          <IconAlert size={15} className="shrink-0 text-danger" />
+                        )}
+                        {d.deadlineStatus === 'today' && (
+                          <IconBell size={15} className="shrink-0 text-warn" />
+                        )}
                         <span className="truncate text-[15px] font-semibold">
                           {d.workerName}{' '}
-                          <span className="font-normal text-tg-hint">({d.workerRole})</span>
+                          <span className="font-normal text-fg-muted">({d.workerRole})</span>
                         </span>
                       </div>
-                      <div className="truncate text-[14px] text-tg-hint">{d.clientName}</div>
+                      <div className="truncate text-[14px] text-fg-muted">{d.clientName}</div>
                     </div>
                   }
                   right={
@@ -146,7 +131,7 @@ export function HomeTab({
                           ? 'text-danger'
                           : d.deadlineStatus === 'today'
                             ? 'text-warn'
-                            : 'text-tg-hint',
+                            : 'text-fg-muted',
                       )}
                     >
                       {deadlineText(d.deadlineDate, d.deadlineStatus, d.daysLeft)}
@@ -155,7 +140,7 @@ export function HomeTab({
                 />
                 <div className="mt-2.5 flex items-center gap-2">
                   <Progress percent={(d.completedUnits / Math.max(1, d.totalUnits)) * 100} />
-                  <span className="shrink-0 text-[12px] tabular-nums text-tg-hint">
+                  <span className="shrink-0 text-[12px] tabular-nums text-fg-muted">
                     {d.completedUnits}/{d.totalUnits} {d.unitLabel}
                   </span>
                 </div>
@@ -168,15 +153,11 @@ export function HomeTab({
 
       {stats.activeClients === 0 && (
         <EmptyState
-          icon="💼"
+          icon={<IconClients size={22} />}
           title="Hali klient yo'q"
-          description="Birinchi klientni qo'shing va jamoangizga biriktiring."
+          description="Klientlar bo'limidan birinchi klientni qo'shing."
         />
       )}
-
-      <Button size="lg" onClick={() => setWizardOpen(true)}>
-        + Yangi klient
-      </Button>
 
       <InviteSheet
         productionId={productionId}

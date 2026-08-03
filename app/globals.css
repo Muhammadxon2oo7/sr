@@ -1,42 +1,121 @@
 @import 'tailwindcss';
 
 /*
-  Telegram mavzu o'zgaruvchilari — WebApp SDK ularni <html> ga o'rnatadi.
-  Telegram tashqarisida (brauzerda) zaxira qiymatlar ishlaydi.
+  Minimalistik oq-qora dizayn tizimi (shadcn uslubi).
+  Rang — faqat ma'no tashiganda: xavf, ogohlantirish, muvaffaqiyat.
+  Qolgan hamma narsa neytral kulrang shkalada.
 */
-@theme {
-  --color-tg-bg: var(--tg-theme-bg-color, #ffffff);
-  --color-tg-text: var(--tg-theme-text-color, #0f172a);
-  --color-tg-hint: var(--tg-theme-hint-color, #64748b);
-  --color-tg-link: var(--tg-theme-link-color, #2563eb);
-  --color-tg-button: var(--tg-theme-button-color, #2563eb);
-  --color-tg-button-text: var(--tg-theme-button-text-color, #ffffff);
-  --color-tg-secondary: var(--tg-theme-secondary-bg-color, #f1f5f9);
-  --color-tg-section: var(--tg-theme-section-bg-color, #ffffff);
-  --color-tg-separator: var(--tg-theme-section-separator-color, #e2e8f0);
 
-  --color-ok: #16a34a;
-  --color-warn: #d97706;
+@theme {
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-muted: #f4f4f5;
+  --color-fg: #09090b;
+  --color-fg-muted: #71717a;
+  --color-fg-subtle: #a1a1aa;
+  --color-border: #e4e4e7;
+  --color-border-strong: #d4d4d8;
+
+  /* Asosiy amal — qora (qorong'i mavzuda oq) */
+  --color-primary: #09090b;
+  --color-primary-fg: #fafafa;
+
+  /* Semantik ranglar — juda tejamkor ishlatiladi */
   --color-danger: #dc2626;
+  --color-warn: #b45309;
+  --color-ok: #15803d;
+
+  --radius-card: 12px;
+  --radius-control: 10px;
+
+  --font-sans:
+    ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Text', 'Segoe UI', Roboto,
+    system-ui, sans-serif;
+}
+
+/* Qorong'i mavzu — Telegram yoki tizim sozlamasi bo'yicha */
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-bg: #09090b;
+    --color-surface: #111113;
+    --color-muted: #1c1c1f;
+    --color-fg: #fafafa;
+    --color-fg-muted: #a1a1aa;
+    --color-fg-subtle: #71717a;
+    --color-border: #26262a;
+    --color-border-strong: #3f3f46;
+
+    --color-primary: #fafafa;
+    --color-primary-fg: #09090b;
+
+    --color-danger: #f87171;
+    --color-warn: #fbbf24;
+    --color-ok: #4ade80;
+  }
+}
+
+/* Telegram qorong'i mavzuni majburlaganda */
+:root[data-theme='dark'] {
+  --color-bg: #09090b;
+  --color-surface: #111113;
+  --color-muted: #1c1c1f;
+  --color-fg: #fafafa;
+  --color-fg-muted: #a1a1aa;
+  --color-fg-subtle: #71717a;
+  --color-border: #26262a;
+  --color-border-strong: #3f3f46;
+  --color-primary: #fafafa;
+  --color-primary-fg: #09090b;
+  --color-danger: #f87171;
+  --color-warn: #fbbf24;
+  --color-ok: #4ade80;
+}
+
+:root[data-theme='light'] {
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-muted: #f4f4f5;
+  --color-fg: #09090b;
+  --color-fg-muted: #71717a;
+  --color-fg-subtle: #a1a1aa;
+  --color-border: #e4e4e7;
+  --color-border-strong: #d4d4d8;
+  --color-primary: #09090b;
+  --color-primary-fg: #fafafa;
+  --color-danger: #dc2626;
+  --color-warn: #b45309;
+  --color-ok: #15803d;
 }
 
 html,
 body {
-  background: var(--color-tg-secondary);
-  color: var(--color-tg-text);
+  background: var(--color-bg);
+  color: var(--color-fg);
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
 }
 
 body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, system-ui, sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.011em;
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Sarlavhalar biroz zichroq — professional his beradi */
+h1,
+h2,
+h3 {
+  letter-spacing: -0.021em;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
 
 /*
   Skeleton — yorug'lik chizig'i chapdan o'ngga yuguradi.
-  Bu "pulsatsiya"dan ko'ra tirikroq ko'rinadi va yuklanish davom etayotganini aniq bildiradi.
 */
 @keyframes shimmer-sweep {
   100% {
@@ -46,7 +125,7 @@ body {
 .skeleton {
   position: relative;
   overflow: hidden;
-  background: var(--color-tg-separator);
+  background: var(--color-muted);
 }
 .skeleton::after {
   content: '';
@@ -56,13 +135,12 @@ body {
   background: linear-gradient(
     90deg,
     transparent,
-    color-mix(in srgb, var(--color-tg-section) 70%, transparent),
+    color-mix(in srgb, var(--color-bg) 60%, transparent),
     transparent
   );
   animation: shimmer-sweep 1.6s infinite;
 }
 
-/* Harakatni kamaytirish rejimini hurmat qilamiz */
 @media (prefers-reduced-motion: reduce) {
   .skeleton::after {
     animation: none;
@@ -77,14 +155,23 @@ button {
   color: inherit;
 }
 
-/* iOS'da zoom bo'lmasligi uchun */
+/* iOS'da fokusda zoom bo'lmasligi uchun */
 input,
 textarea,
 select {
   font-size: 16px;
 }
 
+input[type='date'] {
+  min-height: 42px;
+}
+
 ::-webkit-scrollbar {
   width: 0;
   height: 0;
+}
+
+::selection {
+  background: var(--color-fg);
+  color: var(--color-bg);
 }

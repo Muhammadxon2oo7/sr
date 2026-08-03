@@ -32,44 +32,13 @@ export function WorkerProfile() {
           <Avatar name={user.name} photoUrl={user.photoUrl} size={64} />
           <div className="min-w-0">
             <div className="truncate text-[19px] font-bold">{user.name}</div>
-            {user.username && <div className="text-[14px] text-tg-hint">@{user.username}</div>}
-            <div className="mt-1 inline-block rounded-full bg-tg-button/10 px-2.5 py-0.5 text-[13px] font-medium text-tg-button">
+            {user.username && <div className="text-[14px] text-fg-muted">@{user.username}</div>}
+            <div className="mt-1 inline-block rounded-full bg-muted px-2.5 py-0.5 text-[13px] font-medium text-fg">
               {user.roleLabel}
             </div>
           </div>
         </div>
       </Card>
-
-      {data && (
-        <Section title="Umumiy ko'rsatkichlar">
-          <Card className="space-y-1.5">
-            <Row
-              left={<span className="text-[14px] text-tg-hint">Jami productionlar</span>}
-              right={<span className="font-semibold">{data.groups.length}</span>}
-            />
-            <Row
-              left={<span className="text-[14px] text-tg-hint">Jami klientlar</span>}
-              right={
-                <span className="font-semibold">
-                  {data.groups.reduce((acc, g) => acc + g.clients.length, 0)}
-                </span>
-              }
-            />
-            <Row
-              left={<span className="text-[14px] text-tg-hint">Jami ishlangan pul</span>}
-              right={<span className="font-semibold">{money(data.totals.owedAmount)}</span>}
-            />
-            <Row
-              left={<span className="text-[14px] text-tg-hint">Jami to&apos;langan</span>}
-              right={<span className="font-semibold text-ok">{money(data.totals.paidAmount)}</span>}
-            />
-            <Row
-              left={<span className="text-[14px] text-tg-hint">Jami to&apos;lanmagan</span>}
-              right={<span className="text-[17px] font-bold text-warn">{money(data.totals.debt)}</span>}
-            />
-          </Card>
-        </Section>
-      )}
 
       {data && data.groups.length > 0 && (
         <Section title="Prodakshnlar">
@@ -82,12 +51,12 @@ export function WorkerProfile() {
                       <Avatar name={g.production.name} photoUrl={g.production.photoUrl} size={36} />
                       <div className="min-w-0">
                         <div className="truncate text-[15px] font-semibold">{g.production.name}</div>
-                        <div className="text-[12px] text-tg-hint">@{g.production.username}</div>
+                        <div className="text-[12px] text-fg-muted">@{g.production.username}</div>
                       </div>
                     </div>
                   }
                   right={
-                    <div className="text-[13px] text-tg-hint">{g.clients.length} klient</div>
+                    <div className="text-[13px] text-fg-muted">{g.clients.length} klient</div>
                   }
                 />
               </Card>
@@ -102,7 +71,7 @@ export function WorkerProfile() {
 
       <DemoControls />
 
-      <p className="px-1 text-center text-[12px] text-tg-hint">
+      <p className="px-1 text-center text-[12px] text-fg-muted">
         Rol bir marta tanlanadi va o&apos;zgartirilmaydi.
       </p>
 

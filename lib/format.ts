@@ -70,18 +70,7 @@ export function deadlineColor(status: DeadlineStatus): string {
     case 'today':
       return 'text-warn';
     default:
-      return 'text-tg-hint';
-  }
-}
-
-export function deadlineBadge(status: DeadlineStatus): string {
-  switch (status) {
-    case 'overdue':
-      return '⚠️';
-    case 'today':
-      return '🔔';
-    default:
-      return '';
+      return 'text-fg-muted';
   }
 }
 

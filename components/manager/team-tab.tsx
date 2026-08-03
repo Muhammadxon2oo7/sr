@@ -17,6 +17,7 @@ import {
   cx,
 } from '@/components/ui';
 import { AnimatePresence, AnimatedItem, AnimatedList, motion, spring } from '@/components/ui/motion';
+import { IconAlert, IconChevronRight, IconPlus, IconTeam } from '@/components/ui/icons';
 import { RequestsList } from './requests-list';
 import { InviteSheet } from './invite-sheet';
 import { AssignmentMoreSheet } from './assignment-more-sheet';
@@ -56,20 +57,20 @@ export function TeamTab({ productionId }: { productionId: string }) {
     <div className="space-y-5 px-4 pb-6 pt-4">
       <div className="flex items-center justify-between">
         <h1 className="text-[24px] font-bold">Jamoa</h1>
-        <Button size="sm" onClick={() => setInviteOpen(true)}>
-          + Qo&apos;shish
+        <Button size="sm" icon={<IconPlus size={15} />} onClick={() => setInviteOpen(true)}>
+          Qo&apos;shish
         </Button>
       </div>
 
       {data.pendingRequests.length > 0 && (
-        <Section title={`📩 Kutilayotgan arizalar (${data.pendingRequests.length})`}>
+        <Section title={`Kutilayotgan arizalar (${data.pendingRequests.length})`}>
           <RequestsList requests={data.pendingRequests} productionId={productionId} />
         </Section>
       )}
 
       {totalMembers === 0 ? (
         <EmptyState
-          icon="👥"
+          icon={<IconTeam size={22} />}
           title="Jamoa hali bo'sh"
           description="Ishchilarni qidirib taklif yuboring yoki referal havolani ulashing."
           action={
@@ -100,7 +101,7 @@ export function TeamTab({ productionId }: { productionId: string }) {
                               <Avatar name={m.name} photoUrl={m.photoUrl} />
                               <div className="min-w-0">
                                 <div className="truncate text-[16px] font-semibold">{m.name}</div>
-                                <div className="truncate text-[12px] text-tg-hint">
+                                <div className="truncate text-[12px] text-fg-muted">
                                   {m.clientsCount} klient · shu oyda {m.completedThisMonth} ish
                                 </div>
                               </div>
@@ -117,14 +118,14 @@ export function TeamTab({ productionId }: { productionId: string }) {
                                 >
                                   {money(m.debt)}
                                 </div>
-                                <div className="text-[11px] text-tg-hint">to&apos;lash kerak</div>
+                                <div className="text-[11px] text-fg-muted">to&apos;lash kerak</div>
                               </div>
                               <motion.span
                                 animate={{ rotate: isOpen ? 90 : 0 }}
                                 transition={spring}
-                                className="text-tg-hint"
+                                className="text-fg-muted"
                               >
-                                ›
+                                <IconChevronRight size={18} />
                               </motion.span>
                             </div>
                           }
@@ -139,7 +140,7 @@ export function TeamTab({ productionId }: { productionId: string }) {
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
                             transition={spring}
-                            className="overflow-hidden border-t border-tg-separator"
+                            className="overflow-hidden border-t border-border"
                           >
                             {m.clients.map((c) => (
                               <ClientLine
@@ -153,14 +154,14 @@ export function TeamTab({ productionId }: { productionId: string }) {
                       </AnimatePresence>
 
                       {isOpen && m.clients.length === 0 && (
-                        <div className="border-t border-tg-separator px-4 py-3 text-[13px] text-tg-hint">
+                        <div className="border-t border-border px-4 py-3 text-[13px] text-fg-muted">
                           Klient biriktirilmagan
                         </div>
                       )}
 
                       {isOpen && (
                         <button
-                          className="w-full border-t border-tg-separator py-2.5 text-[12px] text-danger active:opacity-60"
+                          className="w-full border-t border-border py-2.5 text-[12px] text-danger active:opacity-60"
                           onClick={async () => {
                             const warn =
                               m.clientsCount > 0
@@ -208,10 +209,12 @@ function ClientLine({
     <div className="flex items-center gap-2 px-4 py-2.5">
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          {client.deadlineStatus === 'overdue' && <span className="text-[12px]">⚠️</span>}
+          {client.deadlineStatus === 'overdue' && (
+            <IconAlert size={14} className="shrink-0 text-danger" />
+          )}
           <span className="truncate text-[14px] font-medium">{client.clientName}</span>
         </div>
-        <div className="truncate text-[12px] text-tg-hint">
+        <div className="truncate text-[12px] text-fg-muted">
           {client.completedUnits}/{client.totalUnits} {client.unitLabel} ·{' '}
           {money(client.unitPrice)}/{client.unitLabel}
         </div>
@@ -222,7 +225,7 @@ function ClientLine({
           {money(client.debt)}
         </div>
         {client.deadlineDate && (
-          <div className="text-[11px] text-tg-hint">
+          <div className="text-[11px] text-fg-muted">
             {deadlineText(client.deadlineDate, client.deadlineStatus)}
           </div>
         )}
@@ -230,7 +233,7 @@ function ClientLine({
 
       <button
         onClick={onMore}
-        className="shrink-0 rounded-lg bg-tg-secondary px-2.5 py-1.5 text-[12px] font-medium text-tg-link active:opacity-60"
+        className="shrink-0 rounded-lg bg-muted px-2.5 py-1.5 text-[12px] font-medium text-fg active:opacity-60"
       >
         more
       </button>

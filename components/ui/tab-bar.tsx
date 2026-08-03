@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { haptic } from '@/lib/telegram';
 import { cx } from './index';
 import { AnimatePresence, motion, spring } from './motion';
@@ -7,7 +8,7 @@ import { AnimatePresence, motion, spring } from './motion';
 export interface TabDef<T extends string> {
   key: T;
   label: string;
-  icon: string;
+  icon: ReactNode;
   badge?: number;
 }
 
@@ -21,7 +22,7 @@ export function TabBar<T extends string>({
   onChange: (key: T) => void;
 }) {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-tg-separator bg-tg-bg/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl">
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-bg/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl">
       <div className="mx-auto flex max-w-lg">
         {tabs.map((t) => {
           const isActive = active === t.key;
@@ -32,33 +33,25 @@ export function TabBar<T extends string>({
                 haptic('light');
                 onChange(t.key);
               }}
-              className="relative flex flex-1 flex-col items-center gap-0.5 py-2"
+              className={cx(
+                'relative flex flex-1 flex-col items-center gap-1 py-2.5 transition-colors',
+                isActive ? 'text-fg' : 'text-fg-subtle',
+              )}
             >
-              {/* Faol tab ostidagi indikator bir tabdan ikkinchisiga sirg'aladi */}
+              {/* Faol tab tepasidagi chiziq bir tabdan ikkinchisiga sirg'aladi */}
               {isActive && (
                 <motion.span
-                  layoutId="tab-pill"
+                  layoutId="tab-indicator"
                   transition={spring}
-                  className="absolute inset-x-3 inset-y-1 -z-10 rounded-2xl bg-tg-button/10"
+                  className="absolute -top-px left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-fg"
                 />
               )}
 
-              <motion.span
-                className="text-[20px] leading-none"
-                animate={{ scale: isActive ? 1.12 : 1, y: isActive ? -1 : 0 }}
-                transition={spring}
-              >
+              <motion.span animate={{ scale: isActive ? 1.04 : 1 }} transition={spring}>
                 {t.icon}
               </motion.span>
 
-              <span
-                className={cx(
-                  'text-[10px] font-medium transition-colors',
-                  isActive ? 'text-tg-button' : 'text-tg-hint',
-                )}
-              >
-                {t.label}
-              </span>
+              <span className="text-[10px] font-medium leading-none">{t.label}</span>
 
               <AnimatePresence>
                 {t.badge ? (
@@ -68,7 +61,7 @@ export function TabBar<T extends string>({
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0, opacity: 0 }}
                     transition={spring}
-                    className="absolute right-[22%] top-1 min-w-4 rounded-full bg-danger px-1 text-[10px] font-bold leading-4 text-white"
+                    className="absolute right-[24%] top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-fg px-1 text-[10px] font-semibold leading-none text-bg"
                   >
                     {t.badge}
                   </motion.span>

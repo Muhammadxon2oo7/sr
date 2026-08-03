@@ -5,6 +5,7 @@ import { assetUrl } from '@/lib/api';
 import { initials } from '@/lib/format';
 import { haptic } from '@/lib/telegram';
 import { AnimatePresence, AnimatedNumber, motion, quick, softSpring, spring } from './motion';
+import { IconCheck, IconX } from './icons';
 
 export function cx(...parts: (string | false | null | undefined)[]): string {
   return parts.filter(Boolean).join(' ');
@@ -23,7 +24,7 @@ export function Card({
 }) {
   return (
     <motion.div
-      whileTap={onClick ? { scale: 0.975 } : undefined}
+      whileTap={onClick ? { scale: 0.985 } : undefined}
       transition={spring}
       onClick={
         onClick
@@ -34,7 +35,7 @@ export function Card({
           : undefined
       }
       className={cx(
-        'rounded-2xl bg-tg-section p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]',
+        'rounded-[12px] border border-border bg-surface p-4',
         onClick && 'cursor-pointer',
         className,
       )}
@@ -56,13 +57,11 @@ export function Section({
   className?: string;
 }) {
   return (
-    <section className={cx('space-y-2', className)}>
+    <section className={cx('space-y-2.5', className)}>
       {(title || action) && (
-        <div className="flex items-center justify-between px-1">
+        <div className="flex items-center justify-between px-0.5">
           {title && (
-            <h2 className="text-[13px] font-semibold uppercase tracking-wide text-tg-hint">
-              {title}
-            </h2>
+            <h2 className="text-[13px] font-medium text-fg-muted">{title}</h2>
           )}
           {action}
         </div>
@@ -83,34 +82,37 @@ export function Button({
   loading,
   type = 'button',
   className,
+  icon,
 }: {
-  children: ReactNode;
+  children?: ReactNode;
   onClick?: () => void;
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'success';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'success' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
   loading?: boolean;
   type?: 'button' | 'submit';
   className?: string;
+  icon?: ReactNode;
 }) {
   const variants: Record<string, string> = {
-    primary: 'bg-tg-button text-tg-button-text',
-    secondary: 'bg-tg-secondary text-tg-text',
-    ghost: 'bg-transparent text-tg-link',
-    danger: 'bg-danger/10 text-danger',
-    success: 'bg-ok/10 text-ok',
+    primary: 'bg-primary text-primary-fg',
+    secondary: 'bg-muted text-fg',
+    outline: 'border border-border-strong bg-transparent text-fg',
+    ghost: 'bg-transparent text-fg-muted',
+    danger: 'border border-danger/25 bg-transparent text-danger',
+    success: 'bg-primary text-primary-fg',
   };
   const sizes: Record<string, string> = {
-    sm: 'px-3 py-1.5 text-[13px] rounded-lg',
-    md: 'px-4 py-2.5 text-[15px] rounded-xl',
-    lg: 'px-5 py-3.5 text-[16px] rounded-2xl w-full',
+    sm: 'h-8 px-3 text-[13px] rounded-[8px] gap-1.5',
+    md: 'h-10 px-4 text-[14px] rounded-[10px] gap-2',
+    lg: 'h-12 px-5 text-[15px] rounded-[10px] w-full gap-2',
   };
 
   return (
     <motion.button
       type={type}
       disabled={disabled || loading}
-      whileTap={disabled || loading ? undefined : { scale: 0.96 }}
+      whileTap={disabled || loading ? undefined : { scale: 0.97 }}
       transition={spring}
       onClick={
         onClick
@@ -121,25 +123,63 @@ export function Button({
           : undefined
       }
       className={cx(
-        'font-medium transition-opacity disabled:opacity-40',
+        'inline-flex items-center justify-center font-medium transition-opacity active:opacity-90 disabled:opacity-40',
         variants[variant],
         sizes[size],
         className,
       )}
     >
-      {loading ? <Spinner /> : children}
+      {loading ? (
+        <Spinner />
+      ) : (
+        <>
+          {icon}
+          {children}
+        </>
+      )}
     </motion.button>
   );
 }
 
-/** Yuklanish indikatori — matn o'rniga aylanuvchi halqa. */
 function Spinner() {
   return (
     <motion.span
-      className="mx-auto block h-[1.1em] w-[1.1em] rounded-full border-2 border-current border-t-transparent"
+      className="block h-[1.05em] w-[1.05em] rounded-full border-2 border-current border-t-transparent"
       animate={{ rotate: 360 }}
       transition={{ repeat: Infinity, duration: 0.7, ease: 'linear' }}
     />
+  );
+}
+
+/** Faqat ikonkali dumaloq tugma */
+export function IconButton({
+  children,
+  onClick,
+  label,
+  className,
+}: {
+  children: ReactNode;
+  onClick: () => void;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <motion.button
+      type="button"
+      aria-label={label}
+      whileTap={{ scale: 0.92 }}
+      transition={spring}
+      onClick={() => {
+        haptic('light');
+        onClick();
+      }}
+      className={cx(
+        'inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-border text-fg-muted',
+        className,
+      )}
+    >
+      {children}
+    </motion.button>
   );
 }
 
@@ -162,13 +202,13 @@ export function Avatar({
       alt={name}
       width={size}
       height={size}
-      className="shrink-0 rounded-full object-cover"
+      className="shrink-0 rounded-full border border-border object-cover"
       style={{ width: size, height: size }}
     />
   ) : (
     <div
-      className="flex shrink-0 items-center justify-center rounded-full bg-tg-button/15 font-semibold text-tg-button"
-      style={{ width: size, height: size, fontSize: size * 0.38 }}
+      className="flex shrink-0 items-center justify-center rounded-full border border-border bg-muted font-medium text-fg-muted"
+      style={{ width: size, height: size, fontSize: size * 0.36 }}
     >
       {initials(name)}
     </div>
@@ -177,15 +217,12 @@ export function Avatar({
 
 // ── Progress ──────────────────────────────────────────────────
 
-export function Progress({ percent, tone = 'default' }: { percent: number; tone?: 'default' | 'ok' }) {
+export function Progress({ percent }: { percent: number; tone?: 'default' | 'ok' }) {
   const clamped = Math.min(100, Math.max(0, percent));
   return (
-    <div className="h-1.5 w-full overflow-hidden rounded-full bg-tg-separator">
+    <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
       <motion.div
-        className={cx(
-          'h-full rounded-full',
-          tone === 'ok' || clamped >= 100 ? 'bg-ok' : 'bg-tg-button',
-        )}
+        className="h-full rounded-full bg-primary"
         initial={{ width: 0 }}
         animate={{ width: `${clamped}%` }}
         transition={softSpring}
@@ -194,7 +231,7 @@ export function Progress({ percent, tone = 'default' }: { percent: number; tone?
   );
 }
 
-// ── Stat tile ─────────────────────────────────────────────────
+// ── Stat ──────────────────────────────────────────────────────
 
 export function Stat({
   label,
@@ -204,34 +241,56 @@ export function Stat({
   hint,
 }: {
   label: string;
-  /** Raqam berilsa — qiymat "sanalib" animatsiya bilan ko'rsatiladi. */
   value: string | number;
   format?: (n: number) => string;
   tone?: 'default' | 'ok' | 'danger' | 'warn';
   hint?: string;
 }) {
   const tones: Record<string, string> = {
-    default: 'text-tg-text',
-    ok: 'text-ok',
+    default: 'text-fg',
+    ok: 'text-fg',
     danger: 'text-danger',
     warn: 'text-warn',
   };
   return (
-    <motion.div
-      className="rounded-2xl bg-tg-section p-3"
-      whileTap={{ scale: 0.98 }}
-      transition={spring}
-    >
-      <div className="text-[12px] font-medium text-tg-hint">{label}</div>
-      <div className={cx('mt-0.5 text-[19px] font-bold tabular-nums', tones[tone])}>
+    <div className="rounded-[12px] border border-border bg-surface px-3.5 py-3">
+      <div className="text-[12px] text-fg-muted">{label}</div>
+      <div className={cx('mt-1 text-[20px] font-semibold tabular', tones[tone])}>
         {typeof value === 'number' ? (
           <AnimatedNumber value={value} format={format ?? ((n) => String(Math.round(n)))} />
         ) : (
           value
         )}
       </div>
-      {hint && <div className="text-[11px] text-tg-hint">{hint}</div>}
-    </motion.div>
+      {hint && <div className="mt-0.5 text-[11px] text-fg-subtle">{hint}</div>}
+    </div>
+  );
+}
+
+// ── Badge ─────────────────────────────────────────────────────
+
+export function Badge({
+  children,
+  tone = 'default',
+}: {
+  children: ReactNode;
+  tone?: 'default' | 'danger' | 'warn' | 'ok';
+}) {
+  const tones: Record<string, string> = {
+    default: 'border-border text-fg-muted',
+    danger: 'border-danger/30 text-danger',
+    warn: 'border-warn/30 text-warn',
+    ok: 'border-border text-fg',
+  };
+  return (
+    <span
+      className={cx(
+        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium',
+        tones[tone],
+      )}
+    >
+      {children}
+    </span>
   );
 }
 
@@ -243,47 +302,49 @@ export function EmptyState({
   description,
   action,
 }: {
-  icon: string;
+  icon?: ReactNode;
   title: string;
   description?: string;
   action?: ReactNode;
 }) {
   return (
     <motion.div
-      className="flex flex-col items-center px-6 py-12 text-center"
-      initial={{ opacity: 0, y: 8 }}
+      className="flex flex-col items-center px-6 py-14 text-center"
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={softSpring}
     >
-      <motion.div
-        className="mb-3 text-[44px] leading-none"
-        animate={{ y: [0, -6, 0] }}
-        transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
-      >
-        {icon}
-      </motion.div>
-      <div className="text-[16px] font-semibold">{title}</div>
-      {description && <p className="mt-1 max-w-xs text-[14px] text-tg-hint">{description}</p>}
-      {action && <div className="mt-5 w-full max-w-xs">{action}</div>}
+      {icon && (
+        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-border text-fg-subtle">
+          {icon}
+        </div>
+      )}
+      <div className="text-[15px] font-medium">{title}</div>
+      {description && (
+        <p className="mt-1.5 max-w-[280px] text-[13px] leading-relaxed text-fg-muted">
+          {description}
+        </p>
+      )}
+      {action && <div className="mt-6 w-full max-w-[280px]">{action}</div>}
     </motion.div>
   );
 }
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cx('skeleton rounded-xl', className)} />;
+  return <div className={cx('skeleton rounded-[12px]', className)} />;
 }
 
 export function LoadingScreen() {
   return (
     <div className="space-y-3 p-4">
-      <Skeleton className="h-20" />
+      <Skeleton className="h-16" />
       <Skeleton className="h-24" />
       <Skeleton className="h-24" />
     </div>
   );
 }
 
-// ── Sheet (bottom modal) ──────────────────────────────────────
+// ── Sheet ─────────────────────────────────────────────────────
 
 export function Sheet({
   open,
@@ -312,7 +373,7 @@ export function Sheet({
       {open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center">
           <motion.div
-            className="absolute inset-0 bg-black/45 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-black/50"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -320,9 +381,8 @@ export function Sheet({
             onClick={onClose}
           />
 
-          {/* Pastdan chiqadi va barmoq bilan pastga surib yopiladi */}
           <motion.div
-            className="relative max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-tg-bg pb-[calc(env(safe-area-inset-bottom)+16px)] shadow-[0_-8px_40px_rgba(0,0,0,0.18)]"
+            className="relative max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-[16px] border-t border-border bg-bg pb-[calc(env(safe-area-inset-bottom)+20px)]"
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
@@ -334,15 +394,16 @@ export function Sheet({
               if (info.offset.y > 110 || info.velocity.y > 550) onClose();
             }}
           >
-            <div className="sticky top-0 z-10 bg-tg-bg pt-2">
-              <div className="mx-auto mb-2 h-1 w-9 rounded-full bg-tg-separator" />
-              <div className="flex items-center justify-between border-b border-tg-separator px-4 pb-3">
-                <h3 className="text-[17px] font-semibold">{title}</h3>
+            <div className="sticky top-0 z-10 bg-bg pt-2.5">
+              <div className="mx-auto mb-2.5 h-1 w-9 rounded-full bg-border-strong" />
+              <div className="flex items-center justify-between border-b border-border px-4 pb-3">
+                <h3 className="text-[16px] font-semibold tracking-tight">{title}</h3>
                 <button
                   onClick={onClose}
-                  className="-mr-1 rounded-full px-2 py-1 text-[15px] text-tg-link active:opacity-60"
+                  aria-label="Yopish"
+                  className="-mr-1 flex h-8 w-8 items-center justify-center rounded-full text-fg-muted active:opacity-60"
                 >
-                  Yopish
+                  <IconX size={18} />
                 </button>
               </div>
             </div>
@@ -354,7 +415,7 @@ export function Sheet({
   );
 }
 
-// ── Form fields ───────────────────────────────────────────────
+// ── Forma ─────────────────────────────────────────────────────
 
 export function Field({
   label,
@@ -369,22 +430,75 @@ export function Field({
 }) {
   return (
     <label className="block space-y-1.5">
-      <span className="block text-[13px] font-medium text-tg-hint">{label}</span>
+      <span className="block text-[13px] font-medium text-fg">{label}</span>
       {children}
       {error ? (
         <span className="block text-[12px] text-danger">{error}</span>
       ) : hint ? (
-        <span className="block text-[12px] text-tg-hint">{hint}</span>
+        <span className="block text-[12px] leading-snug text-fg-muted">{hint}</span>
       ) : null}
     </label>
   );
 }
 
 export const inputClass =
-  'w-full rounded-xl border border-tg-separator bg-tg-section px-3.5 py-2.5 outline-none focus:border-tg-button transition-colors';
+  'w-full rounded-[10px] border border-border bg-surface px-3.5 py-2.5 text-[15px] outline-none transition-colors placeholder:text-fg-subtle focus:border-fg';
 
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} className={cx(inputClass, props.className)} />;
+  return (
+    <input
+      {...props}
+      className={cx(inputClass, props.disabled && 'opacity-50', props.className)}
+    />
+  );
+}
+
+export function Checkbox({
+  checked,
+  onChange,
+  label,
+  disabled,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  label: string;
+  disabled?: boolean;
+}) {
+  return (
+    <motion.button
+      type="button"
+      disabled={disabled}
+      whileTap={disabled ? undefined : { scale: 0.99 }}
+      transition={spring}
+      onClick={() => {
+        if (disabled) return;
+        haptic('light');
+        onChange(!checked);
+      }}
+      className={cx('flex w-full items-center gap-2.5 py-1 text-left', disabled && 'opacity-40')}
+    >
+      <span
+        className={cx(
+          'flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-[6px] border transition-colors',
+          checked ? 'border-primary bg-primary text-primary-fg' : 'border-border-strong',
+        )}
+      >
+        <AnimatePresence>
+          {checked && (
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0 }}
+              transition={spring}
+            >
+              <IconCheck size={13} strokeWidth={2.5} />
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </span>
+      <span className="text-[14px]">{label}</span>
+    </motion.button>
+  );
 }
 
 // ── Row ───────────────────────────────────────────────────────
@@ -409,13 +523,23 @@ export function Row({
 export function ErrorBanner({ message }: { message: string }) {
   return (
     <motion.div
-      className="rounded-xl bg-danger/10 px-3.5 py-2.5 text-[14px] text-danger"
-      initial={{ opacity: 0, height: 0, marginTop: 0 }}
+      className="rounded-[10px] border border-danger/25 px-3.5 py-2.5 text-[13px] leading-snug text-danger"
+      initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: 'auto' }}
       exit={{ opacity: 0, height: 0 }}
       transition={quick}
     >
       {message}
     </motion.div>
+  );
+}
+
+/** Sahifa sarlavhasi — barcha tablar uchun bir xil */
+export function PageHeader({ title, action }: { title: string; action?: ReactNode }) {
+  return (
+    <div className="flex items-center justify-between">
+      <h1 className="text-[22px] font-semibold tracking-tight">{title}</h1>
+      {action}
+    </div>
   );
 }
