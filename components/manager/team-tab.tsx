@@ -54,11 +54,19 @@ export function TeamTab({ productionId }: { productionId: string }) {
 
   return (
     <div className="space-y-5 px-4 pb-6 pt-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-[24px] font-bold">Jamoa</h1>
-        <Button size="sm" onClick={() => setInviteOpen(true)}>
-          + Qo&apos;shish
-        </Button>
+      <div className="flex items-center gap-3">
+        <Avatar name={data.production.name} photoUrl={data.production.photoUrl} size={52} />
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-[19px] font-bold">{data.production.name}</div>
+          <div className="truncate text-[14px] text-tg-hint">{totalMembers}ta ishchi</div>
+        </div>
+        <button
+          onClick={() => setInviteOpen(true)}
+          aria-label="Jamoaga qo'shish"
+          className="shrink-0 rounded-xl bg-tg-secondary px-5 py-2.5 text-[20px] font-medium leading-none text-tg-link active:opacity-60"
+        >
+          +
+        </button>
       </div>
 
       {data.pendingRequests.length > 0 && (
