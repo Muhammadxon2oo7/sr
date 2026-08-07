@@ -1153,6 +1153,11 @@ function route(
       return toAssignmentDto(a, client.name);
     }
 
+    if (p2 === 'remind' && method === 'POST') {
+      if (!isManager) throw new MockError('Bu amalni faqat menejer bajara oladi.', 403);
+      return { sent: true };
+    }
+
     if (p2 === 'payouts' && method === 'POST') {
       if (!isManager) throw new MockError('To\'lovni faqat menejer qayd eta oladi.', 403);
       const amount = Number(b['amount'] ?? 0);

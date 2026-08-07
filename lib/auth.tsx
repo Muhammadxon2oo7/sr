@@ -30,15 +30,6 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null);
 
-/**
- * Telegram yorug'/qorong'i rejimini <html data-theme> ga o'tkazadi.
- * Telegram tashqarisida — tizim sozlamasi (CSS media query) ishlaydi.
- */
-function applyColorScheme(scheme?: 'light' | 'dark') {
-  if (typeof document === 'undefined' || !scheme) return;
-  document.documentElement.dataset.theme = scheme;
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -82,7 +73,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         // ── Demo rejim: server yo'q, login/parol bilan kiriladi ──
         if (DEMO) {
-          applyColorScheme(tg()?.colorScheme);
           const { getSession } = await import('./mock/store');
           if (!getSession()) {
             if (!cancelled) {
@@ -100,7 +90,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         app?.ready();
         app?.expand();
         app?.disableVerticalSwipes?.();
-        applyColorScheme(app?.colorScheme);
 
         const url = new URL(window.location.href);
         const param =

@@ -2,7 +2,6 @@
 
 import { useRef, useState } from 'react';
 import { TabBar, type TabDef } from '@/components/ui/tab-bar';
-import { IconHome, IconUser } from '@/components/ui/icons';
 import { AnimatePresence, motion, tabVariants } from '@/components/ui/motion';
 import { WorkerHome } from './worker-home';
 import { WorkerProfile } from './worker-profile';
@@ -10,8 +9,8 @@ import { WorkerProfile } from './worker-profile';
 type Tab = 'home' | 'profile';
 
 const tabs: TabDef<Tab>[] = [
-  { key: 'home', label: 'Bosh sahifa', icon: <IconHome size={21} /> },
-  { key: 'profile', label: 'Profil', icon: <IconUser size={21} /> },
+  { key: 'home', label: 'Bosh sahifa', icon: '🏠' },
+  { key: 'profile', label: 'Profil', icon: '👤' },
 ];
 
 export function WorkerApp() {

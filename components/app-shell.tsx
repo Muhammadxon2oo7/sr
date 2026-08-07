@@ -3,7 +3,6 @@
 import { useAuth } from '@/lib/auth';
 import { LoginScreen } from '@/components/demo/login-screen';
 import { EmptyState, LoadingScreen } from '@/components/ui';
-import { IconAlert } from '@/components/ui/icons';
 import { RoleSelect } from '@/components/onboarding/role-select';
 import { CreateProduction } from '@/components/onboarding/create-production';
 import { ManagerApp } from '@/components/manager/manager-app';
@@ -18,13 +17,7 @@ export function AppShell() {
   if (loading) return <LoadingScreen />;
 
   if (error) {
-    return (
-      <EmptyState
-        icon={<IconAlert size={22} />}
-        title="Kirish amalga oshmadi"
-        description={error}
-      />
-    );
+    return <EmptyState icon="⚠️" title="Kirish amalga oshmadi" description={error} />;
   }
 
   if (!me) return <LoadingScreen />;

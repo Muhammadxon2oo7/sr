@@ -3,9 +3,7 @@
 import { useState } from 'react';
 import { DEMO_ACCOUNTS } from '@/lib/mock/data';
 import { haptic } from '@/lib/telegram';
-import { Button, ErrorBanner, Field, Input } from '@/components/ui';
-import { Logo } from '@/components/ui/logo';
-import { IconChevronRight } from '@/components/ui/icons';
+import { Button, ErrorBanner, Field, Input, cx } from '@/components/ui';
 import { AnimatePresence, motion, softSpring, spring } from '@/components/ui/motion';
 
 /**
@@ -23,7 +21,7 @@ export function LoginScreen({ onLogin }: { onLogin: (userId: string) => void }) 
     );
     if (!acc) {
       haptic('error');
-      setError("Login yoki parol noto'g'ri.");
+      setError('Login yoki parol noto\'g\'ri.');
       return;
     }
     haptic('success');
@@ -31,25 +29,28 @@ export function LoginScreen({ onLogin }: { onLogin: (userId: string) => void }) 
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-lg flex-col justify-center px-5 py-12">
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={softSpring}>
-        {/* Logo */}
-        <div className="mb-9 flex flex-col items-center text-center">
+    <div className="mx-auto flex min-h-dvh max-w-lg flex-col justify-center px-5 py-10">
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={softSpring}
+      >
+        <div className="mb-8 text-center">
           <motion.div
-            initial={{ scale: 0.85, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
+            className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-3xl bg-tg-button text-[32px]"
+            initial={{ scale: 0.6, rotate: -8 }}
+            animate={{ scale: 1, rotate: 0 }}
             transition={spring}
-            className="text-fg"
           >
-            <Logo size={56} />
+            🎬
           </motion.div>
-          <h1 className="mt-4 text-[24px] font-semibold tracking-tight">Prodakshn</h1>
-          <p className="mt-1 text-[13px] text-fg-muted">
+          <h1 className="text-[26px] font-bold leading-tight">Prodakshn</h1>
+          <p className="mt-1 text-[14px] text-tg-hint">
             Klientlar, jamoa va pul oqimi — bitta joyda
           </p>
         </div>
 
-        <div className="space-y-3.5">
+        <div className="space-y-3">
           <Field label="Login">
             <Input
               value={login}
@@ -80,38 +81,41 @@ export function LoginScreen({ onLogin }: { onLogin: (userId: string) => void }) 
         </div>
 
         {/* Demo akkauntlar — bosilsa avtomatik kiradi */}
-        <div className="mt-9">
-          <div className="mb-2.5 px-0.5 text-[12px] font-medium text-fg-muted">
-            Demo akkauntlar · parol 1234
+        <div className="mt-8">
+          <div className="mb-2 text-center text-[12px] font-medium uppercase tracking-wide text-tg-hint">
+            Demo akkauntlar (parol: 1234)
           </div>
-          <div className="overflow-hidden rounded-[12px] border border-border">
+          <div className="space-y-2">
             {DEMO_ACCOUNTS.map((a, i) => (
               <motion.button
                 key={a.login}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.04 * i }}
-                whileTap={{ backgroundColor: 'rgba(127,127,127,0.08)' }}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...spring, delay: 0.05 * i }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   setLogin(a.login);
                   setPassword(a.password);
                   submit(a.login, a.password);
                 }}
-                className="flex w-full items-center gap-3 border-b border-border bg-surface px-4 py-3 text-left last:border-b-0"
+                className={cx(
+                  'flex w-full items-center justify-between rounded-2xl bg-tg-section px-4 py-3 text-left',
+                )}
               >
-                <div className="min-w-0 flex-1">
-                  <div className="text-[14px] font-medium">{a.title}</div>
-                  <div className="truncate text-[12px] text-fg-muted">{a.subtitle}</div>
+                <div className="min-w-0">
+                  <div className="text-[15px] font-semibold">{a.title}</div>
+                  <div className="truncate text-[12px] text-tg-hint">{a.subtitle}</div>
                 </div>
-                <span className="shrink-0 font-mono text-[12px] text-fg-subtle">{a.login}</span>
-                <IconChevronRight size={16} className="shrink-0 text-fg-subtle" />
+                <span className="shrink-0 rounded-lg bg-tg-secondary px-2 py-1 font-mono text-[12px] text-tg-hint">
+                  {a.login}
+                </span>
               </motion.button>
             ))}
           </div>
         </div>
 
-        <p className="mt-7 text-center text-[11px] leading-relaxed text-fg-subtle">
-          Demo versiya — ma&apos;lumot faqat shu brauzerda saqlanadi.
+        <p className="mt-6 text-center text-[11px] leading-relaxed text-tg-hint">
+          Demo versiya — barcha ma&apos;lumot faqat shu brauzerda saqlanadi.
           <br />
           Server yo&apos;q, hech narsa hech qayerga yuborilmaydi.
         </p>

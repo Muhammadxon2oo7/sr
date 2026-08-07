@@ -19,7 +19,6 @@ import {
   Skeleton,
   cx,
 } from '@/components/ui';
-import { IconClock, IconPlus } from '@/components/ui/icons';
 import { AddWorkerSheet } from './add-worker-sheet';
 
 /** Klient kartasi (TZ 5.4.2). */
@@ -53,6 +52,18 @@ export function ClientSheet({
     void qc.invalidateQueries({ queryKey: ['team', productionId] });
     void qc.invalidateQueries({ queryKey: ['finance', productionId] });
   }
+
+  const complete = useMutation({
+    mutationFn: (assignmentId: string) => api.post(`/assignments/${assignmentId}/complete`),
+    onSuccess: () => {
+      haptic('success');
+      invalidate();
+    },
+    onError: (err) => {
+      haptic('error');
+      setError((err as Error).message);
+    },
+  });
 
   /** Ishchini shu klientdan olib tashlash (qolganlari ro'yxat bilan yuboriladi) */
   const removeWorker = useMutation({
@@ -116,27 +127,33 @@ export function ClientSheet({
             {/* Umumiy holat */}
             <Card>
               <Row
-                left={<span className="text-[14px] text-fg-muted">Kelishilgan summa</span>}
+                left={<span className="text-[14px] text-tg-hint">Kelishilgan summa</span>}
                 right={<span className="text-[17px] font-bold">{money(client.totalAmount)}</span>}
               />
               <Row
                 className="mt-2"
-                left={<span className="text-[14px] text-fg-muted">Klientdan tushdi</span>}
+                left={<span className="text-[14px] text-tg-hint">Klientdan tushdi</span>}
                 right={<span className="font-semibold text-ok">{money(client.receivedAmount)}</span>}
               />
               <Row
                 className="mt-1"
-                left={<span className="text-[14px] text-fg-muted">Qolgan (klientdan)</span>}
+                left={<span className="text-[14px] text-tg-hint">Qolgan (klientdan)</span>}
                 right={<span className="font-semibold">{money(client.remainingFromClient)}</span>}
               />
+              <div className="mt-3">
+                <Progress percent={client.progressPercent} />
+                <div className="mt-1 text-[12px] text-tg-hint">
+                  {client.completedUnits}/{client.totalUnits} ish bajarildi
+                </div>
+              </div>
               <Button className="mt-3 w-full" variant="secondary" onClick={() => setIncomeOpen(true)}>
-                Klientdan to&apos;lov qayd etish
+                + Klientdan to&apos;lov qayd etish
               </Button>
             </Card>
 
             {/* Ishchilar */}
             <div className="space-y-2">
-              <div className="px-1 text-[13px] font-semibold uppercase tracking-wide text-fg-muted">
+              <div className="px-1 text-[13px] font-semibold uppercase tracking-wide text-tg-hint">
                 Ishchilar
               </div>
               {client.assignments.map((a) => (
@@ -147,12 +164,12 @@ export function ClientSheet({
                         <Avatar name={a.worker.name} photoUrl={a.worker.photoUrl} size={36} />
                         <div className="min-w-0">
                           <div className="truncate text-[15px] font-semibold">{a.worker.name}</div>
-                          <div className="truncate text-[12px] text-fg-muted">{a.worker.roleName}</div>
+                          <div className="truncate text-[12px] text-tg-hint">{a.worker.roleName}</div>
                         </div>
                       </div>
                     }
                     right={
-                      <div className="text-[12px] tabular-nums text-fg-muted">
+                      <div className="text-[12px] tabular-nums text-tg-hint">
                         {a.completedUnits}/{a.totalUnits} {a.unitLabel}
                       </div>
                     }
@@ -174,26 +191,36 @@ export function ClientSheet({
                   <button
                     onClick={() => setDeadlineFor(a)}
                     className={cx(
-                      'w-full rounded-xl bg-muted px-3 py-2 text-left text-[13px] active:opacity-70',
+                      'w-full rounded-xl bg-tg-secondary px-3 py-2 text-left text-[13px] active:opacity-70',
                       a.deadlineStatus === 'overdue' && 'text-danger',
                       a.deadlineStatus === 'today' && 'text-warn',
                     )}
                   >
-                    <IconClock size={13} className="mr-1 inline-block align-[-2px]" />
+                    ⏰{' '}
                     {a.deadlineType === 'RECURRING'
                       ? `Har ${a.intervalDays} kunda — keyingisi: ${deadlineText(a.deadlineDate, a.deadlineStatus, a.daysLeft)}`
                       : deadlineText(a.deadlineDate, a.deadlineStatus, a.daysLeft)}
-                    <span className="float-right text-fg">o&apos;zgartirish</span>
+                    <span className="float-right text-tg-link">o&apos;zgartirish</span>
                   </button>
 
-                  <Button
-                    variant="secondary"
-                    className="w-full"
-                    disabled={a.debt <= 0}
-                    onClick={() => setPayoutFor(a)}
-                  >
-                    To&apos;lov qayd etish
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="success"
+                      className="flex-1"
+                      disabled={a.isFinished || complete.isPending}
+                      onClick={() => complete.mutate(a.id)}
+                    >
+                      {a.isFinished ? 'Barchasi bajarildi ✓' : '✓ Bajarildi'}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      className="flex-1"
+                      disabled={a.debt <= 0}
+                      onClick={() => setPayoutFor(a)}
+                    >
+                      💵 To&apos;lov
+                    </Button>
+                  </div>
 
                   <button
                     className="w-full text-[12px] text-danger active:opacity-60"
@@ -211,30 +238,25 @@ export function ClientSheet({
                 </Card>
               ))}
 
-              <Button
-                variant="outline"
-                className="w-full"
-                icon={<IconPlus size={16} />}
-                onClick={() => setAddWorkerOpen(true)}
-              >
-                Ishchi biriktirish
+              <Button variant="secondary" className="w-full" onClick={() => setAddWorkerOpen(true)}>
+                + Ishchi biriktirish
               </Button>
             </div>
 
             {/* Jamlanma */}
             <Card>
               <Row
-                left={<span className="text-[14px] text-fg-muted">Jamoaga berish kerak</span>}
+                left={<span className="text-[14px] text-tg-hint">Jamoaga berish kerak</span>}
                 right={<span className="font-semibold">{money(client.owedToTeam)}</span>}
               />
               <Row
                 className="mt-1"
-                left={<span className="text-[14px] text-fg-muted">Jamoaga to&apos;langan</span>}
+                left={<span className="text-[14px] text-tg-hint">Jamoaga to&apos;langan</span>}
                 right={<span className="font-semibold">{money(client.paidToTeam)}</span>}
               />
               <Row
                 className="mt-1"
-                left={<span className="text-[14px] text-fg-muted">Foyda</span>}
+                left={<span className="text-[14px] text-tg-hint">Foyda</span>}
                 right={
                   <span className={cx('font-bold', client.margin >= 0 ? 'text-ok' : 'text-danger')}>
                     {money(client.margin)}
@@ -246,7 +268,7 @@ export function ClientSheet({
             {/* To'lovlar tarixi */}
             {client.incomePayments.length > 0 && (
               <div className="space-y-2">
-                <div className="px-1 text-[13px] font-semibold uppercase tracking-wide text-fg-muted">
+                <div className="px-1 text-[13px] font-semibold uppercase tracking-wide text-tg-hint">
                   Klientdan tushumlar
                 </div>
                 {client.incomePayments.map((p) => (
@@ -255,7 +277,7 @@ export function ClientSheet({
                       left={
                         <div>
                           <div className="text-[15px] font-semibold">{money(p.amount)}</div>
-                          <div className="text-[12px] text-fg-muted">
+                          <div className="text-[12px] text-tg-hint">
                             {formatFullDate(p.paidAt)}
                             {p.note ? ` · ${p.note}` : ''}
                           </div>
@@ -370,8 +392,8 @@ function MiniStat({
   tone?: 'default' | 'ok' | 'danger';
 }) {
   return (
-    <div className="rounded-xl bg-muted px-2 py-2">
-      <div className="text-[11px] text-fg-muted">{label}</div>
+    <div className="rounded-xl bg-tg-secondary px-2 py-2">
+      <div className="text-[11px] text-tg-hint">{label}</div>
       <div
         className={cx(
           'text-[14px] font-bold tabular-nums',
@@ -425,7 +447,7 @@ function PayoutSheet({
         <div className="space-y-4">
           <Card>
             <Row
-              left={<span className="text-[14px] text-fg-muted">{assignment.worker.name}</span>}
+              left={<span className="text-[14px] text-tg-hint">{assignment.worker.name}</span>}
               right={<span className="font-semibold text-danger">Qarz: {money(assignment.debt)}</span>}
             />
           </Card>
@@ -593,7 +615,7 @@ function DeadlineSheet({
               onClick={() => setType(t)}
               className={cx(
                 'flex-1 rounded-xl border-2 px-3 py-2.5 text-[14px] font-medium',
-                type === t ? 'border-fg text-fg' : 'border-border text-fg-muted',
+                type === t ? 'border-tg-button text-tg-button' : 'border-tg-separator text-tg-hint',
               )}
             >
               {t === 'ONE_TIME' ? 'Keyingi ish' : 'Har N kunda'}

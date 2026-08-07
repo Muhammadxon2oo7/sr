@@ -1,39 +1,25 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { deadlineText, money } from '@/lib/format';
-import type { DashboardResponse } from '@/lib/types';
+import { money, timeLeftText, toDateInput } from '@/lib/format';
+import type { DashboardResponse, DeadlineRow } from '@/lib/types';
 import {
   Avatar,
   Button,
   Card,
-  EmptyState,
+  ErrorBanner,
+  Input,
   LoadingScreen,
-  Progress,
-  Row,
   Section,
-  Stat,
+  Sheet,
   cx,
 } from '@/components/ui';
 import { AnimatedItem, AnimatedList } from '@/components/ui/motion';
-import { IconAlert, IconBell, IconClients } from '@/components/ui/icons';
-import { RequestsList } from './requests-list';
-import { InviteSheet } from './invite-sheet';
-import { ClientWizard } from './client-wizard';
-import { ClientSheet } from './client-sheet';
 
-export function HomeTab({
-  productionId,
-  onOpenClients,
-}: {
-  productionId: string;
-  onOpenClients: () => void;
-}) {
-  const [inviteOpen, setInviteOpen] = useState(false);
-  const [wizardOpen, setWizardOpen] = useState(false);
-  const [openClientId, setOpenClientId] = useState<string | null>(null);
+export function HomeTab({ productionId }: { productionId: string }) {
+  const [extending, setExtending] = useState<DeadlineRow | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['dashboard', productionId],
@@ -42,61 +28,56 @@ export function HomeTab({
 
   if (isLoading || !data) return <LoadingScreen />;
 
-  const { production, stats, deadlines, pendingRequests } = data;
+  const { stats, deadlines } = data;
+  const marginPercent =
+    stats.receivedFromClients > 0
+      ? Math.round((stats.profit / stats.receivedFromClients) * 100)
+      : 0;
 
   return (
     <div className="space-y-5 px-4 pb-6 pt-4">
-      {/* Umumiy ko'rsatkichlar */}
-      <Section title="Umumiy">
-        <div className="grid grid-cols-2 gap-2">
-          <Stat label="Aktiv klientlar" value={stats.activeClients} />
-          <Stat label="Jamoa" value={stats.teamMembers} />
-          <Stat label="Pul olingan" value={stats.receivedFromClients} format={money} tone="ok" />
-          <Stat
-            label="Jamoaga to'langan"
-            value={stats.paidToTeam}
-            format={money}
-            hint={
-              stats.teamFullyPaid
-                ? "to'liq to'langan"
-                : `${money(stats.debtToTeam)} to'lanmagan`
-            }
-            tone={stats.teamFullyPaid ? 'ok' : 'warn'}
-          />
+      {/* Umumiy foyda */}
+      <Card>
+        <div className="text-[13px] text-tg-hint">Umumiy foyda</div>
+        <div className="mt-1.5 flex items-center gap-2.5">
+          <span
+            className={cx(
+              'text-[34px] font-bold leading-none tabular-nums',
+              stats.profit >= 0 ? 'text-tg-text' : 'text-danger',
+            )}
+          >
+            {money(stats.profit)}
+          </span>
+          <span className="rounded-lg bg-tg-secondary px-2 py-1 text-[13px] font-medium text-tg-hint">
+            {marginPercent}%
+          </span>
         </div>
-        <Card className="mt-2">
-          <Row
-            left={<span className="text-[14px] text-fg-muted">Foyda</span>}
-            right={
-              <span
-                className={cx(
-                  'text-[22px] font-bold',
-                  stats.profit >= 0 ? 'text-ok' : 'text-danger',
-                )}
-              >
-                {money(stats.profit)}
-              </span>
-            }
-          />
-          <div className="mt-1 text-[12px] text-fg-muted">
-            {money(stats.receivedFromClients)} olingan − {money(stats.owedToTeam)} jamoaga berish
-            kerak
+        <div className="mt-2 text-[13px] text-tg-hint">
+          {money(stats.receivedFromClients)} − {money(stats.owedToTeam)}
+        </div>
+      </Card>
+
+      {/* Klientlar va jamoa */}
+      <div className="grid grid-cols-2 gap-3">
+        <Card>
+          <div className="text-[13px] text-tg-hint">Jami klientlar</div>
+          <div className="mt-1.5 text-[28px] font-bold leading-none tabular-nums">
+            {stats.activeClients}
           </div>
         </Card>
-      </Section>
+        <Card>
+          <div className="text-[13px] text-tg-hint">Jamoa</div>
+          <div className="mt-1.5 text-[28px] font-bold leading-none tabular-nums">
+            {stats.teamMembers}
+          </div>
+        </Card>
+      </div>
 
-      {/* Arizalar */}
-      {pendingRequests.length > 0 && (
-        <Section title={`A'zolikka arizalar (${pendingRequests.length})`}>
-          <RequestsList requests={pendingRequests} productionId={productionId} />
-        </Section>
-      )}
-
-      {/* Dedlaynlar — eng muhim blok */}
+      {/* Yaqinlashayotgan dedlaynlar */}
       <Section title="Yaqinlashayotgan dedlaynlar">
         {deadlines.length === 0 ? (
           <Card>
-            <div className="py-2 text-center text-[14px] text-fg-muted">
+            <div className="py-2 text-center text-[14px] text-tg-hint">
               Faol dedlaynlar yo&apos;q
             </div>
           </Card>
@@ -104,77 +85,155 @@ export function HomeTab({
           <AnimatedList className="space-y-2">
             {deadlines.map((d) => (
               <AnimatedItem key={d.assignmentId} className="mb-2">
-              <Card onClick={() => setOpenClientId(d.clientId)}>
-                <Row
-                  left={
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        {d.deadlineStatus === 'overdue' && (
-                          <IconAlert size={15} className="shrink-0 text-danger" />
-                        )}
-                        {d.deadlineStatus === 'today' && (
-                          <IconBell size={15} className="shrink-0 text-warn" />
-                        )}
-                        <span className="truncate text-[15px] font-semibold">
-                          {d.workerName}{' '}
-                          <span className="font-normal text-fg-muted">({d.workerRole})</span>
-                        </span>
-                      </div>
-                      <div className="truncate text-[14px] text-fg-muted">{d.clientName}</div>
-                    </div>
-                  }
-                  right={
-                    <div
-                      className={cx(
-                        'text-[13px] font-medium',
-                        d.deadlineStatus === 'overdue'
-                          ? 'text-danger'
-                          : d.deadlineStatus === 'today'
-                            ? 'text-warn'
-                            : 'text-fg-muted',
-                      )}
-                    >
-                      {deadlineText(d.deadlineDate, d.deadlineStatus, d.daysLeft)}
-                    </div>
-                  }
+                <DeadlineCard
+                  row={d}
+                  productionId={productionId}
+                  onExtend={() => setExtending(d)}
                 />
-                <div className="mt-2.5 flex items-center gap-2">
-                  <Progress percent={(d.completedUnits / Math.max(1, d.totalUnits)) * 100} />
-                  <span className="shrink-0 text-[12px] tabular-nums text-fg-muted">
-                    {d.completedUnits}/{d.totalUnits} {d.unitLabel}
-                  </span>
-                </div>
-              </Card>
               </AnimatedItem>
             ))}
           </AnimatedList>
         )}
       </Section>
 
-      {stats.activeClients === 0 && (
-        <EmptyState
-          icon={<IconClients size={22} />}
-          title="Hali klient yo'q"
-          description="Klientlar bo'limidan birinchi klientni qo'shing."
-        />
-      )}
-
-      <InviteSheet
+      <ExtendSheet
+        row={extending}
         productionId={productionId}
-        open={inviteOpen}
-        onClose={() => setInviteOpen(false)}
-      />
-      <ClientWizard
-        productionId={productionId}
-        open={wizardOpen}
-        onClose={() => setWizardOpen(false)}
-        onCreated={onOpenClients}
-      />
-      <ClientSheet
-        clientId={openClientId}
-        productionId={productionId}
-        onClose={() => setOpenClientId(null)}
+        onClose={() => setExtending(null)}
       />
     </div>
+  );
+}
+
+function DeadlineCard({
+  row,
+  productionId,
+  onExtend,
+}: {
+  row: DeadlineRow;
+  productionId: string;
+  onExtend: () => void;
+}) {
+  const qc = useQueryClient();
+
+  const remind = useMutation({
+    mutationFn: () => api.post(`/assignments/${row.assignmentId}/remind`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['dashboard', productionId] }),
+  });
+
+  return (
+    <Card>
+      <div className="flex items-center gap-3">
+        <Avatar name={row.workerName} size={44} />
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-[17px] font-semibold">{row.workerName}</div>
+          <div className="truncate text-[14px] text-tg-hint">{row.clientName}</div>
+        </div>
+        <div
+          className={cx(
+            'shrink-0 text-[13px] font-medium',
+            row.deadlineStatus === 'overdue'
+              ? 'text-danger'
+              : row.deadlineStatus === 'today'
+                ? 'text-warn'
+                : 'text-tg-hint',
+          )}
+        >
+          {timeLeftText(row.deadlineDate)}
+        </div>
+      </div>
+
+      <div className="mt-3 flex gap-2">
+        <Button variant="secondary" size="sm" onClick={onExtend}>
+          Cho&apos;zish
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          loading={remind.isPending}
+          disabled={remind.isSuccess}
+          onClick={() => remind.mutate()}
+        >
+          {remind.isSuccess ? 'Yuborildi' : 'Eslatish'}
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
+/** Dedlaynni yangi sanaga surish. */
+function ExtendSheet({
+  row,
+  productionId,
+  onClose,
+}: {
+  row: DeadlineRow | null;
+  productionId: string;
+  onClose: () => void;
+}) {
+  const qc = useQueryClient();
+  const [date, setDate] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  // Sheet ochilganda joriy dedlayn sanasi bilan to'ldiriladi
+  const [lastId, setLastId] = useState<string | null>(null);
+  if (row && row.assignmentId !== lastId) {
+    setLastId(row.assignmentId);
+    setDate(toDateInput(row.deadlineDate));
+    setError(null);
+  }
+
+  const save = useMutation({
+    mutationFn: (iso: string) =>
+      api.patch(`/assignments/${row!.assignmentId}`, {
+        deadlineDate: iso,
+        startDate: iso,
+      }),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ['dashboard', productionId] });
+      onClose();
+    },
+    onError: (err: Error) => setError(err.message),
+  });
+
+  function shift(days: number) {
+    const base = row?.deadlineDate ? new Date(row.deadlineDate) : new Date();
+    const from = base.getTime() < Date.now() ? new Date() : base;
+    from.setDate(from.getDate() + days);
+    setDate(toDateInput(from.toISOString()));
+  }
+
+  return (
+    <Sheet open={!!row} onClose={onClose} title="Dedlaynni cho'zish">
+      <div className="space-y-4">
+        <div className="flex gap-2">
+          <Button variant="secondary" size="sm" onClick={() => shift(1)}>
+            +1 kun
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => shift(3)}>
+            +3 kun
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => shift(7)}>
+            +1 hafta
+          </Button>
+        </div>
+
+        <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+
+        {error && <ErrorBanner message={error} />}
+
+        <Button
+          size="lg"
+          loading={save.isPending}
+          disabled={!date}
+          onClick={() => {
+            setError(null);
+            save.mutate(new Date(`${date}T12:00:00`).toISOString());
+          }}
+        >
+          Saqlash
+        </Button>
+      </div>
+    </Sheet>
   );
 }

@@ -63,6 +63,24 @@ export function deadlineText(
   return formatDate(iso);
 }
 
+/** Dedlaynga qancha qolgani — "2 soat qoldi", "3 kun qoldi", "1 kun kechikdi". */
+export function timeLeftText(iso: string | null): string {
+  if (!iso) return 'Dedlayn yo\'q';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return 'Dedlayn yo\'q';
+
+  const diffMs = d.getTime() - Date.now();
+  const hours = Math.floor(Math.abs(diffMs) / 3_600_000);
+  const days = Math.floor(hours / 24);
+
+  if (diffMs <= 0) {
+    if (hours < 1) return 'Muddati o\'tdi';
+    return days >= 1 ? `${days} kun kechikdi` : `${hours} soat kechikdi`;
+  }
+  if (hours < 1) return `${Math.max(1, Math.floor(diffMs / 60_000))} daqiqa qoldi`;
+  return days >= 1 ? `${days} kun qoldi` : `${hours} soat qoldi`;
+}
+
 export function deadlineColor(status: DeadlineStatus): string {
   switch (status) {
     case 'overdue':
@@ -70,7 +88,18 @@ export function deadlineColor(status: DeadlineStatus): string {
     case 'today':
       return 'text-warn';
     default:
-      return 'text-fg-muted';
+      return 'text-tg-hint';
+  }
+}
+
+export function deadlineBadge(status: DeadlineStatus): string {
+  switch (status) {
+    case 'overdue':
+      return '⚠️';
+    case 'today':
+      return '🔔';
+    default:
+      return '';
   }
 }
 

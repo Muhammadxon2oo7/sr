@@ -78,27 +78,6 @@ export function openLink(url: string) {
   else if (typeof window !== 'undefined') window.open(url, '_blank');
 }
 
-/**
- * Havolani Telegram kontaktlariga yuborish.
- * Telegram ichida chat tanlash oynasi ochiladi (foydalanuvchi kimga yuborishni o'zi tanlaydi).
- */
-export function shareToTelegram(url: string, text: string) {
-  const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
-  const app = tg();
-
-  // Telegram 6.1+ da chat tanlash oynasini ochadi
-  if (app?.openTelegramLink) {
-    app.openTelegramLink(shareUrl);
-    return true;
-  }
-  // Brauzerda — Telegram Web ochiladi
-  if (typeof window !== 'undefined') {
-    window.open(shareUrl, '_blank');
-    return true;
-  }
-  return false;
-}
-
 export async function copyText(text: string): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(text);

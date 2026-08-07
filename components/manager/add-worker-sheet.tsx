@@ -18,7 +18,6 @@ import {
   cx,
 } from '@/components/ui';
 import { AnimatePresence } from '@/components/ui/motion';
-import { IconCheck, IconTeam } from '@/components/ui/icons';
 
 const INTERVALS = [
   { days: 1, label: 'Har kuni' },
@@ -124,29 +123,29 @@ export function AddWorkerSheet({
       <div className="space-y-4">
         {available.length === 0 ? (
           <EmptyState
-            icon={<IconTeam size={22} />}
+            icon="👥"
             title="Qo'shadigan ishchi yo'q"
             description="Jamoadagi barcha ishchilar allaqachon shu klientga biriktirilgan."
           />
         ) : (
           <>
             <div className="space-y-2">
-              <div className="text-[13px] font-medium text-fg-muted">Kim ishlaydi</div>
+              <div className="text-[13px] font-medium text-tg-hint">Kim ishlaydi</div>
               {available.map((w) => (
                 <button
                   key={w.userId}
                   onClick={() => setUserId(w.userId)}
                   className={cx(
-                    'flex w-full items-center gap-3 rounded-2xl border-2 bg-surface px-3.5 py-3 text-left active:opacity-70',
-                    userId === w.userId ? 'border-fg' : 'border-transparent',
+                    'flex w-full items-center gap-3 rounded-2xl border-2 bg-tg-section px-3.5 py-3 text-left active:opacity-70',
+                    userId === w.userId ? 'border-tg-button' : 'border-transparent',
                   )}
                 >
                   <Avatar name={w.name} photoUrl={w.photoUrl} size={36} />
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-[15px] font-semibold">{w.name}</div>
-                    <div className="truncate text-[12px] text-fg-muted">{w.roleLabel}</div>
+                    <div className="truncate text-[12px] text-tg-hint">{w.roleLabel}</div>
                   </div>
-                  {userId === w.userId && <IconCheck size={18} className="text-fg" />}
+                  {userId === w.userId && <span className="text-tg-button">✓</span>}
                 </button>
               ))}
             </div>
@@ -191,7 +190,7 @@ export function AddWorkerSheet({
                 </Field>
 
                 <div className="space-y-2">
-                  <div className="text-[13px] font-medium text-fg-muted">Dedlayn</div>
+                  <div className="text-[13px] font-medium text-tg-hint">Dedlayn</div>
                   <div className="flex gap-2">
                     {(['ONE_TIME', 'RECURRING'] as DeadlineType[]).map((t) => (
                       <button
@@ -200,8 +199,8 @@ export function AddWorkerSheet({
                         className={cx(
                           'flex-1 rounded-xl border-2 px-3 py-2 text-[13px] font-medium',
                           deadlineType === t
-                            ? 'border-fg text-fg'
-                            : 'border-border text-fg-muted',
+                            ? 'border-tg-button text-tg-button'
+                            : 'border-tg-separator text-tg-hint',
                         )}
                       >
                         {t === 'ONE_TIME' ? 'Keyingi dedlayn' : 'Har N kuni'}
@@ -225,8 +224,8 @@ export function AddWorkerSheet({
                             className={cx(
                               'flex-1 rounded-xl border-2 px-2 py-2 text-[13px] font-medium',
                               intervalDays === String(i.days)
-                                ? 'border-fg text-fg'
-                                : 'border-border text-fg-muted',
+                                ? 'border-tg-button text-tg-button'
+                                : 'border-tg-separator text-tg-hint',
                             )}
                           >
                             {i.label}

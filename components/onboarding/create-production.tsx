@@ -63,9 +63,9 @@ export function CreateProduction() {
     <div className="mx-auto min-h-dvh max-w-lg px-4 pb-28 pt-8">
       <div className="mb-6 flex gap-1.5">
         {[0, 1].map((i) => (
-          <div key={i} className="h-1 flex-1 overflow-hidden rounded-full bg-border">
+          <div key={i} className="h-1 flex-1 overflow-hidden rounded-full bg-tg-separator">
             <motion.div
-              className="h-full rounded-full bg-primary"
+              className="h-full rounded-full bg-tg-button"
               initial={false}
               animate={{ scaleX: i <= step ? 1 : 0 }}
               style={{ originX: 0 }}
@@ -87,7 +87,7 @@ export function CreateProduction() {
       {step === 0 && (
         <>
           <h1 className="text-[26px] font-bold leading-tight">Agentligingiz nomi</h1>
-          <p className="mt-2 text-[15px] text-fg-muted">Jamoangiz va klientlar ko&apos;radigan nom.</p>
+          <p className="mt-2 text-[15px] text-tg-hint">Jamoangiz va klientlar ko&apos;radigan nom.</p>
           <div className="mt-6">
             <Field label="Nomi">
               <Input
@@ -105,7 +105,7 @@ export function CreateProduction() {
       {step === 1 && (
         <>
           <h1 className="text-[26px] font-bold leading-tight">Agentlik logosi</h1>
-          <p className="mt-2 text-[15px] text-fg-muted">Ixtiyoriy — keyinroq ham qo&apos;shsa bo&apos;ladi.</p>
+          <p className="mt-2 text-[15px] text-tg-hint">Ixtiyoriy — keyinroq ham qo&apos;shsa bo&apos;ladi.</p>
 
           <motion.div
             className="mt-8 flex flex-col items-center gap-4"
@@ -124,7 +124,7 @@ export function CreateProduction() {
               <Avatar name={name || 'P'} size={112} />
             )}
 
-            <label className="cursor-pointer rounded-xl bg-muted px-4 py-2.5 text-[15px] font-medium active:opacity-70">
+            <label className="cursor-pointer rounded-xl bg-tg-secondary px-4 py-2.5 text-[15px] font-medium active:opacity-70">
               {uploading ? 'Yuklanmoqda…' : photoUrl ? 'Rasmni almashtirish' : 'Rasm tanlash'}
               <input
                 type="file"
@@ -138,12 +138,12 @@ export function CreateProduction() {
             </label>
           </motion.div>
 
-          <div className="mt-8 rounded-2xl bg-surface p-4">
-            <div className="text-[13px] font-semibold uppercase tracking-wide text-fg-muted">
+          <div className="mt-8 rounded-2xl bg-tg-section p-4">
+            <div className="text-[13px] font-semibold uppercase tracking-wide text-tg-hint">
               Tekshiring
             </div>
             <div className="mt-2 text-[17px] font-semibold">{name}</div>
-            <div className="text-[13px] text-fg-muted">
+            <div className="text-[13px] text-tg-hint">
               Ishchilar sizni shu nom bo&apos;yicha qidirib topadi.
             </div>
           </div>
@@ -160,13 +160,13 @@ export function CreateProduction() {
       {demo && (
         <button
           onClick={logout}
-          className="mt-6 w-full text-center text-[13px] text-fg-muted active:opacity-60"
+          className="mt-6 w-full text-center text-[13px] text-tg-hint active:opacity-60"
         >
           Boshqa akkaunt bilan kirish
         </button>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 border-t border-border bg-bg/90 backdrop-blur-xl p-4 pb-[calc(env(safe-area-inset-bottom)+16px)]">
+      <div className="fixed inset-x-0 bottom-0 border-t border-tg-separator bg-tg-bg/90 backdrop-blur-xl p-4 pb-[calc(env(safe-area-inset-bottom)+16px)]">
         <div className="mx-auto flex max-w-lg gap-2">
           {step > 0 && (
             <Button variant="secondary" size="lg" onClick={() => goStep((step - 1) as Step)}>

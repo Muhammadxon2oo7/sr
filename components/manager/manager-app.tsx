@@ -5,7 +5,6 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import type { DashboardResponse, ProductionDto } from '@/lib/types';
 import { TabBar, type TabDef } from '@/components/ui/tab-bar';
-import { IconClients, IconHome, IconTeam, IconUser } from '@/components/ui/icons';
 import { AnimatePresence, motion, tabVariants } from '@/components/ui/motion';
 import { HomeTab } from './home-tab';
 import { TeamTab } from './team-tab';
@@ -34,10 +33,10 @@ export function ManagerApp({ production }: { production: ProductionDto }) {
   const pendingCount = dashboard.data?.pendingRequests.length ?? 0;
 
   const tabs: TabDef<Tab>[] = [
-    { key: 'home', label: 'Bosh sahifa', icon: <IconHome size={21} /> },
-    { key: 'team', label: 'Jamoa', icon: <IconTeam size={21} />, badge: pendingCount || undefined },
-    { key: 'clients', label: 'Klientlar', icon: <IconClients size={21} /> },
-    { key: 'profile', label: 'Profil', icon: <IconUser size={21} /> },
+    { key: 'home', label: 'Bosh sahifa', icon: '🏠' },
+    { key: 'team', label: 'Jamoa', icon: '👥', badge: pendingCount || undefined },
+    { key: 'clients', label: 'Klientlar', icon: '💼' },
+    { key: 'profile', label: 'Profil', icon: '👤' },
   ];
 
   return (
@@ -51,9 +50,7 @@ export function ManagerApp({ production }: { production: ProductionDto }) {
           animate="center"
           exit="exit"
         >
-          {tab === 'home' && (
-            <HomeTab productionId={production.id} onOpenClients={() => goTo('clients')} />
-          )}
+          {tab === 'home' && <HomeTab productionId={production.id} />}
           {tab === 'team' && <TeamTab productionId={production.id} />}
           {tab === 'clients' && <ClientsTab productionId={production.id} />}
           {tab === 'profile' && <ProfileTab productionId={production.id} />}
