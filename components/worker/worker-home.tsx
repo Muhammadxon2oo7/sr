@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { deadlineText, money } from '@/lib/format';
-import type { WorkerDashboard } from '@/lib/types';
+import { haptic } from '@/lib/telegram';
+import { money, timeLeftText } from '@/lib/format';
+import type { WorkerClientRow, WorkerDashboard } from '@/lib/types';
 import {
   Avatar,
   Button,
@@ -12,7 +13,6 @@ import {
   EmptyState,
   LoadingScreen,
   Progress,
-  Row,
   Sheet,
   Stat,
   cx,
@@ -106,51 +106,7 @@ export function WorkerHome() {
               <AnimatedList className="space-y-2">
               {g.clients.map((c) => (
                 <AnimatedItem key={c.assignmentId} className="mb-2">
-                <Card onClick={() => setOpenAssignment(c.assignmentId)}>
-                  <Row
-                    left={
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          {c.deadlineStatus === 'overdue' && <span>⚠️</span>}
-                          {c.deadlineStatus === 'today' && <span>🔔</span>}
-                          <span className="truncate text-[17px] font-semibold">{c.clientName}</span>
-                        </div>
-                        <div className="text-[13px] text-tg-hint">
-                          {c.totalUnits} {c.unitLabel}dan {c.completedUnits}tasi bitdi
-                        </div>
-                      </div>
-                    }
-                    right={
-                      <div>
-                        <div className={cx('text-[16px] font-bold', c.debt > 0 ? 'text-warn' : 'text-ok')}>
-                          {money(c.debt)}
-                        </div>
-                        <div className="text-[11px] text-tg-hint">to&apos;lanmagan</div>
-                      </div>
-                    }
-                  />
-
-                  <div className="mt-2.5">
-                    <Progress percent={c.progressPercent} />
-                  </div>
-
-                  <div className="mt-2 flex items-center justify-between text-[12px]">
-                    <span
-                      className={cx(
-                        c.deadlineStatus === 'overdue'
-                          ? 'text-danger'
-                          : c.deadlineStatus === 'today'
-                            ? 'text-warn'
-                            : 'text-tg-hint',
-                      )}
-                    >
-                      ⏰ {deadlineText(c.deadlineDate, c.deadlineStatus, c.daysLeft)}
-                    </span>
-                    <span className="text-tg-hint">
-                      ishlandi {money(c.owedAmount)} · to&apos;landi {money(c.paidAmount)}
-                    </span>
-                  </div>
-                </Card>
+                  <ClientCard client={c} onInfo={() => setOpenAssignment(c.assignmentId)} />
                 </AnimatedItem>
               ))}
               </AnimatedList>
@@ -174,5 +130,83 @@ export function WorkerHome() {
         onClose={() => setOpenAssignment(null)}
       />
     </div>
+  );
+}
+
+/** Ishchining bitta klienti: progress, qolgan vaqt, pul va "+1 bajarildi". */
+function ClientCard({
+  client: c,
+  onInfo,
+}: {
+  client: WorkerClientRow;
+  onInfo: () => void;
+}) {
+  const qc = useQueryClient();
+  const [error, setError] = useState<string | null>(null);
+
+  const complete = useMutation({
+    mutationFn: () => api.post(`/assignments/${c.assignmentId}/complete`),
+    onSuccess: () => {
+      haptic('success');
+      setError(null);
+      void qc.invalidateQueries({ queryKey: ['worker-dashboard'] });
+    },
+    onError: (err) => {
+      haptic('error');
+      setError((err as Error).message);
+    },
+  });
+
+  return (
+    <Card>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          aria-label="Batafsil"
+          onClick={onInfo}
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-tg-hint text-[13px] font-semibold text-tg-hint active:opacity-60"
+        >
+          i
+        </button>
+        <span className="truncate text-[19px] font-semibold">{c.clientName}</span>
+      </div>
+
+      <div className="mt-2 text-right text-[14px] font-medium tabular-nums text-tg-hint">
+        {c.completedUnits}/{c.totalUnits}
+      </div>
+      <div className="mt-1">
+        <Progress percent={c.progressPercent} />
+      </div>
+
+      <div
+        className={cx(
+          'mt-3 text-[28px] font-bold',
+          c.deadlineStatus === 'overdue'
+            ? 'text-danger'
+            : c.deadlineStatus === 'today'
+              ? 'text-warn'
+              : '',
+        )}
+      >
+        {timeLeftText(c.deadlineDate)}
+      </div>
+
+      <div className="mt-2 text-[13px] text-tg-hint">
+        ishladin {money(c.owedAmount)} · to&apos;landi {money(c.paidAmount)} · to&apos;lanmadi{' '}
+        {money(c.debt)}
+      </div>
+
+      {error && <div className="mt-2 text-[13px] text-danger">{error}</div>}
+
+      <Button
+        className="mt-3 w-full"
+        variant="secondary"
+        disabled={c.isFinished}
+        loading={complete.isPending}
+        onClick={() => complete.mutate()}
+      >
+        {c.isFinished ? 'Hammasi bajarildi ✓' : '+1 bajarildi'}
+      </Button>
+    </Card>
   );
 }

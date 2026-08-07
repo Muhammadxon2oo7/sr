@@ -5,7 +5,7 @@ import { AnimatePresence, motion, spring, stepVariants } from '@/components/ui/m
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { haptic } from '@/lib/telegram';
-import { money, toDateInput } from '@/lib/format';
+import { money, toDateTimeInput } from '@/lib/format';
 import type { AssignmentInput, ClientDto, DeadlineType, TeamOption } from '@/lib/types';
 import {
   Avatar,
@@ -23,12 +23,6 @@ import {
 interface Draft extends AssignmentInput {
   name: string;
 }
-
-const INTERVALS = [
-  { days: 1, label: 'Har kuni' },
-  { days: 2, label: 'Har 2 kunda' },
-  { days: 7, label: 'Har hafta' },
-];
 
 /** "+ Yangi klient" — bosqichma-bosqich master (TZ 5.4.1). */
 export function ClientWizard({
@@ -105,12 +99,11 @@ export function ClientWizard({
         [w.userId]: d[w.userId] ?? {
           userId: w.userId,
           name: w.name,
-          unitLabel: 'video',
+          unitLabel: 'ish',
           totalUnits: 1,
           unitPrice: 0,
           deadlineType: 'ONE_TIME',
-          deadlineDate: toDateInput(new Date(Date.now() + 7 * 86400000).toISOString()),
-          startDate: toDateInput(new Date().toISOString()),
+          deadlineDate: toDateTimeInput(new Date(Date.now() + 7 * 86400000).toISOString()),
         },
       }));
       return [...prev, w.userId];
@@ -141,9 +134,8 @@ export function ClientWizard({
       (d) =>
         d.totalUnits > 0 &&
         Number(d.unitPrice) > 0 &&
-        (d.deadlineType === 'ONE_TIME'
-          ? Boolean(d.deadlineDate)
-          : Boolean(d.intervalDays) && Boolean(d.startDate)),
+        Boolean(d.deadlineDate) &&
+        (d.deadlineType === 'ONE_TIME' || Number(d.intervalDays) > 0),
     ),
     true,
   ][step];
@@ -162,22 +154,20 @@ export function ClientWizard({
       name: name.trim(),
       totalAmount: Number(totalAmount),
       receivedAmount: Number(receivedAmount || 0),
-      assignments: activeDrafts.map((d) => ({
-        userId: d.userId,
-        unitLabel: d.unitLabel?.trim() || 'ish',
-        totalUnits: Number(d.totalUnits),
-        unitPrice: Number(d.unitPrice),
-        deadlineType: d.deadlineType,
-        deadlineDate:
-          d.deadlineType === 'ONE_TIME' && d.deadlineDate
-            ? new Date(`${d.deadlineDate}T12:00:00`).toISOString()
-            : undefined,
-        intervalDays: d.deadlineType === 'RECURRING' ? Number(d.intervalDays) : undefined,
-        startDate:
-          d.deadlineType === 'RECURRING' && d.startDate
-            ? new Date(`${d.startDate}T12:00:00`).toISOString()
-            : undefined,
-      })),
+      assignments: activeDrafts.map((d) => {
+        // Bitta datetime maydoni: bir martalik uchun dedlayn, takrorlanuvchi uchun birinchi sana
+        const at = d.deadlineDate ? new Date(d.deadlineDate).toISOString() : undefined;
+        return {
+          userId: d.userId,
+          unitLabel: d.unitLabel?.trim() || 'ish',
+          totalUnits: Number(d.totalUnits),
+          unitPrice: Number(d.unitPrice),
+          deadlineType: d.deadlineType,
+          deadlineDate: d.deadlineType === 'ONE_TIME' ? at : undefined,
+          intervalDays: d.deadlineType === 'RECURRING' ? Number(d.intervalDays) : undefined,
+          startDate: d.deadlineType === 'RECURRING' ? at : undefined,
+        };
+      }),
     });
   }
 
@@ -287,119 +277,92 @@ export function ClientWizard({
         )}
 
         {step === 3 && (
-          <div className="space-y-3">
-            {activeDrafts.map((d) => (
-              <Card key={d.userId} className="space-y-3">
-                <div className="text-[16px] font-semibold">{d.name}</div>
+          <div className="space-y-4">
+            {activeDrafts.map((d) => {
+              const recurring = d.deadlineType === 'RECURRING';
+              return (
+                <Card key={d.userId} className="space-y-4">
+                  <div className="text-[18px] font-semibold">{d.name}</div>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <Field label="Ish birligi">
-                    <Input
-                      value={d.unitLabel ?? ''}
-                      onChange={(e) => patchDraft(d.userId, { unitLabel: e.target.value })}
-                      placeholder="video / maket / kun"
-                      maxLength={24}
-                    />
-                  </Field>
-                  <Field label="Jami soni">
-                    <Input
-                      type="number"
-                      inputMode="numeric"
-                      min={1}
-                      value={d.totalUnits}
-                      onChange={(e) =>
-                        patchDraft(d.userId, { totalUnits: Number(e.target.value) || 0 })
-                      }
-                    />
-                  </Field>
-                </div>
-
-                <Field
-                  label={`Har bir ${d.unitLabel || 'ish'} uchun narx ($)`}
-                  hint={
-                    Number(d.unitPrice) > 0
-                      ? `Hammasi bajarilsa: ${money(Number(d.unitPrice) * Number(d.totalUnits || 0))}`
-                      : 'To\'lash kerak bo\'lgan summa shu narx × bajarilgan ishlar soni bo\'yicha hisoblanadi.'
-                  }
-                >
-                  <Input
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    value={d.unitPrice}
-                    onChange={(e) => patchDraft(d.userId, { unitPrice: Number(e.target.value) || 0 })}
-                  />
-                </Field>
-
-                <div className="space-y-2">
-                  <div className="text-[13px] font-medium text-tg-hint">Dedlayn turi</div>
-                  <div className="flex gap-2">
-                    {(['ONE_TIME', 'RECURRING'] as DeadlineType[]).map((t) => (
-                      <button
-                        key={t}
-                        onClick={() => patchDraft(d.userId, { deadlineType: t })}
-                        className={cx(
-                          'flex-1 rounded-xl border-2 px-3 py-2 text-[14px] font-medium',
-                          d.deadlineType === t
-                            ? 'border-tg-button text-tg-button'
-                            : 'border-tg-separator text-tg-hint',
-                        )}
-                      >
-                        {t === 'ONE_TIME' ? 'Keyingi ish' : 'Har N kunda'}
-                      </button>
-                    ))}
-                  </div>
-
-                  {d.deadlineType === 'ONE_TIME' ? (
-                    <Input
-                      type="date"
-                      value={d.deadlineDate ?? ''}
-                      onChange={(e) => patchDraft(d.userId, { deadlineDate: e.target.value })}
-                    />
-                  ) : (
-                    <div className="space-y-2">
-                      <div className="flex gap-2">
-                        {INTERVALS.map((i) => (
-                          <button
-                            key={i.days}
-                            onClick={() => patchDraft(d.userId, { intervalDays: i.days })}
-                            className={cx(
-                              'flex-1 rounded-xl border-2 px-2 py-2 text-[13px] font-medium',
-                              d.intervalDays === i.days
-                                ? 'border-tg-button text-tg-button'
-                                : 'border-tg-separator text-tg-hint',
-                            )}
-                          >
-                            {i.label}
-                          </button>
-                        ))}
-                      </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Field label="Jami qilinadigan ish soni">
                       <Input
                         type="number"
                         inputMode="numeric"
                         min={1}
-                        max={365}
-                        placeholder="yoki o'z intervalingiz (kun)"
-                        value={d.intervalDays ?? ''}
+                        value={d.totalUnits}
                         onChange={(e) =>
-                          patchDraft(d.userId, { intervalDays: Number(e.target.value) || undefined })
+                          patchDraft(d.userId, { totalUnits: Number(e.target.value) || 0 })
                         }
                       />
-                      <Field
-                        label="Birinchi dedlayn sanasi"
-                        hint="Keyingi dedlaynlar shu sanadan boshlab avtomatik hisoblanadi."
+                    </Field>
+                    <Field label="Har bir ish narxi">
+                      <Input
+                        type="number"
+                        inputMode="decimal"
+                        min={0}
+                        value={d.unitPrice}
+                        onChange={(e) =>
+                          patchDraft(d.userId, { unitPrice: Number(e.target.value) || 0 })
+                        }
+                      />
+                    </Field>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="text-[18px] font-semibold">Dedlayn</div>
+                    <Input
+                      type="datetime-local"
+                      value={d.deadlineDate ?? ''}
+                      onChange={(e) => patchDraft(d.userId, { deadlineDate: e.target.value })}
+                    />
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        aria-label="Takrorlanuvchi dedlayn"
+                        onClick={() =>
+                          patchDraft(d.userId, {
+                            deadlineType: (recurring
+                              ? 'ONE_TIME'
+                              : 'RECURRING') as DeadlineType,
+                            intervalDays: recurring ? undefined : (d.intervalDays ?? 2),
+                          })
+                        }
+                        className={cx(
+                          'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border-2 text-[18px] font-bold text-white',
+                          recurring ? 'border-ok bg-ok' : 'border-tg-separator',
+                        )}
                       >
+                        {recurring ? '✓' : ''}
+                      </button>
+                      <div className="flex flex-1 items-center gap-2">
+                        <span className="text-[15px]">Har</span>
                         <Input
-                          type="date"
-                          value={d.startDate ?? ''}
-                          onChange={(e) => patchDraft(d.userId, { startDate: e.target.value })}
+                          type="number"
+                          inputMode="numeric"
+                          min={1}
+                          max={365}
+                          disabled={!recurring}
+                          value={d.intervalDays ?? ''}
+                          onChange={(e) =>
+                            patchDraft(d.userId, {
+                              intervalDays: Number(e.target.value) || undefined,
+                            })
+                          }
                         />
-                      </Field>
+                        <span className="text-[15px]">kun</span>
+                      </div>
                     </div>
-                  )}
-                </div>
-              </Card>
-            ))}
+
+                    <p className="text-[13px] leading-snug text-tg-hint">
+                      O&apos;chiq bo&apos;lsa tanlab bo&apos;lmaydi. Yoniq bo&apos;lsa har N kuni
+                      dedlayn avtomatik belgilanadi.
+                    </p>
+                  </div>
+                </Card>
+              );
+            })}
           </div>
         )}
 
@@ -429,7 +392,7 @@ export function ClientWizard({
                         {d.totalUnits} {d.unitLabel} × {money(Number(d.unitPrice))} ·{' '}
                         {d.deadlineType === 'ONE_TIME'
                           ? d.deadlineDate
-                          : `har ${d.intervalDays} kunda (${d.startDate} dan)`}
+                          : `har ${d.intervalDays} kunda (${d.deadlineDate} dan)`}
                       </div>
                     </div>
                   }

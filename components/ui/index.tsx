@@ -384,7 +384,12 @@ export const inputClass =
   'w-full rounded-xl border border-tg-separator bg-tg-section px-3.5 py-2.5 outline-none focus:border-tg-button transition-colors';
 
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} className={cx(inputClass, props.className)} />;
+  return (
+    <input
+      {...props}
+      className={cx(inputClass, props.disabled && 'opacity-40', props.className)}
+    />
+  );
 }
 
 // ── Row ───────────────────────────────────────────────────────

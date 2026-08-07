@@ -3,12 +3,15 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import { money } from '@/lib/format';
+import { alertDialog, openLink } from '@/lib/telegram';
 import type { WorkerDashboard } from '@/lib/types';
 import { useState } from 'react';
 import { Avatar, Button, Card, LoadingScreen, Row, Section, Sheet } from '@/components/ui';
 import { FindProduction } from '@/components/onboarding/find-production';
 import { DemoControls } from '@/components/demo/demo-controls';
+
+/** Rasmiy kanal — `.env` orqali almashtiriladi. */
+const TELEGRAM_CHANNEL = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL ?? 'https://t.me/telegram';
 
 /** Profil tab'i (TZ 6.3). */
 export function WorkerProfile() {
@@ -40,36 +43,20 @@ export function WorkerProfile() {
         </div>
       </Card>
 
-      {data && (
-        <Section title="Umumiy ko'rsatkichlar">
-          <Card className="space-y-1.5">
-            <Row
-              left={<span className="text-[14px] text-tg-hint">Jami productionlar</span>}
-              right={<span className="font-semibold">{data.groups.length}</span>}
-            />
-            <Row
-              left={<span className="text-[14px] text-tg-hint">Jami klientlar</span>}
-              right={
-                <span className="font-semibold">
-                  {data.groups.reduce((acc, g) => acc + g.clients.length, 0)}
-                </span>
-              }
-            />
-            <Row
-              left={<span className="text-[14px] text-tg-hint">Jami ishlangan pul</span>}
-              right={<span className="font-semibold">{money(data.totals.owedAmount)}</span>}
-            />
-            <Row
-              left={<span className="text-[14px] text-tg-hint">Jami to&apos;langan</span>}
-              right={<span className="font-semibold text-ok">{money(data.totals.paidAmount)}</span>}
-            />
-            <Row
-              left={<span className="text-[14px] text-tg-hint">Jami to&apos;lanmagan</span>}
-              right={<span className="text-[17px] font-bold text-warn">{money(data.totals.debt)}</span>}
-            />
-          </Card>
-        </Section>
-      )}
+      <Section>
+        <Card className="space-y-2">
+          <Button className="w-full" onClick={() => alertDialog('Premium obuna tez orada.')}>
+            Premiumga obuna
+          </Button>
+          <Button
+            className="w-full"
+            variant="secondary"
+            onClick={() => openLink(TELEGRAM_CHANNEL)}
+          >
+            Telegram kanalga qo&apos;shilish
+          </Button>
+        </Card>
+      </Section>
 
       {data && data.groups.length > 0 && (
         <Section title="Prodakshnlar">

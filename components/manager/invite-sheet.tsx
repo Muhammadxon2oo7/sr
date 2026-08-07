@@ -3,27 +3,14 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { copyText, haptic, openLink } from '@/lib/telegram';
+import { haptic, openLink } from '@/lib/telegram';
 import type { UserSearchResult } from '@/lib/types';
-import {
-  Avatar,
-  Button,
-  Card,
-  EmptyState,
-  ErrorBanner,
-  Input,
-  Row,
-  Sheet,
-  cx,
-} from '@/components/ui';
-import { AnimatePresence, AnimatedItem, AnimatedList } from '@/components/ui/motion';
-
-type Mode = 'search' | 'link';
+import { Button, ErrorBanner, Input, Sheet } from '@/components/ui';
+import { AnimatePresence } from '@/components/ui/motion';
 
 /**
- * Jamoaga qo'shishning ikki yo'li (buyurtmachi talabi):
- *  1. Foydalanuvchini qidirib taklif yuborish → ishchi qabul qilsa qo'shiladi.
- *  2. Referal havola → havola orqali kirgan ishchi to'g'ridan-to'g'ri qo'shiladi.
+ * Jamoaga qo'shish: @username bo'yicha taklif yuborish yoki
+ * referal havolani to'g'ridan-to'g'ri Telegram chatiga ulashish.
  */
 export function InviteSheet({
   productionId,
@@ -34,184 +21,90 @@ export function InviteSheet({
   open: boolean;
   onClose: () => void;
 }) {
-  const [mode, setMode] = useState<Mode>('search');
-
-  return (
-    <Sheet open={open} onClose={onClose} title="Jamoaga qo'shish">
-      <div className="space-y-4">
-        <div className="flex gap-2 rounded-xl bg-tg-secondary p-1">
-          {(
-            [
-              { key: 'search', label: '🔍 Qidirib taklif qilish' },
-              { key: 'link', label: '🔗 Referal havola' },
-            ] as { key: Mode; label: string }[]
-          ).map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setMode(t.key)}
-              className={cx(
-                'flex-1 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors',
-                mode === t.key ? 'bg-tg-section text-tg-text shadow-sm' : 'text-tg-hint',
-              )}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-
-        {mode === 'search' ? (
-          <UserSearch productionId={productionId} />
-        ) : (
-          <ReferralLink productionId={productionId} />
-        )}
-      </div>
-    </Sheet>
-  );
-}
-
-// ── 1. Foydalanuvchini qidirib taklif yuborish ────────────────
-
-function UserSearch({ productionId }: { productionId: string }) {
   const qc = useQueryClient();
-  const [q, setQ] = useState('');
-  const [submitted, setSubmitted] = useState('');
+  const [username, setUsername] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [invited, setInvited] = useState<string[]>([]);
+  const [sentTo, setSentTo] = useState<string | null>(null);
 
-  const { data, isFetching } = useQuery({
-    queryKey: ['user-search', productionId, submitted],
-    enabled: submitted.trim().length >= 2,
-    queryFn: () =>
-      api.get<UserSearchResult[]>(
-        `/productions/${productionId}/user-search?q=${encodeURIComponent(submitted)}`,
-      ),
+  const { data: linkData } = useQuery({
+    queryKey: ['invite-link', productionId],
+    enabled: open,
+    queryFn: () => api.get<{ link: string }>(`/productions/${productionId}/invite-link`),
   });
+  const link = linkData?.link ?? '';
 
   const invite = useMutation({
-    mutationFn: (userId: string) => api.post(`/productions/${productionId}/invite`, { userId }),
-    onSuccess: (_r, userId) => {
+    mutationFn: async () => {
+      const q = username.trim().replace(/^@/, '');
+      if (q.length < 2) throw new Error('Username kamida 2 belgi bo\'lsin.');
+
+      const found = await api.get<UserSearchResult[]>(
+        `/productions/${productionId}/user-search?q=${encodeURIComponent(q)}`,
+      );
+      const user =
+        found.find((u) => u.username?.toLowerCase() === q.toLowerCase()) ??
+        (found.length === 1 ? found[0] : undefined);
+
+      if (!user) {
+        throw new Error(
+          'Bunday foydalanuvchi topilmadi. U hali botga kirmagan bo\'lishi mumkin — havolani yuboring.',
+        );
+      }
+      if (user.isMember) throw new Error(`${user.name} allaqachon jamoada.`);
+      if (user.invitePending) throw new Error(`${user.name}ga taklif allaqachon yuborilgan.`);
+
+      await api.post(`/productions/${productionId}/invite`, { userId: user.userId });
+      return user;
+    },
+    onSuccess: (user) => {
       haptic('success');
       setError(null);
-      setInvited((prev) => [...prev, userId]);
+      setSentTo(user.name);
+      setUsername('');
       void qc.invalidateQueries({ queryKey: ['team', productionId] });
     },
     onError: (err) => {
       haptic('error');
+      setSentTo(null);
       setError((err as Error).message);
     },
   });
 
   return (
-    <div className="space-y-3">
-      <p className="text-[14px] text-tg-hint">
-        Ishchini ismi yoki @username bo&apos;yicha toping. Taklif yuborilgach, u qabul qilsa
-        jamoangizga qo&apos;shiladi.
-      </p>
+    <Sheet open={open} onClose={onClose} title="Jamoaga qo'shish">
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 rounded-xl bg-tg-secondary px-3.5 py-1.5">
+          <input
+            value={username}
+            onChange={(e) => {
+              setUsername(e.target.value);
+              setSentTo(null);
+            }}
+            onKeyDown={(e) => e.key === 'Enter' && invite.mutate()}
+            placeholder="@username"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            className="min-w-0 flex-1 bg-transparent py-2 text-[16px] outline-none placeholder:text-tg-hint"
+          />
+          <button
+            type="button"
+            aria-label="Taklif yuborish"
+            disabled={invite.isPending}
+            onClick={() => invite.mutate()}
+            className="shrink-0 px-2 text-[22px] leading-none text-tg-link active:opacity-60 disabled:opacity-40"
+          >
+            ✓
+          </button>
+        </div>
 
-      <div className="flex gap-2">
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && setSubmitted(q)}
-          placeholder="Ism yoki @username"
-          autoFocus
-        />
-        <Button onClick={() => setSubmitted(q)} loading={isFetching}>
-          Qidirish
-        </Button>
-      </div>
+        <AnimatePresence>{error && <ErrorBanner message={error} />}</AnimatePresence>
+        {sentTo && (
+          <div className="text-[14px] text-ok">{sentTo}ga taklif yuborildi ✓</div>
+        )}
 
-      <AnimatePresence>{error && <ErrorBanner message={error} />}</AnimatePresence>
+        <div className="text-[14px] text-tg-hint">Yoki</div>
 
-      {submitted.trim().length >= 2 && data?.length === 0 && (
-        <EmptyState
-          icon="🔍"
-          title="Topilmadi"
-          description="Bu foydalanuvchi hali botga kirmagan bo'lishi mumkin. Referal havolani yuboring."
-        />
-      )}
-
-      <AnimatedList className="space-y-2">
-        {data?.map((u) => {
-          const sent = invited.includes(u.userId) || u.invitePending;
-          return (
-            <AnimatedItem key={u.userId} className="mb-2">
-              <Card>
-                <Row
-                  left={
-                    <div className="flex items-center gap-3">
-                      <Avatar name={u.name} photoUrl={u.photoUrl} />
-                      <div className="min-w-0">
-                        <div className="truncate text-[15px] font-semibold">{u.name}</div>
-                        <div className="truncate text-[12px] text-tg-hint">
-                          {u.roleLabel}
-                          {u.username ? ` · @${u.username}` : ''}
-                        </div>
-                      </div>
-                    </div>
-                  }
-                  right={
-                    u.isMember ? (
-                      <span className="text-[13px] text-ok">Jamoada ✓</span>
-                    ) : sent ? (
-                      <span className="text-[13px] text-tg-hint">Yuborildi</span>
-                    ) : (
-                      <Button
-                        size="sm"
-                        disabled={invite.isPending}
-                        onClick={() => invite.mutate(u.userId)}
-                      >
-                        Taklif
-                      </Button>
-                    )
-                  }
-                />
-              </Card>
-            </AnimatedItem>
-          );
-        })}
-      </AnimatedList>
-    </div>
-  );
-}
-
-// ── 2. Referal havola ─────────────────────────────────────────
-
-function ReferralLink({ productionId }: { productionId: string }) {
-  const [copied, setCopied] = useState(false);
-
-  const { data } = useQuery({
-    queryKey: ['invite-link', productionId],
-    queryFn: () => api.get<{ link: string }>(`/productions/${productionId}/invite-link`),
-  });
-
-  const link = data?.link ?? '';
-
-  return (
-    <div className="space-y-4">
-      <p className="text-[14px] text-tg-hint">
-        Havolani Telegram kontaktlaringizga yuboring. Havola orqali kirgan ishchi rolini
-        tanlagach <b>to&apos;g&apos;ridan-to&apos;g&apos;ri</b> jamoangizga qo&apos;shiladi —
-        tasdiqlash talab qilinmaydi.
-      </p>
-
-      <div className="break-all rounded-xl bg-tg-secondary px-3.5 py-3 font-mono text-[13px]">
-        {link || 'Yuklanmoqda…'}
-      </div>
-
-      <div className="flex gap-2">
-        <Button
-          size="lg"
-          disabled={!link}
-          onClick={async () => {
-            const ok = await copyText(link);
-            haptic(ok ? 'success' : 'error');
-            setCopied(ok);
-            setTimeout(() => setCopied(false), 2000);
-          }}
-        >
-          {copied ? 'Nusxalandi ✓' : 'Nusxa olish'}
-        </Button>
         <Button
           size="lg"
           variant="secondary"
@@ -224,9 +117,9 @@ function ReferralLink({ productionId }: { productionId: string }) {
             )
           }
         >
-          Kontaktga yuborish
+          Link yuborish
         </Button>
       </div>
-    </div>
+    </Sheet>
   );
 }

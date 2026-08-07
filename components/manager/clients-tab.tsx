@@ -3,17 +3,9 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { deadlineText, money } from '@/lib/format';
+import { money } from '@/lib/format';
 import type { ClientDto, TeamOption } from '@/lib/types';
-import {
-  Button,
-  Card,
-  EmptyState,
-  LoadingScreen,
-  Progress,
-  Row,
-  cx,
-} from '@/components/ui';
+import { Button, Card, EmptyState, LoadingScreen, Progress, cx } from '@/components/ui';
 import { AnimatedItem, AnimatedList, motion, spring } from '@/components/ui/motion';
 import { ClientWizard } from './client-wizard';
 import { ClientSheet } from './client-sheet';
@@ -39,13 +31,6 @@ export function ClientsTab({ productionId }: { productionId: string }) {
 
   return (
     <div className="space-y-4 px-4 pb-6 pt-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-[24px] font-bold">Klientlar</h1>
-        <Button size="sm" onClick={() => setWizardOpen(true)}>
-          + Yangi
-        </Button>
-      </div>
-
       {/* Ishchi bo'yicha filtr */}
       {(team.data?.length ?? 0) > 0 && (
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
@@ -63,6 +48,10 @@ export function ClientsTab({ productionId }: { productionId: string }) {
           ))}
         </div>
       )}
+
+      <Button size="lg" variant="secondary" onClick={() => setWizardOpen(true)}>
+        yangi klient
+      </Button>
 
       {isLoading ? (
         <LoadingScreen />
@@ -86,66 +75,23 @@ export function ClientsTab({ productionId }: { productionId: string }) {
           {data.map((c) => (
             <AnimatedItem key={c.id} className="mb-2">
             <Card onClick={() => setOpenClientId(c.id)}>
-              <Row
-                left={
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      {c.deadlineStatus === 'overdue' && <span>⚠️</span>}
-                      <span className="truncate text-[17px] font-semibold">{c.name}</span>
-                      {c.archived && (
-                        <span className="rounded bg-tg-secondary px-1.5 text-[11px] text-tg-hint">
-                          arxiv
-                        </span>
-                      )}
-                    </div>
-                    <div className="truncate text-[13px] text-tg-hint">
-                      {c.assignments.map((a) => a.worker.name).join(', ') || 'Ishchi biriktirilmagan'}
-                    </div>
-                  </div>
-                }
-                right={
-                  <div>
-                    <div
-                      className={cx('text-[17px] font-bold', c.margin >= 0 ? 'text-ok' : 'text-danger')}
-                    >
-                      {money(c.margin)}
-                    </div>
-                    <div className="text-[11px] text-tg-hint">foyda</div>
-                  </div>
-                }
-              />
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="truncate text-[20px] font-semibold">{c.name}</span>
+                <span className="shrink-0 text-[22px] font-bold tabular-nums">
+                  {money(c.totalAmount)}
+                </span>
+              </div>
 
-              <div className="mt-2.5 flex items-center gap-2">
+              <div className="mt-2 text-right text-[14px] font-medium tabular-nums text-tg-hint">
+                {c.completedUnits}/{c.totalUnits}
+              </div>
+              <div className="mt-1">
                 <Progress percent={c.progressPercent} />
-                <span className="shrink-0 text-[12px] tabular-nums text-tg-hint">
-                  {c.completedUnits}/{c.totalUnits}
-                </span>
               </div>
 
-              {/* olingan pul − berish kerak = foyda */}
-              <div className="mt-2 flex items-center justify-between text-[12px]">
-                <span className="text-tg-hint">
-                  Olingan <b className="text-ok">{money(c.receivedAmount)}</b>
-                </span>
-                <span className="text-tg-hint">
-                  Berish kerak <b className="text-tg-text">{money(c.owedToTeam)}</b>
-                </span>
+              <div className="mt-3 truncate text-[14px] text-tg-hint">
+                {c.assignments.map((a) => a.worker.name).join(', ') || 'Ishchi biriktirilmagan'}
               </div>
-
-              {c.nextDeadline && (
-                <div
-                  className={cx(
-                    'mt-2 text-[12px]',
-                    c.deadlineStatus === 'overdue'
-                      ? 'text-danger'
-                      : c.deadlineStatus === 'today'
-                        ? 'text-warn'
-                        : 'text-tg-hint',
-                  )}
-                >
-                  ⏰ {deadlineText(c.nextDeadline, c.deadlineStatus)}
-                </div>
-              )}
             </Card>
             </AnimatedItem>
           ))}

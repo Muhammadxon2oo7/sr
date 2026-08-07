@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { alertDialog, openLink } from '@/lib/telegram';
 import { money } from '@/lib/format';
 import type { FinanceResponse } from '@/lib/types';
 import { Avatar, Button, Card, LoadingScreen, Row, Section, Stat, cx } from '@/components/ui';
@@ -11,6 +12,9 @@ import { AnimatedItem, AnimatedList } from '@/components/ui/motion';
 import { InviteSheet } from './invite-sheet';
 import { EditProductionSheet } from './edit-production-sheet';
 import { DemoControls } from '@/components/demo/demo-controls';
+
+/** Rasmiy kanal — `.env` orqali almashtiriladi. */
+const TELEGRAM_CHANNEL = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL ?? 'https://t.me/telegram';
 
 /**
  * Menejer profili: agentlik ma'lumotlari + umumiy moliya jamlanmasi
@@ -83,32 +87,18 @@ export function ProfileTab({ productionId }: { productionId: string }) {
         </div>
       </Section>
 
-      <Section title="Kelishuvlar bo'yicha">
-        <Card className="space-y-1.5">
-          <Row
-            left={<span className="text-[14px] text-tg-hint">Klientlar bilan kelishilgan</span>}
-            right={<span className="font-semibold">{money(totals.agreedWithClients)}</span>}
-          />
-          <Row
-            left={<span className="text-[14px] text-tg-hint">Klientlardan olinmagan</span>}
-            right={
-              <span className="font-semibold text-warn">{money(totals.outstandingFromClients)}</span>
-            }
-          />
-          <Row
-            left={<span className="text-[14px] text-tg-hint">Hammasi bitsa jamoaga</span>}
-            right={<span className="font-semibold">{money(totals.plannedToTeam)}</span>}
-          />
-          <Row
-            left={<span className="text-[14px] text-tg-hint">Kutilayotgan foyda</span>}
-            right={
-              <span
-                className={cx('font-bold', totals.expectedProfit >= 0 ? 'text-ok' : 'text-danger')}
-              >
-                {money(totals.expectedProfit)}
-              </span>
-            }
-          />
+      <Section>
+        <Card className="space-y-2">
+          <Button className="w-full" onClick={() => alertDialog('Premium obuna tez orada.')}>
+            Premiumga obuna
+          </Button>
+          <Button
+            className="w-full"
+            variant="secondary"
+            onClick={() => openLink(TELEGRAM_CHANNEL)}
+          >
+            Telegram kanalga qo&apos;shilish
+          </Button>
         </Card>
       </Section>
 
