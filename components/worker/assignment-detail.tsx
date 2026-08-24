@@ -10,6 +10,7 @@ import {
   Button,
   Card,
   ErrorBanner,
+  Icon,
   Progress,
   Row,
   Sheet,
@@ -68,25 +69,28 @@ export function AssignmentDetail({
           {error && <ErrorBanner message={error} />}
 
           <Card>
-            <div className="text-[13px] text-tg-hint">{data.production.name}</div>
-            <div className="mt-1 text-[20px] font-bold">{data.clientName}</div>
+            <div className="eyebrow">{data.production.name}</div>
+            <div className="mt-1 text-[20px] font-extrabold tracking-[-0.03em]">
+              {data.clientName}
+            </div>
 
-            <div className="mt-3 flex items-center gap-2">
+            <div className="mt-3.5 flex items-center gap-3">
               <Progress percent={data.progressPercent} />
-              <span className="shrink-0 text-[13px] font-semibold tabular-nums">
-                {data.completedUnits}/{data.totalUnits}
+              <span className="nums shrink-0 text-[13px] font-bold">
+                {data.completedUnits}
+                <span className="text-faint">/{data.totalUnits}</span>
               </span>
             </div>
-            <div className="mt-1 text-[12px] text-tg-hint">{data.unitLabel}</div>
+            <div className="mt-1.5 text-[11.5px] text-faint">{data.unitLabel}</div>
           </Card>
 
           <Card>
             <Row
-              left={<span className="text-[14px] text-tg-hint">Dedlayn</span>}
+              left={<span className="text-[13.5px] text-muted">Dedlayn</span>}
               right={
                 <span
                   className={cx(
-                    'font-semibold',
+                    'font-bold',
                     data.deadlineStatus === 'overdue'
                       ? 'text-danger'
                       : data.deadlineStatus === 'today'
@@ -99,7 +103,7 @@ export function AssignmentDetail({
               }
             />
             {data.deadlineType === 'RECURRING' && (
-              <div className="mt-1 text-[12px] text-tg-hint">
+              <div className="mt-1 text-[12px] text-muted">
                 Takrorlanuvchi: har {data.intervalDays} kunda
               </div>
             )}
@@ -107,25 +111,23 @@ export function AssignmentDetail({
 
           {/* Pul — faqat ko'rish uchun */}
           <Card className="space-y-1.5">
-            <div className="text-[13px] font-semibold uppercase tracking-wide text-tg-hint">
-              Pul (faqat ko&apos;rish)
-            </div>
+            <div className="eyebrow">Pul · faqat ko&apos;rish</div>
             <Row
-              left={<span className="text-[14px] text-tg-hint">Har bir {data.unitLabel}</span>}
-              right={<span className="font-semibold">{money(data.unitPrice)}</span>}
+              left={<span className="text-[13.5px] text-muted">Har bir {data.unitLabel}</span>}
+              right={<span className="nums font-bold">{money(data.unitPrice)}</span>}
             />
             <Row
-              left={<span className="text-[14px] text-tg-hint">Ishlangan pul</span>}
-              right={<span className="font-semibold">{money(data.owedAmount)}</span>}
+              left={<span className="text-[13.5px] text-muted">Ishlangan pul</span>}
+              right={<span className="nums font-bold">{money(data.owedAmount)}</span>}
             />
             <Row
-              left={<span className="text-[14px] text-tg-hint">To&apos;langan</span>}
-              right={<span className="font-semibold text-ok">{money(data.paidAmount)}</span>}
+              left={<span className="text-[13.5px] text-muted">To&apos;langan</span>}
+              right={<span className="nums font-bold text-ok">{money(data.paidAmount)}</span>}
             />
             <Row
-              left={<span className="text-[14px] text-tg-hint">To&apos;lanmagan</span>}
+              left={<span className="text-[13.5px] text-muted">To&apos;lanmagan</span>}
               right={
-                <span className={cx('text-[17px] font-bold', data.debt > 0 ? 'text-warn' : 'text-ok')}>
+                <span className={cx('nums text-[17px] font-extrabold', data.debt > 0 ? 'text-warn' : 'text-ok')}>
                   {money(data.debt)}
                 </span>
               }
@@ -134,18 +136,16 @@ export function AssignmentDetail({
 
           {data.payouts.length > 0 && (
             <div className="space-y-2">
-              <div className="px-1 text-[13px] font-semibold uppercase tracking-wide text-tg-hint">
-                To&apos;lovlar tarixi
-              </div>
+              <div className="eyebrow px-1">To&apos;lovlar tarixi</div>
               {data.payouts.map((p) => (
                 <Card key={p.id}>
                   <Row
-                    left={<span className="text-[15px] font-semibold">{money(p.amount)}</span>}
+                    left={<span className="nums text-[15px] font-extrabold">{money(p.amount)}</span>}
                     right={
-                      <span className="text-[12px] text-tg-hint">{formatFullDate(p.paidAt)}</span>
+                      <span className="text-[12px] text-muted">{formatFullDate(p.paidAt)}</span>
                     }
                   />
-                  {p.note && <div className="mt-1 text-[12px] text-tg-hint">{p.note}</div>}
+                  {p.note && <div className="mt-1 text-[12px] text-faint">{p.note}</div>}
                 </Card>
               ))}
             </div>
@@ -153,17 +153,18 @@ export function AssignmentDetail({
 
           <Button
             size="lg"
-            variant={data.isFinished ? 'secondary' : 'success'}
+            icon={data.isFinished ? 'check' : 'plus'}
+            variant={data.isFinished ? 'success' : 'primary'}
             disabled={data.isFinished || complete.isPending}
             loading={complete.isPending}
             onClick={() => complete.mutate()}
           >
             {data.isFinished
-              ? 'Barcha ishlar bajarilgan ✓'
-              : `✓ Ish bajarildi (${data.completedUnits + 1}/${data.totalUnits})`}
+              ? 'Barcha ishlar bajarilgan'
+              : `Ish bajarildi (${data.completedUnits + 1}/${data.totalUnits})`}
           </Button>
 
-          <p className="px-1 text-center text-[12px] text-tg-hint">
+          <p className="px-1 text-center text-[11.5px] text-faint">
             Belgilaganingizdan so&apos;ng menejerga avtomatik xabar boradi.
           </p>
         </div>
@@ -179,13 +180,13 @@ export function AssignmentDetail({
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="flex h-24 w-24 items-center justify-center rounded-full bg-ok text-[44px] text-white shadow-2xl"
+              className="ember flex h-24 w-24 items-center justify-center rounded-full text-white shadow-glow"
               initial={{ scale: 0.3, rotate: -20 }}
               animate={{ scale: [0.3, 1.15, 1], rotate: 0 }}
               exit={{ scale: 0.5, opacity: 0 }}
               transition={spring}
             >
-              ✓
+              {Icon.check({ size: 46, strokeWidth: 2.6 })}
             </motion.div>
           </motion.div>
         )}

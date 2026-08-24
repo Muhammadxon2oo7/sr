@@ -5,7 +5,7 @@ import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { haptic } from '@/lib/telegram';
 import type { ProductionSearchResult } from '@/lib/types';
-import { Avatar, Button, Card, EmptyState, ErrorBanner, Input, Row } from '@/components/ui';
+import { Avatar, Button, Card, EmptyState, ErrorBanner, Icon, Input, Row } from '@/components/ui';
 
 /** Ishchi havolasiz kirganda: @username orqali qidiruv + ariza (TZ 4.3). */
 export function FindProduction({ onDone }: { onDone?: () => void }) {
@@ -53,7 +53,7 @@ export function FindProduction({ onDone }: { onDone?: () => void }) {
           onKeyDown={(e) => e.key === 'Enter' && void search()}
           placeholder="Agentlik nomi yoki @username"
         />
-        <Button onClick={search} loading={searching}>
+        <Button icon="search" onClick={search} loading={searching}>
           Qidirish
         </Button>
       </div>
@@ -61,7 +61,11 @@ export function FindProduction({ onDone }: { onDone?: () => void }) {
       {error && <ErrorBanner message={error} />}
 
       {results && results.length === 0 && (
-        <EmptyState icon="🔍" title="Hech narsa topilmadi" description="@username'ni tekshirib qayta urinib ko'ring." />
+        <EmptyState
+          icon="search"
+          title="Hech narsa topilmadi"
+          description="@username'ni tekshirib qayta urinib ko'ring."
+        />
       )}
 
       <div className="space-y-2">
@@ -70,10 +74,10 @@ export function FindProduction({ onDone }: { onDone?: () => void }) {
             <Row
               left={
                 <div className="flex items-center gap-3">
-                  <Avatar name={p.name} photoUrl={p.photoUrl} />
+                  <Avatar name={p.name} photoUrl={p.photoUrl} size={42} />
                   <div className="min-w-0">
-                    <div className="truncate text-[16px] font-semibold">{p.name}</div>
-                    <div className="truncate text-[13px] text-tg-hint">
+                    <div className="truncate text-[16px] font-bold tracking-[-0.02em]">{p.name}</div>
+                    <div className="truncate text-[12.5px] text-muted">
                       @{p.username} · {p.membersCount} a&apos;zo
                     </div>
                   </div>
@@ -81,7 +85,9 @@ export function FindProduction({ onDone }: { onDone?: () => void }) {
               }
               right={
                 sentTo.includes(p.id) ? (
-                  <span className="text-[13px] text-ok">Yuborildi ✓</span>
+                  <span className="inline-flex items-center gap-1 text-[12.5px] font-bold text-ok">
+                    {Icon.check({ size: 14 })} Yuborildi
+                  </span>
                 ) : (
                   <Button size="sm" onClick={() => apply(p.id)}>
                     Ariza

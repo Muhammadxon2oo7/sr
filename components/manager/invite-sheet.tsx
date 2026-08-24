@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { haptic, openLink } from '@/lib/telegram';
 import type { UserSearchResult } from '@/lib/types';
-import { Button, ErrorBanner, Input, Sheet } from '@/components/ui';
+import { Button, ErrorBanner, Icon, Sheet } from '@/components/ui';
 import { AnimatePresence } from '@/components/ui/motion';
 
 /**
@@ -73,7 +73,8 @@ export function InviteSheet({
   return (
     <Sheet open={open} onClose={onClose} title="Jamoaga qo'shish">
       <div className="space-y-4">
-        <div className="flex items-center gap-2 rounded-xl bg-tg-secondary px-3.5 py-1.5">
+        <div className="hairline flex items-center gap-2 rounded-2xl bg-surface px-4 py-1.5 focus-within:border-brand/60">
+          <span className="shrink-0 text-faint">{Icon.search({ size: 17 })}</span>
           <input
             value={username}
             onChange={(e) => {
@@ -85,29 +86,36 @@ export function InviteSheet({
             autoCapitalize="none"
             autoCorrect="off"
             spellCheck={false}
-            className="min-w-0 flex-1 bg-transparent py-2 text-[16px] outline-none placeholder:text-tg-hint"
+            className="min-w-0 flex-1 bg-transparent py-2.5 text-[16px] outline-none placeholder:text-faint"
           />
           <button
             type="button"
             aria-label="Taklif yuborish"
             disabled={invite.isPending}
             onClick={() => invite.mutate()}
-            className="shrink-0 px-2 text-[22px] leading-none text-tg-link active:opacity-60 disabled:opacity-40"
+            className="ember flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white active:opacity-70 disabled:opacity-40"
           >
-            ✓
+            {Icon.send({ size: 15 })}
           </button>
         </div>
 
         <AnimatePresence>{error && <ErrorBanner message={error} />}</AnimatePresence>
         {sentTo && (
-          <div className="text-[14px] text-ok">{sentTo}ga taklif yuborildi ✓</div>
+          <div className="flex items-center gap-1.5 rounded-2xl bg-ok/10 px-3.5 py-2.5 text-[13.5px] font-semibold text-ok">
+            {Icon.check({ size: 15 })} {sentTo}ga taklif yuborildi
+          </div>
         )}
 
-        <div className="text-[14px] text-tg-hint">Yoki</div>
+        <div className="flex items-center gap-3">
+          <span className="h-px flex-1 bg-line" />
+          <span className="eyebrow">yoki</span>
+          <span className="h-px flex-1 bg-line" />
+        </div>
 
         <Button
           size="lg"
           variant="secondary"
+          icon="send"
           disabled={!link}
           onClick={() =>
             openLink(

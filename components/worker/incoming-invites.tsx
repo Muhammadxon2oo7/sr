@@ -36,30 +36,36 @@ export function IncomingInvites() {
   if (!data?.length) return null;
 
   return (
-    <Section title={`📨 Sizni jamoaga taklif qilishmoqda (${data.length})`}>
+    <Section title={`Sizni jamoaga taklif qilishmoqda · ${data.length}`}>
       <AnimatedList className="space-y-2">
         <AnimatePresence>
           {data.map((inv) => (
             <AnimatedItem key={inv.id} className="mb-2">
-              <Card>
+              <Card className="border-brand/25">
                 <Row
                   left={
                     <div className="flex items-center gap-3">
-                      <Avatar name={inv.production.name} photoUrl={inv.production.photoUrl} />
+                      <Avatar
+                        name={inv.production.name}
+                        photoUrl={inv.production.photoUrl}
+                        size={42}
+                        ring
+                      />
                       <div className="min-w-0">
-                        <div className="truncate text-[16px] font-semibold">
+                        <div className="truncate text-[16px] font-bold tracking-[-0.02em]">
                           {inv.production.name}
                         </div>
-                        <div className="truncate text-[12px] text-tg-hint">
+                        <div className="truncate text-[12px] text-muted">
                           @{inv.production.username} · {inv.production.membersCount} a&apos;zo
                         </div>
                       </div>
                     </div>
                   }
                 />
-                <div className="mt-3 flex gap-2">
+                <div className="mt-3.5 flex gap-2">
                   <Button
                     variant="success"
+                    icon="check"
                     className="flex-1"
                     disabled={respond.isPending}
                     onClick={() => respond.mutate({ id: inv.id, accept: true })}
@@ -68,6 +74,7 @@ export function IncomingInvites() {
                   </Button>
                   <Button
                     variant="danger"
+                    icon="close"
                     className="flex-1"
                     disabled={respond.isPending}
                     onClick={() => respond.mutate({ id: inv.id, accept: false })}

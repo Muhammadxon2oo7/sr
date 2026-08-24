@@ -19,8 +19,8 @@ export function DemoControls() {
 
   return (
     <Section title="Demo rejim">
-      <Card className="space-y-3">
-        <p className="text-[13px] text-tg-hint">
+      <Card tone="flat" className="space-y-3">
+        <p className="text-[12.5px] leading-relaxed text-muted">
           Bu demo versiya — barcha o&apos;zgarishlar faqat shu brauzerda saqlanadi. Server yo&apos;q.
         </p>
         <div className="flex gap-2">

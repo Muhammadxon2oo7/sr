@@ -8,9 +8,11 @@ import { money } from '@/lib/format';
 import type { ClientDto } from '@/lib/types';
 import {
   Button,
+  Card,
   ErrorBanner,
   Field,
   Input,
+  LogoMark,
   Sheet,
   Skeleton,
   cx,
@@ -73,34 +75,79 @@ export function ClientSheet({
           <div className="space-y-5">
             {error && <ErrorBanner message={error} />}
 
-            <div className="space-y-3.5">
-              <MoneyRow label="Kelishilgan summa" value={money(client.totalAmount)} />
-              <MoneyRow label="Klientdan tushgan" value={money(client.receivedAmount)} />
-              <MoneyRow label="To'lanmagan" value={money(client.remainingFromClient)} />
-              <MoneyRow label="Chiqim" value={money(expense)} />
-              <MoneyRow
-                label="Foyda"
-                value={money(profit)}
-                tone={profit >= 0 ? 'ok' : 'danger'}
+            {/* Kalit ko'rsatkich — sof foyda */}
+            <Card tone="ember" className="!p-4">
+              <LogoMark
+                size={140}
+                rounded={false}
+                className="pointer-events-none absolute -right-7 -top-6 text-white/[0.07]"
               />
+              <div className="relative">
+                <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">
+                  Foyda
+                </div>
+                <div className="nums mt-1 text-[32px] font-extrabold leading-none text-white">
+                  {money(profit)}
+                </div>
+                <div className="mt-3.5">
+                  <div className="mb-1.5 flex items-baseline justify-between text-[11.5px] font-semibold text-white/70">
+                    <span>Klientdan tushgan</span>
+                    <span className="nums text-white">
+                      {money(client.receivedAmount)} / {money(client.totalAmount)}
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/25">
+                    <div
+                      className="h-full rounded-full bg-white"
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          client.totalAmount > 0
+                            ? (client.receivedAmount / client.totalAmount) * 100
+                            : 0,
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            <div className="hairline divide-y divide-line overflow-hidden rounded-[20px] bg-surface">
+              <MoneyRow label="Kelishilgan summa" value={money(client.totalAmount)} />
+              <MoneyRow label="Klientdan tushgan" value={money(client.receivedAmount)} tone="ok" />
+              <MoneyRow label="To'lanmagan" value={money(client.remainingFromClient)} />
+              <MoneyRow label="Jamoa chiqimi" value={money(expense)} />
             </div>
 
-            <Button size="lg" variant="secondary" onClick={() => setIncomeOpen(true)}>
+            <Button size="lg" icon="wallet" onClick={() => setIncomeOpen(true)}>
               Klientdan to&apos;lov qayd etish
             </Button>
 
-            <div className="flex justify-between gap-3 pt-1 text-[13px]">
-              <button
-                className="text-tg-link active:opacity-60"
+            <div className="flex gap-2">
+              <Button
+                className="flex-1"
+                variant="secondary"
+                icon="plus"
+                size="sm"
                 onClick={() => setAddWorkerOpen(true)}
               >
-                Ishchi biriktirish
-              </button>
-              <button className="text-tg-link active:opacity-60" onClick={() => setEditOpen(true)}>
+                Ishchi
+              </Button>
+              <Button
+                className="flex-1"
+                variant="secondary"
+                icon="edit"
+                size="sm"
+                onClick={() => setEditOpen(true)}
+              >
                 Tahrirlash
-              </button>
-              <button
-                className="text-danger active:opacity-60"
+              </Button>
+              <Button
+                className="flex-1"
+                variant="danger"
+                icon="close"
+                size="sm"
                 onClick={async () => {
                   if (
                     !(await confirmDialog(
@@ -112,7 +159,7 @@ export function ClientSheet({
                 }}
               >
                 O&apos;chirish
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -163,11 +210,11 @@ function MoneyRow({
   tone?: 'default' | 'ok' | 'danger';
 }) {
   return (
-    <div className="flex items-center justify-between gap-3">
-      <span className="text-[15px] text-tg-hint">{label}</span>
+    <div className="flex items-center justify-between gap-3 px-4 py-3">
+      <span className="text-[13.5px] font-medium text-muted">{label}</span>
       <span
         className={cx(
-          'shrink-0 text-[24px] font-bold tabular-nums',
+          'nums shrink-0 text-[16px] font-extrabold',
           tone === 'ok' && 'text-ok',
           tone === 'danger' && 'text-danger',
         )}

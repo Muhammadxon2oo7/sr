@@ -11,6 +11,8 @@ import {
   Card,
   ErrorBanner,
   Field,
+  Icon,
+  IconButton,
   Input,
   Progress,
   Sheet,
@@ -148,10 +150,10 @@ export function AssignmentMoreSheet({
           <Card>
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <div className="text-[13px] text-tg-hint">dedlayn</div>
+                <div className="eyebrow">Dedlayn</div>
                 <div
                   className={cx(
-                    'mt-0.5 text-[24px] font-bold',
+                    'mt-1 text-[24px] font-extrabold tracking-[-0.03em]',
                     a.deadlineStatus === 'overdue'
                       ? 'text-danger'
                       : a.deadlineStatus === 'today'
@@ -162,7 +164,7 @@ export function AssignmentMoreSheet({
                   {timeLeftText(a.deadlineDate)}
                 </div>
                 {a.deadlineType === 'RECURRING' && (
-                  <div className="mt-0.5 text-[12px] text-tg-hint">
+                  <div className="mt-0.5 text-[12px] text-muted">
                     Har {a.intervalDays} kunda · {formatFullDate(a.startDate)} dan
                   </div>
                 )}
@@ -171,17 +173,17 @@ export function AssignmentMoreSheet({
             </div>
 
             {editing === 'deadline' && (
-              <div className="mt-3 space-y-3 border-t border-tg-separator pt-3">
+              <div className="mt-3.5 space-y-3 border-t border-line pt-3.5">
                 <div className="flex gap-2">
                   {(['ONE_TIME', 'RECURRING'] as DeadlineType[]).map((t) => (
                     <button
                       key={t}
                       onClick={() => setDlType(t)}
                       className={cx(
-                        'flex-1 rounded-xl border-2 px-3 py-2 text-[13px] font-medium',
+                        'flex-1 rounded-xl border px-3 py-2.5 text-[13px] font-bold transition-colors',
                         dlType === t
-                          ? 'border-tg-button text-tg-button'
-                          : 'border-tg-separator text-tg-hint',
+                          ? 'border-brand bg-brand/10 text-brand'
+                          : 'border-line text-muted',
                       )}
                     >
                       {t === 'ONE_TIME' ? 'Keyingi dedlayn' : 'Har N kuni'}
@@ -227,9 +229,11 @@ export function AssignmentMoreSheet({
 
           {/* Progress */}
           <div>
-            <div className="flex items-center justify-end gap-2">
-              <span className="text-[20px] font-bold tabular-nums">
-                {a.completedUnits}/{a.totalUnits}
+            <div className="flex items-center gap-2">
+              <span className="eyebrow flex-1">Bajarilgan</span>
+              <span className="nums text-[18px] font-extrabold">
+                {a.completedUnits}
+                <span className="text-faint">/{a.totalUnits}</span>
               </span>
               <EditButton onClick={() => toggle('units')} />
             </div>
@@ -260,11 +264,11 @@ export function AssignmentMoreSheet({
 
           {/* Har bir ish narxi */}
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[15px]">
-                Xar bir {a.unitLabel} narxi:{' '}
-                <span className="font-semibold">{money(a.unitPrice)}</span>
+            <div className="hairline flex items-center gap-2 rounded-2xl bg-surface px-4 py-3">
+              <span className="flex-1 text-[13.5px] text-muted">
+                Har bir {a.unitLabel} narxi
               </span>
+              <span className="nums text-[16px] font-extrabold">{money(a.unitPrice)}</span>
               <EditButton onClick={() => toggle('price')} />
             </div>
 
@@ -288,10 +292,13 @@ export function AssignmentMoreSheet({
           {/* Pul */}
           <div className="grid grid-cols-2 gap-3">
             <Card>
-              <div className="text-[13px] text-tg-hint">To&apos;lash kerak</div>
+              <div className="flex items-center gap-1.5 text-muted">
+                {Icon.clock({ size: 13 })}
+                <span className="text-[11.5px] font-semibold">To&apos;lash kerak</span>
+              </div>
               <div
                 className={cx(
-                  'mt-1 text-[22px] font-bold',
+                  'nums mt-1 text-[21px] font-extrabold',
                   a.debt > 0 ? 'text-danger' : 'text-ok',
                 )}
               >
@@ -299,8 +306,11 @@ export function AssignmentMoreSheet({
               </div>
             </Card>
             <Card>
-              <div className="text-[13px] text-tg-hint">To&apos;langan</div>
-              <div className="mt-1 text-[22px] font-bold">{money(a.paidAmount)}</div>
+              <div className="flex items-center gap-1.5 text-muted">
+                {Icon.check({ size: 13 })}
+                <span className="text-[11.5px] font-semibold">To&apos;langan</span>
+              </div>
+              <div className="nums mt-1 text-[21px] font-extrabold">{money(a.paidAmount)}</div>
             </Card>
           </div>
 
@@ -327,6 +337,7 @@ export function AssignmentMoreSheet({
           ) : (
             <Button
               size="lg"
+              icon="wallet"
               disabled={a.debt <= 0}
               onClick={() => {
                 setPayAmount(String(a.debt));
@@ -343,17 +354,5 @@ export function AssignmentMoreSheet({
 }
 
 function EditButton({ onClick }: { onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      aria-label="Tahrirlash"
-      onClick={() => {
-        haptic('light');
-        onClick();
-      }}
-      className="shrink-0 text-[18px] leading-none active:opacity-60"
-    >
-      ✏️
-    </button>
-  );
+  return <IconButton icon="edit" size={32} label="Tahrirlash" onClick={onClick} />;
 }

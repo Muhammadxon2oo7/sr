@@ -14,6 +14,7 @@ import {
   EmptyState,
   ErrorBanner,
   Field,
+  Icon,
   Input,
   Row,
   Sheet,
@@ -183,9 +184,9 @@ export function ClientWizard({
       <div className="space-y-4">
         <div className="flex gap-1.5">
           {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-1 flex-1 overflow-hidden rounded-full bg-tg-separator">
+            <div key={i} className="h-1.5 flex-1 overflow-hidden rounded-full bg-sunk">
               <motion.div
-                className="h-full rounded-full bg-tg-button"
+                className="ember h-full rounded-full"
                 initial={false}
                 animate={{ scaleX: i <= step ? 1 : 0 }}
                 style={{ originX: 0 }}
@@ -219,10 +220,10 @@ export function ClientWizard({
 
         {step === 1 && (
           <div className="space-y-2">
-            {team.isLoading && <div className="text-tg-hint">Yuklanmoqda…</div>}
+            {team.isLoading && <div className="text-muted">Yuklanmoqda…</div>}
             {team.data?.length === 0 && (
               <EmptyState
-                icon="👥"
+                icon="team"
                 title="Jamoada hech kim yo'q"
                 description="Avval 'Jamoa' bo'limidan taklif havolasini yuboring."
               />
@@ -234,22 +235,22 @@ export function ClientWizard({
                   key={w.userId}
                   onClick={() => toggleWorker(w)}
                   className={cx(
-                    'flex w-full items-center gap-3 rounded-2xl border-2 bg-tg-section px-3.5 py-3 text-left active:opacity-70',
-                    on ? 'border-tg-button' : 'border-transparent',
+                    'flex w-full items-center gap-3 rounded-[20px] border bg-surface px-3.5 py-3 text-left transition-colors active:bg-sunk',
+                    on ? 'border-brand shadow-glow' : 'border-line',
                   )}
                 >
-                  <Avatar name={w.name} photoUrl={w.photoUrl} size={38} />
+                  <Avatar name={w.name} photoUrl={w.photoUrl} size={40} ring={on} />
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-[15px] font-semibold">{w.name}</div>
-                    <div className="truncate text-[13px] text-tg-hint">{w.roleLabel}</div>
+                    <div className="truncate text-[15px] font-bold tracking-[-0.02em]">{w.name}</div>
+                    <div className="truncate text-[12.5px] text-muted">{w.roleLabel}</div>
                   </div>
                   <div
                     className={cx(
-                      'flex h-5 w-5 items-center justify-center rounded-md border-2 text-[12px] font-bold text-white',
-                      on ? 'border-tg-button bg-tg-button' : 'border-tg-separator',
+                      'flex h-6 w-6 items-center justify-center rounded-lg border-2 text-white transition-colors',
+                      on ? 'border-brand bg-brand' : 'border-line-strong',
                     )}
                   >
-                    {on ? '✓' : ''}
+                    {on ? Icon.check({ size: 13, strokeWidth: 3 }) : null}
                   </div>
                 </button>
               );
@@ -260,7 +261,7 @@ export function ClientWizard({
         {step === 2 && (
           <>
             <Field
-              label="Sделка umumiy summasi ($)"
+              label="Bitim umumiy summasi ($)"
               hint="Klient bilan kelishilgan summa — hali tushgan pul emas."
             >
               <Input
@@ -282,7 +283,10 @@ export function ClientWizard({
               const recurring = d.deadlineType === 'RECURRING';
               return (
                 <Card key={d.userId} className="space-y-4">
-                  <div className="text-[18px] font-semibold">{d.name}</div>
+                  <div className="flex items-center gap-2.5">
+                    <Avatar name={d.name} size={32} />
+                    <div className="text-[16px] font-bold tracking-[-0.02em]">{d.name}</div>
+                  </div>
 
                   <div className="grid grid-cols-2 gap-2">
                     <Field label="Jami qilinadigan ish soni">
@@ -310,7 +314,7 @@ export function ClientWizard({
                   </div>
 
                   <div className="space-y-2">
-                    <div className="text-[18px] font-semibold">Dedlayn</div>
+                    <div className="eyebrow">Dedlayn</div>
                     <Input
                       type="datetime-local"
                       value={d.deadlineDate ?? ''}
@@ -330,11 +334,11 @@ export function ClientWizard({
                           })
                         }
                         className={cx(
-                          'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border-2 text-[18px] font-bold text-white',
-                          recurring ? 'border-ok bg-ok' : 'border-tg-separator',
+                          'flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border-2 text-white transition-colors',
+                          recurring ? 'border-ok bg-ok' : 'border-line-strong',
                         )}
                       >
-                        {recurring ? '✓' : ''}
+                        {recurring ? Icon.check({ size: 18, strokeWidth: 3 }) : null}
                       </button>
                       <div className="flex flex-1 items-center gap-2">
                         <span className="text-[15px]">Har</span>
@@ -355,7 +359,7 @@ export function ClientWizard({
                       </div>
                     </div>
 
-                    <p className="text-[13px] leading-snug text-tg-hint">
+                    <p className="text-[12.5px] leading-snug text-faint">
                       O&apos;chiq bo&apos;lsa tanlab bo&apos;lmaydi. Yoniq bo&apos;lsa har N kuni
                       dedlayn avtomatik belgilanadi.
                     </p>
@@ -370,14 +374,16 @@ export function ClientWizard({
           <div className="space-y-3">
             <Card>
               <Row
-                left={<div className="text-[17px] font-bold">{name}</div>}
-                right={<div className="text-[17px] font-bold">{money(Number(totalAmount))}</div>}
+                left={<div className="text-[17px] font-extrabold tracking-[-0.03em]">{name}</div>}
+                right={
+                  <div className="nums text-[17px] font-extrabold">{money(Number(totalAmount))}</div>
+                }
               />
               <Row
                 className="mt-1"
-                left={<span className="text-[14px] text-tg-hint">Olingan pul</span>}
+                left={<span className="text-[13.5px] text-muted">Olingan pul</span>}
                 right={
-                  <span className="font-semibold text-ok">{money(Number(receivedAmount || 0))}</span>
+                  <span className="nums font-extrabold text-ok">{money(Number(receivedAmount || 0))}</span>
                 }
               />
             </Card>
@@ -387,8 +393,8 @@ export function ClientWizard({
                 <Row
                   left={
                     <div className="min-w-0">
-                      <div className="truncate text-[15px] font-semibold">{d.name}</div>
-                      <div className="text-[13px] text-tg-hint">
+                      <div className="truncate text-[15px] font-bold tracking-[-0.02em]">{d.name}</div>
+                      <div className="text-[12.5px] text-muted">
                         {d.totalUnits} {d.unitLabel} × {money(Number(d.unitPrice))} ·{' '}
                         {d.deadlineType === 'ONE_TIME'
                           ? d.deadlineDate
@@ -397,7 +403,7 @@ export function ClientWizard({
                     </div>
                   }
                   right={
-                    <div className="font-semibold">
+                    <div className="nums font-extrabold">
                       {money(Number(d.unitPrice) * Number(d.totalUnits))}
                     </div>
                   }
@@ -407,15 +413,15 @@ export function ClientWizard({
 
             <Card>
               <Row
-                left={<span className="text-[14px] text-tg-hint">Jamoaga jami (hammasi bitsa)</span>}
-                right={<span className="font-semibold">{money(totalToTeam)}</span>}
+                left={<span className="text-[13.5px] text-muted">Jamoaga jami (hammasi bitsa)</span>}
+                right={<span className="nums font-extrabold">{money(totalToTeam)}</span>}
               />
               <Row
                 className="mt-1"
-                left={<span className="text-[14px] text-tg-hint">Kutilayotgan foyda</span>}
+                left={<span className="text-[13.5px] text-muted">Kutilayotgan foyda</span>}
                 right={
                   <span
-                    className={cx('font-semibold', expectedMargin >= 0 ? 'text-ok' : 'text-danger')}
+                    className={cx('nums font-extrabold', expectedMargin >= 0 ? 'text-ok' : 'text-danger')}
                   >
                     {money(expectedMargin)}
                   </span>
@@ -423,7 +429,7 @@ export function ClientWizard({
               />
             </Card>
 
-            <p className="px-1 text-[13px] text-tg-hint">
+            <p className="px-1 text-[12.5px] text-faint">
               Yaratilgach barcha tanlangan ishchilarga bot orqali xabar boradi.
             </p>
           </div>

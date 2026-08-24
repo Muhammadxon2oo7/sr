@@ -1,43 +1,240 @@
 @import 'tailwindcss';
 
-/*
-  Telegram mavzu o'zgaruvchilari — WebApp SDK ularni <html> ga o'rnatadi.
-  Telegram tashqarisida (brauzerda) zaxira qiymatlar ishlaydi.
-*/
-@theme {
-  --color-tg-bg: var(--tg-theme-bg-color, #ffffff);
-  --color-tg-text: var(--tg-theme-text-color, #0f172a);
-  --color-tg-hint: var(--tg-theme-hint-color, #64748b);
-  --color-tg-link: var(--tg-theme-link-color, #2563eb);
-  --color-tg-button: var(--tg-theme-button-color, #2563eb);
-  --color-tg-button-text: var(--tg-theme-button-text-color, #ffffff);
-  --color-tg-secondary: var(--tg-theme-secondary-bg-color, #f1f5f9);
-  --color-tg-section: var(--tg-theme-section-bg-color, #ffffff);
-  --color-tg-separator: var(--tg-theme-section-separator-color, #e2e8f0);
+/* ═══════════════════════════════════════════════════════════════
+   PRODAKSHN — "Ink & Ember" dizayn tizimi
+   ───────────────────────────────────────────────────────────────
+   Logo tili: chuqur qora sirt ustida cho'g'dek yonayotgan olov
+   gradienti (qizil → to'q sariq) va qalin, kesilgan geometrik "P".
+   Shu til butun ilovaga ko'chirilgan:
+     • sirtlar — issiq qora / issiq oq (sovuq kulrang emas)
+     • bitta aksent — "ember" gradienti, kam va aniq ishlatiladi
+     • radius — yirik va yumshoq (18–28px), logo blokining shakli
+     • urg'u — qalin raqamlar + keng tracking'li mayda yorliqlar
+   ═══════════════════════════════════════════════════════════════ */
 
-  --color-ok: #16a34a;
-  --color-warn: #d97706;
-  --color-danger: #dc2626;
+:root {
+  /* Yorug' mavzu — issiq qog'oz rangi, sovuq kulrang emas */
+  --c-canvas: #f7f4f1;
+  --c-surface: #ffffff;
+  --c-raise: #ffffff;
+  --c-sunk: #efeae5;
+  --c-line: rgba(28, 20, 15, 0.09);
+  --c-line-strong: rgba(28, 20, 15, 0.16);
+  --c-ink: #17110d;
+  --c-muted: #7c716a;
+  --c-faint: #a89e97;
+
+  /* Ember — logodan olingan asosiy aksent */
+  --c-brand: #e8500f;
+  --c-brand-hi: #ff8a1e;
+  --c-brand-deep: #b32d05;
+  --c-on-brand: #ffffff;
+
+  --c-ok: #0f9d58;
+  --c-warn: #c77700;
+  --c-danger: #d92d20;
+
+  --c-shadow: 0 1px 2px rgba(28, 20, 15, 0.05), 0 8px 24px -12px rgba(28, 20, 15, 0.14);
+  --c-shadow-lift: 0 2px 6px rgba(28, 20, 15, 0.07), 0 22px 48px -20px rgba(28, 20, 15, 0.28);
+  --c-glow: 0 10px 34px -12px rgba(232, 80, 15, 0.55);
+
+  --grain-opacity: 0.5;
 }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    /* Qorong'i mavzu — logoning o'z uyi */
+    --c-canvas: #0a0908;
+    --c-surface: #141110;
+    --c-raise: #1c1817;
+    --c-sunk: #0f0d0c;
+    --c-line: rgba(255, 236, 224, 0.09);
+    --c-line-strong: rgba(255, 236, 224, 0.16);
+    --c-ink: #f7f2ee;
+    --c-muted: #a0938c;
+    --c-faint: #6f645e;
+
+    --c-brand: #ff6b1a;
+    --c-brand-hi: #ffa62e;
+    --c-brand-deep: #d13a06;
+    --c-on-brand: #17110d;
+
+    --c-ok: #3ddc97;
+    --c-warn: #ffb020;
+    --c-danger: #ff6b6b;
+
+    --c-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 24px -12px rgba(0, 0, 0, 0.7);
+    --c-shadow-lift: 0 2px 8px rgba(0, 0, 0, 0.55), 0 26px 56px -22px rgba(0, 0, 0, 0.9);
+    --c-glow: 0 12px 40px -12px rgba(255, 107, 26, 0.5);
+
+    --grain-opacity: 0.7;
+  }
+}
+
+:root[data-theme='dark'] {
+  --c-canvas: #0a0908;
+  --c-surface: #141110;
+  --c-raise: #1c1817;
+  --c-sunk: #0f0d0c;
+  --c-line: rgba(255, 236, 224, 0.09);
+  --c-line-strong: rgba(255, 236, 224, 0.16);
+  --c-ink: #f7f2ee;
+  --c-muted: #a0938c;
+  --c-faint: #6f645e;
+
+  --c-brand: #ff6b1a;
+  --c-brand-hi: #ffa62e;
+  --c-brand-deep: #d13a06;
+  --c-on-brand: #17110d;
+
+  --c-ok: #3ddc97;
+  --c-warn: #ffb020;
+  --c-danger: #ff6b6b;
+
+  --c-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 24px -12px rgba(0, 0, 0, 0.7);
+  --c-shadow-lift: 0 2px 8px rgba(0, 0, 0, 0.55), 0 26px 56px -22px rgba(0, 0, 0, 0.9);
+  --c-glow: 0 12px 40px -12px rgba(255, 107, 26, 0.5);
+
+  --grain-opacity: 0.7;
+}
+
+@theme {
+  --color-canvas: var(--c-canvas);
+  --color-surface: var(--c-surface);
+  --color-raise: var(--c-raise);
+  --color-sunk: var(--c-sunk);
+  --color-line: var(--c-line);
+  --color-line-strong: var(--c-line-strong);
+  --color-ink: var(--c-ink);
+  --color-muted: var(--c-muted);
+  --color-faint: var(--c-faint);
+
+  --color-brand: var(--c-brand);
+  --color-brand-hi: var(--c-brand-hi);
+  --color-brand-deep: var(--c-brand-deep);
+  --color-on-brand: var(--c-on-brand);
+
+  --color-ok: var(--c-ok);
+  --color-warn: var(--c-warn);
+  --color-danger: var(--c-danger);
+
+  /*
+    Eski `tg-*` nomlari — hali yangilanmagan ekranlar ham
+    yangi palitrada, bir xil ohangda ko'rinishi uchun taqqoslanadi.
+  */
+  --color-tg-bg: var(--c-canvas);
+  --color-tg-section: var(--c-surface);
+  --color-tg-secondary: var(--c-sunk);
+  --color-tg-separator: var(--c-line);
+  --color-tg-text: var(--c-ink);
+  --color-tg-hint: var(--c-muted);
+  --color-tg-link: var(--c-brand);
+  --color-tg-button: var(--c-brand);
+  --color-tg-button-text: var(--c-on-brand);
+
+  --radius-card: 22px;
+  --radius-sheet: 28px;
+}
+
+/* ── Asos ──────────────────────────────────────────────────── */
 
 html,
 body {
-  background: var(--color-tg-secondary);
-  color: var(--color-tg-text);
+  background: var(--c-canvas);
+  color: var(--c-ink);
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
 }
 
 body {
   font-family:
-    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, system-ui, sans-serif;
+    -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto,
+    system-ui, sans-serif;
+  font-feature-settings: 'ss01', 'cv01', 'tnum' 0;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   padding-bottom: env(safe-area-inset-bottom);
 }
 
 /*
-  Skeleton — yorug'lik chizig'i chapdan o'ngga yuguradi.
-  Bu "pulsatsiya"dan ko'ra tirikroq ko'rinadi va yuklanish davom etayotganini aniq bildiradi.
+  Sahifa foni — pastda logodagi cho'g' shu'lasi zaif sezilib turadi.
+  Bu ilovani "brendning ichida" turgandek his qildiradi.
 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 55% at 50% 102%, color-mix(in srgb, var(--c-brand) 16%, transparent), transparent 70%),
+    radial-gradient(90% 40% at 100% 0%, color-mix(in srgb, var(--c-brand-deep) 9%, transparent), transparent 65%);
+}
+
+/* Nozik "film donasi" — yassi rangli maydonlarga tekstura beradi */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: calc(var(--grain-opacity) * 0.06);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── Brend yordamchilari ───────────────────────────────────── */
+
+/* Ember gradient — sirt sifatida */
+.ember {
+  background-image: linear-gradient(135deg, #1a0f08 0%, var(--c-brand-deep) 52%, var(--c-brand-hi) 100%);
+}
+
+/* Ember gradient — matn sifatida (faqat kalit raqamlar uchun) */
+.ember-text {
+  background-image: linear-gradient(100deg, var(--c-brand-deep), var(--c-brand), var(--c-brand-hi));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Shisha panel — tab bar va yopishqoq sarlavhalar */
+.glass {
+  background: color-mix(in srgb, var(--c-canvas) 72%, transparent);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+.hairline {
+  border: 1px solid var(--c-line);
+}
+
+.shadow-card {
+  box-shadow: var(--c-shadow);
+}
+.shadow-lift {
+  box-shadow: var(--c-shadow-lift);
+}
+.shadow-glow {
+  box-shadow: var(--c-glow);
+}
+
+/* Raqamlar — moliya ekranlari uchun bir xil kenglik */
+.nums {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Mayda bo'lim yorliqlari — logodagi qat'iylikni takrorlaydi */
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-faint);
+}
+
+/* ── Skeleton — chapdan o'ngga yuguruvchi yorug'lik ─────────── */
+
 @keyframes shimmer-sweep {
   100% {
     transform: translateX(100%);
@@ -46,7 +243,7 @@ body {
 .skeleton {
   position: relative;
   overflow: hidden;
-  background: var(--color-tg-separator);
+  background: var(--c-sunk);
 }
 .skeleton::after {
   content: '';
@@ -56,18 +253,36 @@ body {
   background: linear-gradient(
     90deg,
     transparent,
-    color-mix(in srgb, var(--color-tg-section) 70%, transparent),
+    color-mix(in srgb, var(--c-brand) 12%, transparent),
     transparent
   );
-  animation: shimmer-sweep 1.6s infinite;
+  animation: shimmer-sweep 1.5s infinite;
 }
 
-/* Harakatni kamaytirish rejimini hurmat qilamiz */
+/* Cho'g' nafas olgandek — faqat jonli holat indikatorlarida */
+@keyframes ember-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.35);
+  }
+}
+.ember-pulse {
+  animation: ember-pulse 2.4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .skeleton::after {
+  .skeleton::after,
+  .ember-pulse {
     animation: none;
   }
 }
+
+/* ── Forma elementlari ─────────────────────────────────────── */
 
 input,
 textarea,
@@ -84,7 +299,27 @@ select {
   font-size: 16px;
 }
 
+input::placeholder,
+textarea::placeholder {
+  color: var(--c-faint);
+}
+
+/* Sana maydonining kalendar ikonkasi mavzuga moslashadi */
+input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(var(--date-icon-invert, 0));
+  opacity: 0.55;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --date-icon-invert: 1;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 0;
   height: 0;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--c-brand) 28%, transparent);
 }

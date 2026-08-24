@@ -32,21 +32,22 @@ export function RequestsList({
   return (
     <div className="space-y-2">
       {requests.map((r) => (
-        <Card key={r.id}>
+        <Card key={r.id} className="border-brand/25">
           <Row
             left={
               <div className="flex items-center gap-3">
-                <Avatar name={r.name} photoUrl={r.photoUrl} />
+                <Avatar name={r.name} photoUrl={r.photoUrl} size={42} ring />
                 <div className="min-w-0">
-                  <div className="truncate text-[16px] font-semibold">{r.name}</div>
-                  <div className="truncate text-[13px] text-tg-hint">{r.roleLabel}</div>
+                  <div className="truncate text-[16px] font-bold tracking-[-0.02em]">{r.name}</div>
+                  <div className="truncate text-[12.5px] text-muted">{r.roleLabel}</div>
                 </div>
               </div>
             }
           />
-          <div className="mt-3 flex gap-2">
+          <div className="mt-3.5 flex gap-2">
             <Button
               variant="success"
+              icon="check"
               className="flex-1"
               disabled={decide.isPending}
               onClick={() => decide.mutate({ id: r.id, accept: true })}
@@ -55,6 +56,7 @@ export function RequestsList({
             </Button>
             <Button
               variant="danger"
+              icon="close"
               className="flex-1"
               disabled={decide.isPending}
               onClick={() => decide.mutate({ id: r.id, accept: false })}

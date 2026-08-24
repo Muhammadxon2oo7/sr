@@ -62,13 +62,13 @@ export function EditProductionSheet({
         <div className="flex flex-col items-center gap-3">
           {photoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={assetUrl(photoUrl)!} alt="" className="h-24 w-24 rounded-3xl object-cover" />
+            <img src={assetUrl(photoUrl)!} alt="" className="h-24 w-24 rounded-[30px] object-cover" />
           ) : (
             <Avatar name={name || production.name} size={96} />
           )}
 
           <div className="flex gap-2">
-            <label className="cursor-pointer rounded-xl bg-tg-secondary px-3.5 py-2 text-[14px] font-medium active:opacity-70">
+            <label className="hairline cursor-pointer rounded-2xl bg-surface px-4 py-2.5 text-[14px] font-semibold active:bg-sunk">
               {uploading ? 'Yuklanmoqda…' : photoUrl ? 'Almashtirish' : 'Rasm tanlash'}
               <input
                 type="file"
@@ -82,7 +82,7 @@ export function EditProductionSheet({
             </label>
             {photoUrl && (
               <button
-                className="rounded-xl px-3.5 py-2 text-[14px] text-danger active:opacity-60"
+                className="rounded-2xl bg-danger/10 px-4 py-2.5 text-[14px] font-semibold text-danger active:opacity-70"
                 onClick={() => setPhotoUrl(null)}
               >
                 O&apos;chirish

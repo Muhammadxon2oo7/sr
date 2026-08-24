@@ -5,8 +5,19 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { money } from '@/lib/format';
 import type { ClientDto, TeamOption } from '@/lib/types';
-import { Button, Card, EmptyState, LoadingScreen, Progress, cx } from '@/components/ui';
-import { AnimatedItem, AnimatedList, motion, spring } from '@/components/ui/motion';
+import {
+  Button,
+  Card,
+  Chip,
+  EmptyState,
+  Icon,
+  IconButton,
+  LoadingScreen,
+  PageHeader,
+  Progress,
+  Ring,
+} from '@/components/ui';
+import { AnimatedItem, AnimatedList } from '@/components/ui/motion';
 import { ClientWizard } from './client-wizard';
 import { ClientSheet } from './client-sheet';
 
@@ -29,70 +40,92 @@ export function ClientsTab({ productionId }: { productionId: string }) {
       ),
   });
 
+  const totalAmount = data?.reduce((sum, c) => sum + c.totalAmount, 0) ?? 0;
+
   return (
-    <div className="space-y-4 px-4 pb-6 pt-4">
-      {/* Ishchi bo'yicha filtr */}
+    <div className="space-y-4 px-4 pb-6 pt-3">
+      <PageHeader
+        title="Klientlar"
+        subtitle={data?.length ? `${data.length} ta loyiha · ${money(totalAmount)}` : undefined}
+        right={
+          <IconButton icon="plus" tone="brand" label="Yangi klient" onClick={() => setWizardOpen(true)} />
+        }
+      />
+
+      {/* Ishchi bo'yicha filtr — gorizontal sirg'aluvchi lenta */}
       {(team.data?.length ?? 0) > 0 && (
-        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
-          <FilterChip active={workerId === null} onClick={() => setWorkerId(null)}>
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 pt-1">
+          <Chip active={workerId === null} onClick={() => setWorkerId(null)} layoutId="client-filter">
             Hammasi
-          </FilterChip>
+          </Chip>
           {team.data?.map((w) => (
-            <FilterChip
+            <Chip
               key={w.userId}
               active={workerId === w.userId}
               onClick={() => setWorkerId(w.userId)}
+              layoutId="client-filter"
             >
               {w.name}
-            </FilterChip>
+            </Chip>
           ))}
         </div>
       )}
-
-      <Button size="lg" variant="secondary" onClick={() => setWizardOpen(true)}>
-        yangi klient
-      </Button>
 
       {isLoading ? (
         <LoadingScreen />
       ) : !data || data.length === 0 ? (
         <EmptyState
-          icon="💼"
+          icon="clients"
           title={workerId ? 'Bu ishchida klient yo\'q' : 'Hali klient yo\'q'}
           description={
-            workerId ? undefined : 'Birinchi klientni qo\'shing va jamoangizga biriktiring.'
+            workerId
+              ? 'Boshqa ishchini tanlang yoki filtrni tozalang.'
+              : 'Birinchi klientni qo\'shing va jamoangizga biriktiring.'
           }
           action={
             !workerId && (
-              <Button size="lg" onClick={() => setWizardOpen(true)}>
-                + Yangi klient
+              <Button size="lg" icon="plus" onClick={() => setWizardOpen(true)}>
+                Yangi klient
               </Button>
             )
           }
         />
       ) : (
-        <AnimatedList key={workerId ?? 'all'} className="space-y-2">
+        <AnimatedList key={workerId ?? 'all'} className="space-y-2.5">
           {data.map((c) => (
-            <AnimatedItem key={c.id} className="mb-2">
-            <Card onClick={() => setOpenClientId(c.id)}>
-              <div className="flex items-baseline justify-between gap-3">
-                <span className="truncate text-[20px] font-semibold">{c.name}</span>
-                <span className="shrink-0 text-[22px] font-bold tabular-nums">
-                  {money(c.totalAmount)}
-                </span>
-              </div>
+            <AnimatedItem key={c.id} className="mb-2.5">
+              <Card onClick={() => setOpenClientId(c.id)}>
+                <div className="flex items-start gap-3.5">
+                  <Ring percent={c.progressPercent} size={48}>
+                    {c.progressPercent >= 100 ? Icon.check({ size: 16 }) : `${Math.round(c.progressPercent)}%`}
+                  </Ring>
 
-              <div className="mt-2 text-right text-[14px] font-medium tabular-nums text-tg-hint">
-                {c.completedUnits}/{c.totalUnits}
-              </div>
-              <div className="mt-1">
-                <Progress percent={c.progressPercent} />
-              </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="truncate text-[17px] font-bold tracking-[-0.02em]">
+                        {c.name}
+                      </span>
+                      <span className="nums shrink-0 text-[16px] font-extrabold">
+                        {money(c.totalAmount)}
+                      </span>
+                    </div>
 
-              <div className="mt-3 truncate text-[14px] text-tg-hint">
-                {c.assignments.map((a) => a.worker.name).join(', ') || 'Ishchi biriktirilmagan'}
-              </div>
-            </Card>
+                    <div className="mt-1 flex items-center justify-between gap-2 text-[12.5px] text-muted">
+                      <span className="truncate">
+                        {c.assignments.map((a) => a.worker.name).join(', ') ||
+                          'Ishchi biriktirilmagan'}
+                      </span>
+                      <span className="nums shrink-0 font-semibold">
+                        {c.completedUnits}/{c.totalUnits}
+                      </span>
+                    </div>
+
+                    <div className="mt-2.5">
+                      <Progress percent={c.progressPercent} height={5} />
+                    </div>
+                  </div>
+                </div>
+              </Card>
             </AnimatedItem>
           ))}
         </AnimatedList>
@@ -109,37 +142,5 @@ export function ClientsTab({ productionId }: { productionId: string }) {
         onClose={() => setOpenClientId(null)}
       />
     </div>
-  );
-}
-
-function FilterChip({
-  children,
-  active,
-  onClick,
-}: {
-  children: React.ReactNode;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <motion.button
-      onClick={onClick}
-      whileTap={{ scale: 0.94 }}
-      transition={spring}
-      className={cx(
-        'relative shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors',
-        active ? 'text-tg-button-text' : 'bg-tg-section text-tg-hint',
-      )}
-    >
-      {/* Faol filtr foni bir chipdan ikkinchisiga sirg'aladi */}
-      {active && (
-        <motion.span
-          layoutId="filter-chip"
-          transition={spring}
-          className="absolute inset-0 -z-10 rounded-full bg-tg-button"
-        />
-      )}
-      {children}
-    </motion.button>
   );
 }

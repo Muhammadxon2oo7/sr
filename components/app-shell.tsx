@@ -17,7 +17,7 @@ export function AppShell() {
   if (loading) return <LoadingScreen />;
 
   if (error) {
-    return <EmptyState icon="⚠️" title="Kirish amalga oshmadi" description={error} />;
+    return <EmptyState icon="warning" title="Kirish amalga oshmadi" description={error} />;
   }
 
   if (!me) return <LoadingScreen />;

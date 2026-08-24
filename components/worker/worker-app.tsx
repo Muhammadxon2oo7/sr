@@ -9,8 +9,8 @@ import { WorkerProfile } from './worker-profile';
 type Tab = 'home' | 'profile';
 
 const tabs: TabDef<Tab>[] = [
-  { key: 'home', label: 'Bosh sahifa', icon: '🏠' },
-  { key: 'profile', label: 'Profil', icon: '👤' },
+  { key: 'home', label: 'Asosiy', icon: 'home' },
+  { key: 'profile', label: 'Profil', icon: 'user' },
 ];
 
 export function WorkerApp() {
@@ -23,7 +23,7 @@ export function WorkerApp() {
   }
 
   return (
-    <div className="mx-auto min-h-dvh max-w-lg overflow-x-hidden pb-24">
+    <div className="mx-auto min-h-dvh max-w-lg overflow-x-hidden pb-32">
       <AnimatePresence mode="wait" custom={direction.current} initial={false}>
         <motion.div
           key={tab}

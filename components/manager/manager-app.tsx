@@ -33,14 +33,14 @@ export function ManagerApp({ production }: { production: ProductionDto }) {
   const pendingCount = dashboard.data?.pendingRequests.length ?? 0;
 
   const tabs: TabDef<Tab>[] = [
-    { key: 'home', label: 'Bosh sahifa', icon: '🏠' },
-    { key: 'team', label: 'Jamoa', icon: '👥', badge: pendingCount || undefined },
-    { key: 'clients', label: 'Klientlar', icon: '💼' },
-    { key: 'profile', label: 'Profil', icon: '👤' },
+    { key: 'home', label: 'Asosiy', icon: 'home' },
+    { key: 'team', label: 'Jamoa', icon: 'team', badge: pendingCount || undefined },
+    { key: 'clients', label: 'Klientlar', icon: 'clients' },
+    { key: 'profile', label: 'Profil', icon: 'user' },
   ];
 
   return (
-    <div className="mx-auto min-h-dvh max-w-lg overflow-x-hidden pb-24">
+    <div className="mx-auto min-h-dvh max-w-lg overflow-x-hidden pb-32">
       <AnimatePresence mode="wait" custom={direction.current} initial={false}>
         <motion.div
           key={tab}

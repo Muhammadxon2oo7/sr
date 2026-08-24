@@ -8,22 +8,33 @@ import { deadlineText, money } from '@/lib/format';
 import type { TeamMemberClientRow, TeamResponse } from '@/lib/types';
 import {
   Avatar,
+  Badge,
   Button,
   Card,
+  Dot,
   EmptyState,
+  Icon,
+  IconButton,
   LoadingScreen,
-  Row,
+  LogoMark,
   Section,
   cx,
 } from '@/components/ui';
-import { AnimatePresence, AnimatedItem, AnimatedList, motion, spring } from '@/components/ui/motion';
+import {
+  AnimatePresence,
+  AnimatedItem,
+  AnimatedList,
+  motion,
+  softSpring,
+  spring,
+} from '@/components/ui/motion';
 import { RequestsList } from './requests-list';
 import { InviteSheet } from './invite-sheet';
 import { AssignmentMoreSheet } from './assignment-more-sheet';
 
 /**
  * Jamoa sahifasi: rol bo'yicha guruhlar → ishchi → uning klientlari darhol ko'rinadi.
- * Har bir klient yonidagi "more" batafsil kartani ochadi.
+ * Har bir klient yonidagi "batafsil" tugmasi to'liq kartani ochadi.
  */
 export function TeamTab({ productionId }: { productionId: string }) {
   const qc = useQueryClient();
@@ -51,92 +62,127 @@ export function TeamTab({ productionId }: { productionId: string }) {
   if (isLoading || !data) return <LoadingScreen />;
 
   const totalMembers = data.groups.reduce((acc, g) => acc + g.members.length, 0);
+  const totalDebt = data.groups.reduce(
+    (acc, g) => acc + g.members.reduce((s, m) => s + m.debt, 0),
+    0,
+  );
 
   return (
-    <div className="space-y-5 px-4 pb-6 pt-4">
-      <div className="flex items-center gap-3">
-        <Avatar name={data.production.name} photoUrl={data.production.photoUrl} size={52} />
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-[19px] font-bold">{data.production.name}</div>
-          <div className="truncate text-[14px] text-tg-hint">{totalMembers}ta ishchi</div>
-        </div>
-        <button
-          onClick={() => setInviteOpen(true)}
-          aria-label="Jamoaga qo'shish"
-          className="shrink-0 rounded-xl bg-tg-secondary px-5 py-2.5 text-[20px] font-medium leading-none text-tg-link active:opacity-60"
-        >
-          +
-        </button>
-      </div>
+    <div className="space-y-6 px-4 pb-6 pt-3">
+      {/* ── Prodakshn identifikatori ─────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={softSpring}
+      >
+        <Card tone="ember" className="!p-4">
+          <LogoMark
+            size={140}
+            rounded={false}
+            className="pointer-events-none absolute -bottom-8 -right-6 text-white/[0.07]"
+          />
+          <div className="relative flex items-center gap-3.5">
+            <span className="rounded-[18px] bg-white/15 p-[3px] backdrop-blur-sm">
+              <Avatar name={data.production.name} photoUrl={data.production.photoUrl} size={50} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-[18px] font-extrabold tracking-[-0.025em] text-white">
+                {data.production.name}
+              </div>
+              <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                <Badge tone="onEmber" icon="team">
+                  {totalMembers} ishchi
+                </Badge>
+                {totalDebt > 0 && (
+                  <Badge tone="onEmber" icon="wallet">
+                    {money(totalDebt)} qarz
+                  </Badge>
+                )}
+              </div>
+            </div>
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => {
+                haptic('light');
+                setInviteOpen(true);
+              }}
+              aria-label="Jamoaga qo'shish"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-brand-deep"
+            >
+              {Icon.plus({ size: 20, strokeWidth: 2.4 })}
+            </motion.button>
+          </div>
+        </Card>
+      </motion.div>
 
       {data.pendingRequests.length > 0 && (
-        <Section title={`📩 Kutilayotgan arizalar (${data.pendingRequests.length})`}>
+        <Section title={`Kutilayotgan arizalar · ${data.pendingRequests.length}`}>
           <RequestsList requests={data.pendingRequests} productionId={productionId} />
         </Section>
       )}
 
       {totalMembers === 0 ? (
         <EmptyState
-          icon="👥"
+          icon="team"
           title="Jamoa hali bo'sh"
           description="Ishchilarni qidirib taklif yuboring yoki referal havolani ulashing."
           action={
-            <Button size="lg" onClick={() => setInviteOpen(true)}>
+            <Button size="lg" icon="plus" onClick={() => setInviteOpen(true)}>
               Jamoaga qo&apos;shish
             </Button>
           }
         />
       ) : (
         data.groups.map((g) => (
-          <Section key={g.key} title={`${g.label} (${g.members.length})`}>
-            <AnimatedList className="space-y-2">
+          <Section key={g.key} title={`${g.label} · ${g.members.length}`}>
+            <AnimatedList className="space-y-2.5">
               {g.members.map((m) => {
                 const isOpen = !collapsed[m.userId];
                 return (
-                  <AnimatedItem key={m.userId} className="mb-2">
-                    <Card className="!p-0 overflow-hidden">
+                  <AnimatedItem key={m.userId} className="mb-2.5">
+                    <Card className="overflow-hidden !p-0">
                       {/* Ishchi qatori */}
                       <button
-                        onClick={() =>
-                          setCollapsed((c) => ({ ...c, [m.userId]: !c[m.userId] }))
-                        }
-                        className="w-full px-4 py-3.5 text-left active:opacity-70"
+                        onClick={() => {
+                          haptic('light');
+                          setCollapsed((c) => ({ ...c, [m.userId]: !c[m.userId] }));
+                        }}
+                        className="w-full px-4 py-3.5 text-left active:bg-sunk/60"
                       >
-                        <Row
-                          left={
-                            <div className="flex items-center gap-3">
-                              <Avatar name={m.name} photoUrl={m.photoUrl} />
-                              <div className="min-w-0">
-                                <div className="truncate text-[16px] font-semibold">{m.name}</div>
-                                <div className="truncate text-[12px] text-tg-hint">
-                                  {m.clientsCount} klient · shu oyda {m.completedThisMonth} ish
-                                </div>
-                              </div>
+                        <div className="flex items-center gap-3">
+                          <Avatar name={m.name} photoUrl={m.photoUrl} size={42} />
+
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate text-[16px] font-bold tracking-[-0.02em]">
+                              {m.name}
                             </div>
-                          }
-                          right={
-                            <div className="flex items-center gap-2">
-                              <div>
-                                <div
-                                  className={cx(
-                                    'text-[15px] font-bold',
-                                    m.debt > 0 ? 'text-danger' : 'text-ok',
-                                  )}
-                                >
-                                  {money(m.debt)}
-                                </div>
-                                <div className="text-[11px] text-tg-hint">to&apos;lash kerak</div>
-                              </div>
-                              <motion.span
-                                animate={{ rotate: isOpen ? 90 : 0 }}
-                                transition={spring}
-                                className="text-tg-hint"
-                              >
-                                ›
-                              </motion.span>
+                            <div className="truncate text-[12px] text-muted">
+                              {m.clientsCount} klient · shu oyda {m.completedThisMonth} ish
                             </div>
-                          }
-                        />
+                          </div>
+
+                          <div className="shrink-0 text-right">
+                            <div
+                              className={cx(
+                                'nums text-[15px] font-extrabold',
+                                m.debt > 0 ? 'text-danger' : 'text-ok',
+                              )}
+                            >
+                              {money(m.debt)}
+                            </div>
+                            <div className="text-[10.5px] font-semibold uppercase tracking-[0.06em] text-faint">
+                              {m.debt > 0 ? "to'lash kerak" : 'qarz yo’q'}
+                            </div>
+                          </div>
+
+                          <motion.span
+                            animate={{ rotate: isOpen ? 90 : 0 }}
+                            transition={spring}
+                            className="shrink-0 text-faint"
+                          >
+                            {Icon.chevron({ size: 16 })}
+                          </motion.span>
+                        </div>
                       </button>
 
                       {/* Shu ishchining klientlari */}
@@ -147,7 +193,7 @@ export function TeamTab({ productionId }: { productionId: string }) {
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
                             transition={spring}
-                            className="overflow-hidden border-t border-tg-separator"
+                            className="overflow-hidden border-t border-line bg-sunk/40"
                           >
                             {m.clients.map((c) => (
                               <ClientLine
@@ -161,14 +207,14 @@ export function TeamTab({ productionId }: { productionId: string }) {
                       </AnimatePresence>
 
                       {isOpen && m.clients.length === 0 && (
-                        <div className="border-t border-tg-separator px-4 py-3 text-[13px] text-tg-hint">
+                        <div className="border-t border-line px-4 py-3 text-[13px] text-faint">
                           Klient biriktirilmagan
                         </div>
                       )}
 
                       {isOpen && (
                         <button
-                          className="w-full border-t border-tg-separator py-2.5 text-[12px] text-danger active:opacity-60"
+                          className="w-full border-t border-line py-2.5 text-[12px] font-semibold text-danger active:bg-danger/8"
                           onClick={async () => {
                             const warn =
                               m.clientsCount > 0
@@ -204,44 +250,40 @@ export function TeamTab({ productionId }: { productionId: string }) {
   );
 }
 
-/** Ishchi ostidagi bitta klient qatori: nomi — to'lash kerak — (more) */
-function ClientLine({
-  client,
-  onMore,
-}: {
-  client: TeamMemberClientRow;
-  onMore: () => void;
-}) {
+/** Ishchi ostidagi bitta klient qatori: nomi — to'lash kerak — (batafsil) */
+function ClientLine({ client, onMore }: { client: TeamMemberClientRow; onMore: () => void }) {
+  const overdue = client.deadlineStatus === 'overdue';
+
   return (
-    <div className="flex items-center gap-2 px-4 py-2.5">
+    <div className="flex items-center gap-2.5 px-4 py-2.5">
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          {client.deadlineStatus === 'overdue' && <span className="text-[12px]">⚠️</span>}
-          <span className="truncate text-[14px] font-medium">{client.clientName}</span>
+          {overdue && <Dot tone="danger" />}
+          <span className="truncate text-[14px] font-semibold">{client.clientName}</span>
         </div>
-        <div className="truncate text-[12px] text-tg-hint">
+        <div className="nums truncate text-[11.5px] text-faint">
           {client.completedUnits}/{client.totalUnits} {client.unitLabel} ·{' '}
           {money(client.unitPrice)}/{client.unitLabel}
         </div>
       </div>
 
       <div className="shrink-0 text-right">
-        <div className={cx('text-[14px] font-semibold', client.debt > 0 ? 'text-danger' : 'text-ok')}>
+        <div
+          className={cx(
+            'nums text-[14px] font-bold',
+            client.debt > 0 ? 'text-danger' : 'text-ok',
+          )}
+        >
           {money(client.debt)}
         </div>
         {client.deadlineDate && (
-          <div className="text-[11px] text-tg-hint">
+          <div className={cx('text-[11px]', overdue ? 'text-danger' : 'text-faint')}>
             {deadlineText(client.deadlineDate, client.deadlineStatus)}
           </div>
         )}
       </div>
 
-      <button
-        onClick={onMore}
-        className="shrink-0 rounded-lg bg-tg-secondary px-2.5 py-1.5 text-[12px] font-medium text-tg-link active:opacity-60"
-      >
-        more
-      </button>
+      <IconButton icon="info" size={30} label="Batafsil" onClick={onMore} />
     </div>
   );
 }

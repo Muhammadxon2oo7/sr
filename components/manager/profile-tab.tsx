@@ -7,8 +7,21 @@ import { useAuth } from '@/lib/auth';
 import { alertDialog, openLink } from '@/lib/telegram';
 import { money } from '@/lib/format';
 import type { FinanceResponse } from '@/lib/types';
-import { Avatar, Button, Card, LoadingScreen, Row, Section, Stat, cx } from '@/components/ui';
-import { AnimatedItem, AnimatedList } from '@/components/ui/motion';
+import {
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  Icon,
+  LoadingScreen,
+  LogoMark,
+  PageHeader,
+  Row,
+  Section,
+  Stat,
+  cx,
+} from '@/components/ui';
+import { AnimatedItem, AnimatedList, motion, softSpring } from '@/components/ui/motion';
 import { InviteSheet } from './invite-sheet';
 import { EditProductionSheet } from './edit-production-sheet';
 import { DemoControls } from '@/components/demo/demo-controls';
@@ -35,50 +48,81 @@ export function ProfileTab({ productionId }: { productionId: string }) {
   const { production, totals, byClient, byWorker } = data;
 
   return (
-    <div className="space-y-5 px-4 pb-6 pt-4">
-      <h1 className="text-[24px] font-bold">Profil</h1>
+    <div className="space-y-6 px-4 pb-6 pt-3">
+      <PageHeader title="Profil" subtitle={`@${production.username}`} />
 
-      {/* Agentlik */}
-      <Card>
-        <div className="flex items-center gap-4">
-          <Avatar name={production.name} photoUrl={production.photoUrl} size={64} />
-          <div className="min-w-0">
-            <div className="truncate text-[19px] font-bold">{production.name}</div>
-            <div className="text-[13px] text-tg-hint">@{production.username}</div>
-            {me && (
-              <div className="mt-1 inline-block rounded-full bg-tg-button/10 px-2.5 py-0.5 text-[12px] font-medium text-tg-button">
-                {me.user.roleLabel}
-              </div>
-            )}
+      {/* ── Agentlik kartasi ─────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={softSpring}
+      >
+        <Card className="overflow-hidden !p-0">
+          {/* Yuqori qismda ember lenta — logoning "muhri" */}
+          <div className="ember relative h-[74px]">
+            <LogoMark
+              size={150}
+              rounded={false}
+              className="pointer-events-none absolute -right-6 -top-8 text-white/[0.09]"
+            />
           </div>
-        </div>
-        <div className="mt-3 flex gap-2">
-          <Button className="flex-1" variant="secondary" onClick={() => setEditOpen(true)}>
-            Tahrirlash
-          </Button>
-          <Button className="flex-1" onClick={() => setInviteOpen(true)}>
-            + Jamoaga qo&apos;shish
-          </Button>
-        </div>
-      </Card>
 
-      {/* Moliya jamlanmasi */}
-      <Section title="Moliya">
-        <div className="grid grid-cols-2 gap-2">
+          <div className="px-4 pb-4">
+            <div className="-mt-8 flex items-end gap-3.5">
+              <span className="rounded-[24px] bg-surface p-1 shadow-card">
+                <Avatar name={production.name} photoUrl={production.photoUrl} size={68} />
+              </span>
+              <div className="min-w-0 flex-1 pb-1">
+                <div className="truncate text-[19px] font-extrabold tracking-[-0.03em]">
+                  {production.name}
+                </div>
+                {me && (
+                  <div className="mt-1">
+                    <Badge tone="brand" icon="spark">
+                      {me.user.roleLabel}
+                    </Badge>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 flex gap-2">
+              <Button
+                className="flex-1"
+                variant="secondary"
+                icon="edit"
+                onClick={() => setEditOpen(true)}
+              >
+                Tahrirlash
+              </Button>
+              <Button className="flex-1" icon="plus" onClick={() => setInviteOpen(true)}>
+                Qo&apos;shish
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </motion.div>
+
+      {/* ── Moliya ───────────────────────────────────────────── */}
+      <Section title="Moliya jamlanmasi">
+        <div className="grid grid-cols-2 gap-2.5">
           <Stat
-            label="Klientlardan olingan"
+            icon="wallet"
+            label="Klientlardan"
             value={totals.receivedFromClients}
             format={money}
             tone="ok"
           />
-          <Stat label="Jamoaga to'langan" value={totals.paidToTeam} format={money} />
+          <Stat icon="send" label="Jamoaga to'langan" value={totals.paidToTeam} format={money} />
           <Stat
+            icon="trend"
             label="Foyda"
             value={totals.profit}
             format={money}
-            tone={totals.profit >= 0 ? 'ok' : 'danger'}
+            tone={totals.profit >= 0 ? 'brand' : 'danger'}
           />
           <Stat
+            icon="clock"
             label="Jamoaga qarz"
             value={totals.debtToTeam}
             format={money}
@@ -87,26 +131,49 @@ export function ProfileTab({ productionId }: { productionId: string }) {
         </div>
       </Section>
 
-      <Section>
-        <Card className="space-y-2">
-          <Button className="w-full" onClick={() => alertDialog('Premium obuna tez orada.')}>
-            Premiumga obuna
-          </Button>
-          <Button
-            className="w-full"
-            variant="secondary"
-            onClick={() => openLink(TELEGRAM_CHANNEL)}
-          >
-            Telegram kanalga qo&apos;shilish
-          </Button>
-        </Card>
-      </Section>
+      {/* ── Premium ──────────────────────────────────────────── */}
+      <Card tone="ember" className="overflow-hidden">
+        <LogoMark
+          size={130}
+          rounded={false}
+          className="pointer-events-none absolute -bottom-8 -right-5 text-white/[0.08]"
+        />
+        <div className="relative flex items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/18 text-white backdrop-blur-sm">
+            {Icon.spark({ size: 21 })}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-[15px] font-extrabold tracking-[-0.02em] text-white">
+              Prodakshn Premium
+            </div>
+            <div className="text-[12.5px] text-white/70">
+              Cheksiz klient, chuqur analitika, eksport
+            </div>
+          </div>
+        </div>
+        <button
+          onClick={() => alertDialog('Premium obuna tez orada.')}
+          className="relative mt-3.5 w-full rounded-2xl bg-white py-3 text-[15px] font-bold text-brand-deep active:opacity-85"
+        >
+          Obuna bo&apos;lish
+        </button>
+      </Card>
 
+      <Button
+        size="lg"
+        variant="secondary"
+        icon="send"
+        onClick={() => openLink(TELEGRAM_CHANNEL)}
+      >
+        Telegram kanalga qo&apos;shilish
+      </Button>
+
+      {/* ── Kesimlar ─────────────────────────────────────────── */}
       <Section title="Klientlar bo'yicha">
         <AnimatedList className="space-y-2">
           {byClient.length === 0 && (
-            <Card>
-              <div className="py-2 text-center text-[14px] text-tg-hint">Ma&apos;lumot yo&apos;q</div>
+            <Card tone="flat">
+              <div className="py-1 text-center text-[13.5px] text-faint">Ma&apos;lumot yo&apos;q</div>
             </Card>
           )}
           {byClient.map((c) => (
@@ -115,18 +182,27 @@ export function ProfileTab({ productionId }: { productionId: string }) {
                 <Row
                   left={
                     <div className="min-w-0">
-                      <div className="truncate text-[15px] font-semibold">{c.name}</div>
-                      <div className="text-[12px] text-tg-hint">
+                      <div className="truncate text-[15px] font-bold tracking-[-0.02em]">
+                        {c.name}
+                      </div>
+                      <div className="nums text-[12px] text-muted">
                         {money(c.receivedAmount)} olingan · {money(c.paidToTeam)} to&apos;langan
                       </div>
                     </div>
                   }
                   right={
                     <div>
-                      <div className={cx('font-bold', c.margin >= 0 ? 'text-ok' : 'text-danger')}>
+                      <div
+                        className={cx(
+                          'nums font-extrabold',
+                          c.margin >= 0 ? 'text-ok' : 'text-danger',
+                        )}
+                      >
                         {money(c.margin)}
                       </div>
-                      <div className="text-[11px] text-tg-hint">foyda</div>
+                      <div className="text-[10.5px] font-semibold uppercase tracking-[0.06em] text-faint">
+                        foyda
+                      </div>
                     </div>
                   }
                 />
@@ -139,8 +215,8 @@ export function ProfileTab({ productionId }: { productionId: string }) {
       <Section title="Ishchilar bo'yicha">
         <AnimatedList className="space-y-2">
           {byWorker.length === 0 && (
-            <Card>
-              <div className="py-2 text-center text-[14px] text-tg-hint">Ma&apos;lumot yo&apos;q</div>
+            <Card tone="flat">
+              <div className="py-1 text-center text-[13.5px] text-faint">Ma&apos;lumot yo&apos;q</div>
             </Card>
           )}
           {byWorker.map((w) => (
@@ -149,10 +225,12 @@ export function ProfileTab({ productionId }: { productionId: string }) {
                 <Row
                   left={
                     <div className="flex items-center gap-3">
-                      <Avatar name={w.name} photoUrl={w.photoUrl} size={36} />
+                      <Avatar name={w.name} photoUrl={w.photoUrl} size={38} />
                       <div className="min-w-0">
-                        <div className="truncate text-[15px] font-semibold">{w.name}</div>
-                        <div className="text-[12px] text-tg-hint">
+                        <div className="truncate text-[15px] font-bold tracking-[-0.02em]">
+                          {w.name}
+                        </div>
+                        <div className="nums text-[12px] text-muted">
                           {money(w.paidAmount)} / {money(w.owedAmount)} to&apos;langan
                         </div>
                       </div>
@@ -160,10 +238,17 @@ export function ProfileTab({ productionId }: { productionId: string }) {
                   }
                   right={
                     <div>
-                      <div className={cx('font-bold', w.debt > 0 ? 'text-danger' : 'text-ok')}>
+                      <div
+                        className={cx(
+                          'nums font-extrabold',
+                          w.debt > 0 ? 'text-danger' : 'text-ok',
+                        )}
+                      >
                         {money(w.debt)}
                       </div>
-                      <div className="text-[11px] text-tg-hint">qarz</div>
+                      <div className="text-[10.5px] font-semibold uppercase tracking-[0.06em] text-faint">
+                        qarz
+                      </div>
                     </div>
                   }
                 />
