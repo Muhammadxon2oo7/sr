@@ -49,16 +49,14 @@ export function LoginScreen({ onLogin }: { onLogin: (userId: string) => void }) 
           >
             <LogoMark size={76} glow />
           </motion.div>
-          <h1 className="mt-5 text-[30px] font-extrabold leading-none tracking-[-0.04em]">
-            Prodakshn
-          </h1>
+          <h1 className="display mt-5 text-[31px] font-bold leading-none">Prodakshn</h1>
           <p className="mt-2.5 max-w-[260px] text-[14.5px] leading-relaxed text-muted">
             Klientlar, jamoa va pul oqimi — bitta joyda
           </p>
         </div>
 
         {/* ── Forma ────────────────────────────────────────── */}
-        <div className="hairline space-y-3 rounded-[26px] bg-surface p-4 shadow-card">
+        <div className="hairline space-y-3 rounded-[22px] bg-surface p-4 shadow-card">
           <Field label="Login">
             <Input
               value={login}
@@ -115,7 +113,7 @@ export function LoginScreen({ onLogin }: { onLogin: (userId: string) => void }) 
                   {Icon.user({ size: 17 })}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-[15px] font-bold tracking-[-0.02em]">{a.title}</div>
+                  <div className="truncate text-[14.5px] font-bold tracking-[-0.02em]">{a.title}</div>
                   <div className="truncate text-[12px] text-muted">{a.subtitle}</div>
                 </div>
                 <span className="shrink-0 rounded-lg bg-sunk px-2 py-1 font-mono text-[11.5px] text-faint">

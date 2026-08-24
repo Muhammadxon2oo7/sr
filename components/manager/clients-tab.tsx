@@ -43,7 +43,7 @@ export function ClientsTab({ productionId }: { productionId: string }) {
   const totalAmount = data?.reduce((sum, c) => sum + c.totalAmount, 0) ?? 0;
 
   return (
-    <div className="space-y-4 px-4 pb-6 pt-3">
+    <div className="space-y-3.5 px-4 pb-6 pt-3">
       <PageHeader
         title="Klientlar"
         subtitle={data?.length ? `${data.length} ta loyiha · ${money(totalAmount)}` : undefined}
@@ -54,7 +54,7 @@ export function ClientsTab({ productionId }: { productionId: string }) {
 
       {/* Ishchi bo'yicha filtr — gorizontal sirg'aluvchi lenta */}
       {(team.data?.length ?? 0) > 0 && (
-        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 pt-1">
+        <div data-swipe-ignore className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 pt-1">
           <Chip active={workerId === null} onClick={() => setWorkerId(null)} layoutId="client-filter">
             Hammasi
           </Chip>
@@ -91,20 +91,18 @@ export function ClientsTab({ productionId }: { productionId: string }) {
           }
         />
       ) : (
-        <AnimatedList key={workerId ?? 'all'} className="space-y-2.5">
+        <AnimatedList key={workerId ?? 'all'} className="space-y-2">
           {data.map((c) => (
-            <AnimatedItem key={c.id} className="mb-2.5">
+            <AnimatedItem key={c.id} className="mb-2">
               <Card onClick={() => setOpenClientId(c.id)}>
-                <div className="flex items-start gap-3.5">
-                  <Ring percent={c.progressPercent} size={48}>
+                <div className="flex items-start gap-3">
+                  <Ring percent={c.progressPercent} size={44}>
                     {c.progressPercent >= 100 ? Icon.check({ size: 16 }) : `${Math.round(c.progressPercent)}%`}
                   </Ring>
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-2">
-                      <span className="truncate text-[17px] font-bold tracking-[-0.02em]">
-                        {c.name}
-                      </span>
+                      <span className="display truncate text-[16.5px] font-bold">{c.name}</span>
                       <span className="nums shrink-0 text-[16px] font-extrabold">
                         {money(c.totalAmount)}
                       </span>
@@ -120,7 +118,7 @@ export function ClientsTab({ productionId }: { productionId: string }) {
                       </span>
                     </div>
 
-                    <div className="mt-2.5">
+                    <div className="mt-2">
                       <Progress percent={c.progressPercent} height={5} />
                     </div>
                   </div>

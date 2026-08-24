@@ -11,6 +11,7 @@ import {
   Button,
   Card,
   Dot,
+  EmberWatermark,
   ErrorBanner,
   Icon,
   Input,
@@ -42,7 +43,7 @@ export function HomeTab({ productionId }: { productionId: string }) {
   const urgent = deadlines.filter((d) => d.deadlineStatus === 'overdue').length;
 
   return (
-    <div className="space-y-6 px-4 pb-6 pt-3">
+    <div className="space-y-5 px-4 pb-6 pt-3">
       {/* Sarlavha — brend belgisi har ochilganda ko'rinadi */}
       <motion.div
         initial={{ opacity: 0, y: -6 }}
@@ -50,10 +51,10 @@ export function HomeTab({ productionId }: { productionId: string }) {
         transition={softSpring}
         className="flex items-center gap-2.5"
       >
-        <LogoMark size={32} />
+        <LogoMark size={30} />
         <div className="min-w-0 flex-1">
           <div className="eyebrow">Prodakshn</div>
-          <div className="truncate text-[17px] font-bold tracking-[-0.02em]">Boshqaruv paneli</div>
+          <div className="display truncate text-[17px] font-bold">Boshqaruv paneli</div>
         </div>
         {urgent > 0 && (
           <Badge tone="danger" icon="warning">
@@ -68,17 +69,15 @@ export function HomeTab({ productionId }: { productionId: string }) {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={softSpring}
       >
-        <Card tone="ember" className="!p-5">
+        <Card tone="ember" className="!p-4">
           {/* Logo suv belgisi — kartaning o'ng qirrasidan chiqib turadi */}
-          <LogoMark
-            size={168}
-            rounded={false}
-            className="pointer-events-none absolute -right-10 -top-6 text-white/[0.07]"
-          />
+          <EmberWatermark size={132} position="-right-7 -top-8" />
+          {/* Matn har doim o'qilishi uchun yumshoq parda */}
+          <div className="ember-scrim pointer-events-none absolute inset-0" />
 
           <div className="relative">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">
+              <span className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-white/75">
                 Umumiy foyda
               </span>
               <Badge tone="onEmber" icon="trend">
@@ -88,25 +87,25 @@ export function HomeTab({ productionId }: { productionId: string }) {
 
             <div
               className={cx(
-                'nums mt-2 text-[40px] font-extrabold leading-none',
-                stats.profit >= 0 ? 'text-white' : 'text-white/70',
+                'nums mt-1.5 text-[34px] font-extrabold leading-none',
+                stats.profit >= 0 ? 'text-white' : 'text-white/75',
               )}
             >
               {money(stats.profit)}
             </div>
 
             {/* Foyda qanday hosil bo'lgani — bir qarashda */}
-            <div className="mt-5 grid grid-cols-2 gap-2">
-              <div className="rounded-2xl bg-white/12 px-3 py-2.5 backdrop-blur-sm">
-                <div className="text-[10.5px] font-bold uppercase tracking-[0.1em] text-white/65">
+            <div className="mt-3.5 grid grid-cols-2 gap-2">
+              <div className="glass-on-ember rounded-[14px] px-3 py-2">
+                <div className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/70">
                   Kirim
                 </div>
                 <div className="nums mt-0.5 text-[15px] font-extrabold text-white">
                   {money(stats.receivedFromClients)}
                 </div>
               </div>
-              <div className="rounded-2xl bg-black/20 px-3 py-2.5 backdrop-blur-sm">
-                <div className="text-[10.5px] font-bold uppercase tracking-[0.1em] text-white/65">
+              <div className="rounded-[14px] bg-black/25 px-3 py-2 backdrop-blur-sm">
+                <div className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/70">
                   Jamoaga
                 </div>
                 <div className="nums mt-0.5 text-[15px] font-extrabold text-white">
@@ -119,7 +118,7 @@ export function HomeTab({ productionId }: { productionId: string }) {
       </motion.div>
 
       {/* ── Hajm ko'rsatkichlari ─────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2.5">
         <Stat icon="clients" label="Klientlar" value={stats.activeClients} />
         <Stat icon="team" label="Jamoa a'zolari" value={stats.teamMembers} />
       </div>
@@ -143,9 +142,9 @@ export function HomeTab({ productionId }: { productionId: string }) {
             </div>
           </Card>
         ) : (
-          <AnimatedList className="space-y-2.5">
+          <AnimatedList className="space-y-2">
             {deadlines.map((d) => (
-              <AnimatedItem key={d.assignmentId} className="mb-2.5">
+              <AnimatedItem key={d.assignmentId} className="mb-2">
                 <DeadlineCard
                   row={d}
                   productionId={productionId}
@@ -195,15 +194,15 @@ function DeadlineCard({
         )}
       />
 
-      <div className="p-4 pl-[18px]">
+      <div className="p-3.5 pl-4">
         <div className="flex items-center gap-3">
-          <Avatar name={row.workerName} size={44} ring={overdue} />
+          <Avatar name={row.workerName} size={40} ring={overdue} />
 
           <div className="min-w-0 flex-1">
-            <div className="truncate text-[16px] font-bold tracking-[-0.02em]">
+            <div className="truncate text-[15.5px] font-bold tracking-[-0.02em]">
               {row.workerName}
             </div>
-            <div className="truncate text-[13px] text-muted">{row.clientName}</div>
+            <div className="truncate text-[12.5px] text-muted">{row.clientName}</div>
           </div>
 
           <div className="flex shrink-0 items-center gap-1.5">
@@ -219,7 +218,7 @@ function DeadlineCard({
           </div>
         </div>
 
-        <div className="mt-3.5 flex gap-2">
+        <div className="mt-3 flex gap-2">
           <Button variant="secondary" size="sm" icon="calendar" onClick={onExtend}>
             Cho&apos;zish
           </Button>

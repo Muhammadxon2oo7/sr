@@ -11,9 +11,9 @@ import {
   Badge,
   Button,
   Card,
+  EmberWatermark,
   Icon,
   LoadingScreen,
-  LogoMark,
   PageHeader,
   Row,
   Section,
@@ -40,7 +40,7 @@ export function WorkerProfile() {
   const user = me.user;
 
   return (
-    <div className="space-y-6 px-4 pb-6 pt-3">
+    <div className="space-y-5 px-4 pb-6 pt-3">
       <PageHeader title="Profil" subtitle={user.username ? `@${user.username}` : undefined} />
 
       {/* ── Shaxs kartasi ────────────────────────────────────── */}
@@ -49,28 +49,23 @@ export function WorkerProfile() {
         animate={{ opacity: 1, y: 0 }}
         transition={softSpring}
       >
-        <Card className="overflow-hidden !p-0">
-          <div className="ember relative h-[74px]">
-            <LogoMark
-              size={150}
-              rounded={false}
-              className="pointer-events-none absolute -right-6 -top-8 text-white/[0.09]"
-            />
-          </div>
-          <div className="px-4 pb-4">
-            <div className="-mt-8 flex items-end gap-3.5">
-              <span className="rounded-[24px] bg-surface p-1 shadow-card">
-                <Avatar name={user.name} photoUrl={user.photoUrl} size={68} />
-              </span>
-              <div className="min-w-0 flex-1 pb-1">
-                <div className="truncate text-[19px] font-extrabold tracking-[-0.03em]">
-                  {user.name}
-                </div>
-                <div className="mt-1">
-                  <Badge tone="brand" icon="spark">
-                    {user.roleLabel}
-                  </Badge>
-                </div>
+        <Card tone="ember" className="!p-4">
+          <EmberWatermark size={150} position="-right-9 -top-10" />
+          <div className="ember-scrim pointer-events-none absolute inset-0" />
+
+          <div className="relative flex items-center gap-3.5">
+            <span className="rounded-[21px] bg-white/20 p-[3px] ring-1 ring-white/30 backdrop-blur-md">
+              <Avatar name={user.name} photoUrl={user.photoUrl} size={58} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="display truncate text-[19px] font-extrabold text-white">
+                {user.name}
+              </div>
+              <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                {user.username && <Badge tone="onEmber">@{user.username}</Badge>}
+                <Badge tone="onEmber" icon="spark">
+                  {user.roleLabel}
+                </Badge>
               </div>
             </div>
           </div>
@@ -78,26 +73,24 @@ export function WorkerProfile() {
       </motion.div>
 
       {/* ── Premium ──────────────────────────────────────────── */}
-      <Card tone="ember" className="overflow-hidden">
-        <LogoMark
-          size={130}
-          rounded={false}
-          className="pointer-events-none absolute -bottom-8 -right-5 text-white/[0.08]"
-        />
+      <Card tone="ember">
+        <EmberWatermark size={116} position="-bottom-9 -right-6" />
+        <div className="ember-scrim pointer-events-none absolute inset-0" />
+
         <div className="relative flex items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/18 text-white backdrop-blur-sm">
-            {Icon.spark({ size: 21 })}
+          <div className="glass-on-ember flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] text-white">
+            {Icon.spark({ size: 19 })}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-[15px] font-extrabold tracking-[-0.02em] text-white">
-              Prodakshn Premium
+            <div className="display text-[15px] font-extrabold text-white">Prodakshn Premium</div>
+            <div className="truncate text-[12px] text-white/75">
+              Ko&apos;proq buyurtma, tezroq to&apos;lov
             </div>
-            <div className="text-[12.5px] text-white/70">Ko&apos;proq buyurtma, tezroq to&apos;lov</div>
           </div>
         </div>
         <button
           onClick={() => alertDialog('Premium obuna tez orada.')}
-          className="relative mt-3.5 w-full rounded-2xl bg-white py-3 text-[15px] font-bold text-brand-deep active:opacity-85"
+          className="relative mt-3 w-full rounded-[15px] bg-white py-2.5 text-[15px] font-extrabold text-brand-deep active:opacity-85"
         >
           Obuna bo&apos;lish
         </button>

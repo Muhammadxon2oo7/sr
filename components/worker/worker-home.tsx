@@ -13,6 +13,7 @@ import {
   Dot,
   EmptyState,
   Icon,
+  EmberWatermark,
   IconButton,
   LoadingScreen,
   LogoMark,
@@ -40,7 +41,7 @@ export function WorkerHome() {
   const hasAnyClient = data.groups.some((g) => g.clients.length > 0);
 
   return (
-    <div className="space-y-6 px-4 pb-6 pt-3">
+    <div className="space-y-5 px-4 pb-6 pt-3">
       {/* ── Salomlashuv ──────────────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: -6 }}
@@ -48,10 +49,10 @@ export function WorkerHome() {
         transition={softSpring}
         className="flex items-center gap-3"
       >
-        <LogoMark size={34} />
+        <LogoMark size={30} />
         <div className="min-w-0 flex-1">
           <div className="eyebrow">{data.user.roleLabel}</div>
-          <h1 className="truncate text-[24px] font-extrabold leading-tight tracking-[-0.035em]">
+          <h1 className="display truncate text-[23px] font-extrabold leading-tight">
             Salom, {data.user.name.split(' ')[0]}
           </h1>
         </div>
@@ -64,31 +65,29 @@ export function WorkerHome() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={softSpring}
         >
-          <Card tone="ember" className="!p-5">
-            <LogoMark
-              size={160}
-              rounded={false}
-              className="pointer-events-none absolute -right-9 -top-5 text-white/[0.07]"
-            />
+          <Card tone="ember" className="!p-4">
+            <EmberWatermark size={132} position="-right-7 -top-8" />
+            <div className="ember-scrim pointer-events-none absolute inset-0" />
+
             <div className="relative">
-              <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">
+              <div className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-white/75">
                 To&apos;lanmagan
               </div>
-              <div className="nums mt-1.5 text-[38px] font-extrabold leading-none text-white">
+              <div className="nums mt-1 text-[34px] font-extrabold leading-none text-white">
                 {money(data.totals.debt)}
               </div>
 
-              <div className="mt-5 grid grid-cols-2 gap-2">
-                <div className="rounded-2xl bg-white/12 px-3 py-2.5 backdrop-blur-sm">
-                  <div className="text-[10.5px] font-bold uppercase tracking-[0.1em] text-white/65">
+              <div className="mt-3.5 grid grid-cols-2 gap-2">
+                <div className="glass-on-ember rounded-[14px] px-3 py-2">
+                  <div className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/70">
                     Ishlangan
                   </div>
                   <div className="nums mt-0.5 text-[15px] font-extrabold text-white">
                     {money(data.totals.owedAmount)}
                   </div>
                 </div>
-                <div className="rounded-2xl bg-black/20 px-3 py-2.5 backdrop-blur-sm">
-                  <div className="text-[10.5px] font-bold uppercase tracking-[0.1em] text-white/65">
+                <div className="rounded-[14px] bg-black/25 px-3 py-2 backdrop-blur-sm">
+                  <div className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/70">
                     Olingan
                   </div>
                   <div className="nums mt-0.5 text-[15px] font-extrabold text-white">
@@ -136,12 +135,12 @@ export function WorkerHome() {
         />
       ) : (
         data.groups.map((g) => (
-          <section key={g.production.id} className="space-y-2.5">
+          <section key={g.production.id} className="space-y-2">
             {/* Bitta prodakshn bo'lsa sarlavha ko'rsatilmaydi (TZ 6.1) */}
             {!data.singleProduction && (
               <div className="flex items-center gap-2 px-1">
                 <Avatar name={g.production.name} photoUrl={g.production.photoUrl} size={24} />
-                <h2 className="eyebrow !text-muted">{g.production.name}</h2>
+                <h2 className="eyebrow text-muted">{g.production.name}</h2>
               </div>
             )}
 
@@ -152,9 +151,9 @@ export function WorkerHome() {
                 </div>
               </Card>
             ) : (
-              <AnimatedList className="space-y-2.5">
+              <AnimatedList className="space-y-2">
                 {g.clients.map((c) => (
-                  <AnimatedItem key={c.assignmentId} className="mb-2.5">
+                  <AnimatedItem key={c.assignmentId} className="mb-2">
                     <ClientCard client={c} onInfo={() => setOpenAssignment(c.assignmentId)} />
                   </AnimatedItem>
                 ))}
@@ -213,12 +212,10 @@ function ClientCard({ client: c, onInfo }: { client: WorkerClientRow; onInfo: ()
         )}
       />
 
-      <div className="p-4 pl-[18px]">
+      <div className="p-3.5 pl-4">
         <div className="flex items-start gap-2.5">
           <div className="min-w-0 flex-1">
-            <div className="truncate text-[18px] font-extrabold tracking-[-0.03em]">
-              {c.clientName}
-            </div>
+            <div className="display truncate text-[17.5px] font-extrabold">{c.clientName}</div>
 
             {/* Qolgan vaqt — ishchi uchun eng muhim signal */}
             <div className="mt-1 flex items-center gap-1.5">
@@ -244,7 +241,7 @@ function ClientCard({ client: c, onInfo }: { client: WorkerClientRow; onInfo: ()
         </div>
 
         {/* Progress */}
-        <div className="mt-3.5">
+        <div className="mt-3">
           <div className="mb-1.5 flex items-baseline justify-between">
             <span className="eyebrow">Bajarilgan</span>
             <span className="nums text-[13px] font-bold">
@@ -256,7 +253,7 @@ function ClientCard({ client: c, onInfo }: { client: WorkerClientRow; onInfo: ()
         </div>
 
         {/* Pul — uch ustunli mikro-jadval */}
-        <div className="mt-3.5 grid grid-cols-3 gap-2 rounded-2xl bg-sunk px-3 py-2.5">
+        <div className="mt-3 grid grid-cols-3 gap-2 rounded-[14px] bg-sunk px-3 py-2">
           <MoneyCell label="Ishlangan" value={money(c.owedAmount)} />
           <MoneyCell label="To'landi" value={money(c.paidAmount)} tone="ok" />
           <MoneyCell label="Qoldi" value={money(c.debt)} tone={c.debt > 0 ? 'warn' : 'muted'} />
@@ -271,7 +268,7 @@ function ClientCard({ client: c, onInfo }: { client: WorkerClientRow; onInfo: ()
           disabled={c.isFinished || complete.isPending}
           onClick={() => complete.mutate()}
           className={cx(
-            'mt-3.5 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-[15.5px] font-extrabold tracking-[-0.01em] transition-opacity',
+            'mt-3 flex w-full items-center justify-center gap-2 rounded-[16px] py-3 text-[15.5px] font-extrabold tracking-[-0.015em] transition-opacity',
             c.isFinished
               ? 'bg-ok/12 text-ok'
               : 'ember text-white shadow-glow disabled:opacity-50',

@@ -12,9 +12,9 @@ import {
   Badge,
   Button,
   Card,
+  EmberWatermark,
   Icon,
   LoadingScreen,
-  LogoMark,
   PageHeader,
   Row,
   Section,
@@ -48,7 +48,7 @@ export function ProfileTab({ productionId }: { productionId: string }) {
   const { production, totals, byClient, byWorker } = data;
 
   return (
-    <div className="space-y-6 px-4 pb-6 pt-3">
+    <div className="space-y-5 px-4 pb-6 pt-3">
       <PageHeader title="Profil" subtitle={`@${production.username}`} />
 
       {/* ── Agentlik kartasi ─────────────────────────────────── */}
@@ -57,47 +57,45 @@ export function ProfileTab({ productionId }: { productionId: string }) {
         animate={{ opacity: 1, y: 0 }}
         transition={softSpring}
       >
-        <Card className="overflow-hidden !p-0">
-          {/* Yuqori qismda ember lenta — logoning "muhri" */}
-          <div className="ember relative h-[74px]">
-            <LogoMark
-              size={150}
-              rounded={false}
-              className="pointer-events-none absolute -right-6 -top-8 text-white/[0.09]"
-            />
-          </div>
+        <Card tone="ember" className="!p-4">
+          {/* Suv belgisi → parda → kontent. Parda tufayli matn gradientning
+              yorug' uchida ham to'liq o'qiladi. */}
+          <EmberWatermark size={150} position="-right-9 -top-10" />
+          <div className="ember-scrim pointer-events-none absolute inset-0" />
 
-          <div className="px-4 pb-4">
-            <div className="-mt-8 flex items-end gap-3.5">
-              <span className="rounded-[24px] bg-surface p-1 shadow-card">
-                <Avatar name={production.name} photoUrl={production.photoUrl} size={68} />
+          <div className="relative">
+            <div className="flex items-center gap-3.5">
+              <span className="rounded-[21px] bg-white/20 p-[3px] ring-1 ring-white/30 backdrop-blur-md">
+                <Avatar name={production.name} photoUrl={production.photoUrl} size={58} />
               </span>
-              <div className="min-w-0 flex-1 pb-1">
-                <div className="truncate text-[19px] font-extrabold tracking-[-0.03em]">
+              <div className="min-w-0 flex-1">
+                <div className="display truncate text-[19px] font-extrabold text-white">
                   {production.name}
                 </div>
-                {me && (
-                  <div className="mt-1">
-                    <Badge tone="brand" icon="spark">
+                <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                  <Badge tone="onEmber">@{production.username}</Badge>
+                  {me && (
+                    <Badge tone="onEmber" icon="spark">
                       {me.user.roleLabel}
                     </Badge>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
 
             <div className="mt-4 flex gap-2">
-              <Button
-                className="flex-1"
-                variant="secondary"
-                icon="edit"
+              <button
                 onClick={() => setEditOpen(true)}
+                className="glass-on-ember flex flex-1 items-center justify-center gap-2 rounded-[15px] py-2.5 text-[14.5px] font-bold text-white ring-1 ring-white/20 active:opacity-80"
               >
-                Tahrirlash
-              </Button>
-              <Button className="flex-1" icon="plus" onClick={() => setInviteOpen(true)}>
-                Qo&apos;shish
-              </Button>
+                {Icon.edit({ size: 16, strokeWidth: 2.1 })} Tahrirlash
+              </button>
+              <button
+                onClick={() => setInviteOpen(true)}
+                className="flex flex-1 items-center justify-center gap-2 rounded-[15px] bg-white py-2.5 text-[14.5px] font-extrabold text-brand-deep active:opacity-85"
+              >
+                {Icon.plus({ size: 16, strokeWidth: 2.6 })} Qo&apos;shish
+              </button>
             </div>
           </div>
         </Card>
@@ -105,7 +103,7 @@ export function ProfileTab({ productionId }: { productionId: string }) {
 
       {/* ── Moliya ───────────────────────────────────────────── */}
       <Section title="Moliya jamlanmasi">
-        <div className="grid grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-2 gap-2">
           <Stat
             icon="wallet"
             label="Klientlardan"
@@ -132,28 +130,24 @@ export function ProfileTab({ productionId }: { productionId: string }) {
       </Section>
 
       {/* ── Premium ──────────────────────────────────────────── */}
-      <Card tone="ember" className="overflow-hidden">
-        <LogoMark
-          size={130}
-          rounded={false}
-          className="pointer-events-none absolute -bottom-8 -right-5 text-white/[0.08]"
-        />
+      <Card tone="ember">
+        <EmberWatermark size={116} position="-bottom-9 -right-6" />
+        <div className="ember-scrim pointer-events-none absolute inset-0" />
+
         <div className="relative flex items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/18 text-white backdrop-blur-sm">
-            {Icon.spark({ size: 21 })}
+          <div className="glass-on-ember flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] text-white">
+            {Icon.spark({ size: 19 })}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-[15px] font-extrabold tracking-[-0.02em] text-white">
-              Prodakshn Premium
-            </div>
-            <div className="text-[12.5px] text-white/70">
-              Cheksiz klient, chuqur analitika, eksport
+            <div className="display text-[15px] font-extrabold text-white">Prodakshn Premium</div>
+            <div className="truncate text-[12px] text-white/75">
+              Cheksiz klient, analitika, eksport
             </div>
           </div>
         </div>
         <button
           onClick={() => alertDialog('Premium obuna tez orada.')}
-          className="relative mt-3.5 w-full rounded-2xl bg-white py-3 text-[15px] font-bold text-brand-deep active:opacity-85"
+          className="relative mt-3 w-full rounded-[15px] bg-white py-2.5 text-[15px] font-extrabold text-brand-deep active:opacity-85"
         >
           Obuna bo&apos;lish
         </button>

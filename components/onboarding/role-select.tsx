@@ -74,9 +74,7 @@ export function RoleSelect() {
         transition={softSpring}
       >
         <LogoMark size={44} glow />
-        <h1 className="mt-5 text-[27px] font-extrabold leading-tight tracking-[-0.04em]">
-          Kim sifatida ishlaysiz?
-        </h1>
+        <h1 className="display mt-5 text-[26px] font-bold leading-tight">Kim sifatida ishlaysiz?</h1>
         <p className="mt-2 text-[14.5px] leading-relaxed text-muted">
           Rol bir marta tanlanadi va keyinchalik o&apos;zgartirilmaydi.
         </p>
@@ -99,8 +97,8 @@ export function RoleSelect() {
         )}
       </AnimatePresence>
 
-      <AnimatedList className="mt-7 space-y-2.5">
-        <AnimatedItem className="mb-2.5">
+      <AnimatedList className="mt-6 space-y-2">
+        <AnimatedItem className="mb-2">
           <RoleOption
             {...MANAGER}
             selected={picked === MANAGER.value}
@@ -109,11 +107,11 @@ export function RoleSelect() {
         </AnimatedItem>
 
         <AnimatedItem>
-          <div className="eyebrow px-1 pb-2.5 pt-5">Ishchi rollari</div>
+          <div className="eyebrow px-1 pb-2 pt-4">Ishchi rollari</div>
         </AnimatedItem>
 
         {WORKERS.map((r) => (
-          <AnimatedItem key={r.value} className="mb-2.5">
+          <AnimatedItem key={r.value} className="mb-2">
             <RoleOption
               {...r}
               selected={picked === r.value}
@@ -198,7 +196,7 @@ function RoleOption({
       whileTap={{ scale: 0.98 }}
       transition={spring}
       className={cx(
-        'relative flex w-full items-center gap-3.5 overflow-hidden rounded-[20px] border bg-surface px-4 py-3.5 text-left transition-colors',
+        'relative flex w-full items-center gap-3 overflow-hidden rounded-[18px] border bg-surface px-3.5 py-3 text-left transition-colors',
         selected ? 'border-brand shadow-glow' : 'border-line shadow-card',
       )}
     >
@@ -206,15 +204,15 @@ function RoleOption({
 
       <span
         className={cx(
-          'flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-colors',
+          'flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] transition-colors',
           selected ? 'ember text-white' : 'bg-sunk text-muted',
         )}
       >
-        {Icon[icon]({ size: 20 })}
+        {Icon[icon]({ size: 19 })}
       </span>
 
       <div className="min-w-0 flex-1">
-        <div className="text-[16px] font-bold tracking-[-0.02em]">{label}</div>
+        <div className="text-[15.5px] font-bold tracking-[-0.02em]">{label}</div>
         <div className="text-[12.5px] text-muted">{hint}</div>
       </div>
 

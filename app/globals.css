@@ -8,8 +8,13 @@
    Shu til butun ilovaga ko'chirilgan:
      • sirtlar — issiq qora / issiq oq (sovuq kulrang emas)
      • bitta aksent — "ember" gradienti, kam va aniq ishlatiladi
-     • radius — yirik va yumshoq (18–28px), logo blokining shakli
-     • urg'u — qalin raqamlar + keng tracking'li mayda yorliqlar
+     • radius — yirik va yumshoq, logo blokining shakli
+     • urg'u — qalin display shrift + keng tracking'li mayda yorliqlar
+
+   MUHIM: barcha element uslublari `@layer base`, yordamchi klasslar
+   `@layer components` ichida. Qatlamsiz qoldirilsa ular Tailwind
+   utilitalarini (masalan `text-white`) yengib ketadi va matn rangi
+   sinadi — avval aynan shu xato bo'lgan.
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
@@ -36,7 +41,7 @@
 
   --c-shadow: 0 1px 2px rgba(28, 20, 15, 0.05), 0 8px 24px -12px rgba(28, 20, 15, 0.14);
   --c-shadow-lift: 0 2px 6px rgba(28, 20, 15, 0.07), 0 22px 48px -20px rgba(28, 20, 15, 0.28);
-  --c-glow: 0 10px 34px -12px rgba(232, 80, 15, 0.55);
+  --c-glow: 0 8px 26px -10px rgba(232, 80, 15, 0.5);
 
   --grain-opacity: 0.5;
 }
@@ -47,7 +52,7 @@
     --c-canvas: #0a0908;
     --c-surface: #141110;
     --c-raise: #1c1817;
-    --c-sunk: #0f0d0c;
+    --c-sunk: #1a1615;
     --c-line: rgba(255, 236, 224, 0.09);
     --c-line-strong: rgba(255, 236, 224, 0.16);
     --c-ink: #f7f2ee;
@@ -65,7 +70,7 @@
 
     --c-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 24px -12px rgba(0, 0, 0, 0.7);
     --c-shadow-lift: 0 2px 8px rgba(0, 0, 0, 0.55), 0 26px 56px -22px rgba(0, 0, 0, 0.9);
-    --c-glow: 0 12px 40px -12px rgba(255, 107, 26, 0.5);
+    --c-glow: 0 10px 32px -12px rgba(255, 107, 26, 0.45);
 
     --grain-opacity: 0.7;
   }
@@ -75,7 +80,7 @@
   --c-canvas: #0a0908;
   --c-surface: #141110;
   --c-raise: #1c1817;
-  --c-sunk: #0f0d0c;
+  --c-sunk: #1a1615;
   --c-line: rgba(255, 236, 224, 0.09);
   --c-line-strong: rgba(255, 236, 224, 0.16);
   --c-ink: #f7f2ee;
@@ -93,7 +98,7 @@
 
   --c-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 24px -12px rgba(0, 0, 0, 0.7);
   --c-shadow-lift: 0 2px 8px rgba(0, 0, 0, 0.55), 0 26px 56px -22px rgba(0, 0, 0, 0.9);
-  --c-glow: 0 12px 40px -12px rgba(255, 107, 26, 0.5);
+  --c-glow: 0 10px 32px -12px rgba(255, 107, 26, 0.45);
 
   --grain-opacity: 0.7;
 }
@@ -132,105 +137,198 @@
   --color-tg-button: var(--c-brand);
   --color-tg-button-text: var(--c-on-brand);
 
-  --radius-card: 22px;
-  --radius-sheet: 28px;
+  --radius-card: 20px;
+  --radius-sheet: 26px;
+
+  /*
+    Shriftlar — `next/font` orqali yuklanadi (layout.tsx).
+      Display: Space Grotesk — burchakli, biroz "texnik" harflar;
+               logodagi kesilgan geometriyaga ohangdosh.
+      Matn:    Manrope — geometrik, ochiq shakl, mayda o'lchamda ham
+               oson o'qiladi; raqamlari moliyaviy ro'yxatlar uchun tiniq.
+  */
+  --font-sans: var(--font-manrope), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    system-ui, sans-serif;
+  --font-display: var(--font-grotesk), var(--font-manrope), -apple-system, BlinkMacSystemFont,
+    system-ui, sans-serif;
 }
 
 /* ── Asos ──────────────────────────────────────────────────── */
 
-html,
-body {
-  background: var(--c-canvas);
-  color: var(--c-ink);
-  -webkit-tap-highlight-color: transparent;
-  overscroll-behavior-y: none;
+@layer base {
+  html,
+  body {
+    background: var(--c-canvas);
+    color: var(--c-ink);
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Sarlavhalar display shriftda — brendning "ovozi" */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.03em;
+  }
+
+  /*
+    Sahifa foni — pastda logodagi cho'g' shu'lasi zaif sezilib turadi.
+    Bu ilovani "brendning ichida" turgandek his qildiradi.
+  */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+      radial-gradient(120% 55% at 50% 102%, color-mix(in srgb, var(--c-brand) 14%, transparent), transparent 70%),
+      radial-gradient(90% 40% at 100% 0%, color-mix(in srgb, var(--c-brand-deep) 8%, transparent), transparent 65%);
+  }
+
+  /* Nozik "film donasi" — yassi rangli maydonlarga tekstura beradi */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: calc(var(--grain-opacity) * 0.055);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+  }
+
+  /* iOS'da zoom bo'lmasligi uchun */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+    color: var(--c-ink);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--c-faint);
+  }
+
+  /* Sana maydonining kalendar ikonkasi mavzuga moslashadi */
+  input[type='date']::-webkit-calendar-picker-indicator,
+  input[type='datetime-local']::-webkit-calendar-picker-indicator {
+    filter: invert(var(--date-icon-invert, 0));
+    opacity: 0.55;
+  }
+
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--c-brand) 28%, transparent);
+  }
 }
 
-body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto,
-    system-ui, sans-serif;
-  font-feature-settings: 'ss01', 'cv01', 'tnum' 0;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  padding-bottom: env(safe-area-inset-bottom);
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --date-icon-invert: 1;
+  }
 }
-
-/*
-  Sahifa foni — pastda logodagi cho'g' shu'lasi zaif sezilib turadi.
-  Bu ilovani "brendning ichida" turgandek his qildiradi.
-*/
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  pointer-events: none;
-  background:
-    radial-gradient(120% 55% at 50% 102%, color-mix(in srgb, var(--c-brand) 16%, transparent), transparent 70%),
-    radial-gradient(90% 40% at 100% 0%, color-mix(in srgb, var(--c-brand-deep) 9%, transparent), transparent 65%);
-}
-
-/* Nozik "film donasi" — yassi rangli maydonlarga tekstura beradi */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: calc(var(--grain-opacity) * 0.06);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+:root[data-theme='dark'] {
+  --date-icon-invert: 1;
 }
 
 /* ── Brend yordamchilari ───────────────────────────────────── */
 
-/* Ember gradient — sirt sifatida */
-.ember {
-  background-image: linear-gradient(135deg, #1a0f08 0%, var(--c-brand-deep) 52%, var(--c-brand-hi) 100%);
-}
+@layer components {
+  /* Ember gradient — sirt sifatida */
+  .ember {
+    background-image: linear-gradient(135deg, #1a0f08 0%, var(--c-brand-deep) 52%, var(--c-brand-hi) 100%);
+  }
 
-/* Ember gradient — matn sifatida (faqat kalit raqamlar uchun) */
-.ember-text {
-  background-image: linear-gradient(100deg, var(--c-brand-deep), var(--c-brand), var(--c-brand-hi));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
+  /* Ember gradient — matn sifatida (faqat kalit raqamlar uchun) */
+  .ember-text {
+    background-image: linear-gradient(100deg, var(--c-brand-deep), var(--c-brand), var(--c-brand-hi));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
 
-/* Shisha panel — tab bar va yopishqoq sarlavhalar */
-.glass {
-  background: color-mix(in srgb, var(--c-canvas) 72%, transparent);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-}
+  /*
+    Gradient ustidagi matn har doim o'qilishi uchun parda.
+    Kartaning pastki yarmini yumshoq qoraytiradi — rasm ustidagi
+    sarlavhalar kabi. Kontent shu parda ustida turadi.
+  */
+  .ember-scrim {
+    background-image: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.5) 0%,
+      rgba(0, 0, 0, 0.22) 45%,
+      rgba(0, 0, 0, 0) 100%
+    );
+  }
 
-.hairline {
-  border: 1px solid var(--c-line);
-}
+  /* Shisha panel — tab bar, yopishqoq sarlavha va gradient ustidagi tugma */
+  .glass {
+    background: color-mix(in srgb, var(--c-canvas) 72%, transparent);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+  }
 
-.shadow-card {
-  box-shadow: var(--c-shadow);
-}
-.shadow-lift {
-  box-shadow: var(--c-shadow-lift);
-}
-.shadow-glow {
-  box-shadow: var(--c-glow);
-}
+  .glass-on-ember {
+    background: rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
 
-/* Raqamlar — moliya ekranlari uchun bir xil kenglik */
-.nums {
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
-}
+  .hairline {
+    border: 1px solid var(--c-line);
+  }
 
-/* Mayda bo'lim yorliqlari — logodagi qat'iylikni takrorlaydi */
-.eyebrow {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--c-faint);
+  .shadow-card {
+    box-shadow: var(--c-shadow);
+  }
+  .shadow-lift {
+    box-shadow: var(--c-shadow-lift);
+  }
+  .shadow-glow {
+    box-shadow: var(--c-glow);
+  }
+
+  /* Display shrift — sarlavha va yirik raqamlar uchun */
+  .display {
+    font-family: var(--font-display);
+    letter-spacing: -0.035em;
+  }
+
+  /* Raqamlar — moliya ekranlari uchun bir xil kenglik */
+  .nums {
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-display);
+    letter-spacing: -0.025em;
+  }
+
+  /* Mayda bo'lim yorliqlari — logodagi qat'iylikni takrorlaydi */
+  .eyebrow {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--c-faint);
+  }
 }
 
 /* ── Skeleton — chapdan o'ngga yuguruvchi yorug'lik ─────────── */
@@ -240,26 +338,7 @@ body::after {
     transform: translateX(100%);
   }
 }
-.skeleton {
-  position: relative;
-  overflow: hidden;
-  background: var(--c-sunk);
-}
-.skeleton::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in srgb, var(--c-brand) 12%, transparent),
-    transparent
-  );
-  animation: shimmer-sweep 1.5s infinite;
-}
 
-/* Cho'g' nafas olgandek — faqat jonli holat indikatorlarida */
 @keyframes ember-pulse {
   0%,
   100% {
@@ -271,8 +350,31 @@ body::after {
     transform: scale(1.35);
   }
 }
-.ember-pulse {
-  animation: ember-pulse 2.4s ease-in-out infinite;
+
+@layer components {
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background: var(--c-sunk);
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--c-brand) 12%, transparent),
+      transparent
+    );
+    animation: shimmer-sweep 1.5s infinite;
+  }
+
+  /* Cho'g' nafas olgandek — faqat jonli holat indikatorlarida */
+  .ember-pulse {
+    animation: ember-pulse 2.4s ease-in-out infinite;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -280,46 +382,4 @@ body::after {
   .ember-pulse {
     animation: none;
   }
-}
-
-/* ── Forma elementlari ─────────────────────────────────────── */
-
-input,
-textarea,
-select,
-button {
-  font: inherit;
-  color: inherit;
-}
-
-/* iOS'da zoom bo'lmasligi uchun */
-input,
-textarea,
-select {
-  font-size: 16px;
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: var(--c-faint);
-}
-
-/* Sana maydonining kalendar ikonkasi mavzuga moslashadi */
-input[type='date']::-webkit-calendar-picker-indicator {
-  filter: invert(var(--date-icon-invert, 0));
-  opacity: 0.55;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --date-icon-invert: 1;
-  }
-}
-
-::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-}
-
-::selection {
-  background: color-mix(in srgb, var(--c-brand) 28%, transparent);
 }

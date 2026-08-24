@@ -5,7 +5,16 @@ import { api, assetUrl } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { haptic } from '@/lib/telegram';
 import type { ProductionDto } from '@/lib/types';
-import { Avatar, Button, ErrorBanner, Field, Icon, Input, LogoMark } from '@/components/ui';
+import {
+  Avatar,
+  Button,
+  EmberWatermark,
+  ErrorBanner,
+  Field,
+  Icon,
+  Input,
+  LogoMark,
+} from '@/components/ui';
 import { AnimatePresence, motion, softSpring, spring, stepVariants } from '@/components/ui/motion';
 
 type Step = 0 | 1;
@@ -91,9 +100,7 @@ export function CreateProduction() {
         >
           {step === 0 && (
             <>
-              <h1 className="text-[27px] font-extrabold leading-tight tracking-[-0.04em]">
-                Agentligingiz nomi
-              </h1>
+              <h1 className="display text-[26px] font-bold leading-tight">Agentligingiz nomi</h1>
               <p className="mt-2 text-[14.5px] leading-relaxed text-muted">
                 Jamoangiz va klientlar ko&apos;radigan nom.
               </p>
@@ -113,9 +120,7 @@ export function CreateProduction() {
 
           {step === 1 && (
             <>
-              <h1 className="text-[27px] font-extrabold leading-tight tracking-[-0.04em]">
-                Agentlik logosi
-              </h1>
+              <h1 className="display text-[26px] font-bold leading-tight">Agentlik logosi</h1>
               <p className="mt-2 text-[14.5px] leading-relaxed text-muted">
                 Ixtiyoriy — keyinroq ham qo&apos;shsa bo&apos;ladi.
               </p>
@@ -158,18 +163,15 @@ export function CreateProduction() {
               </motion.div>
 
               {/* Tekshiruv kartasi — brend ohangida */}
-              <div className="ember relative mt-9 overflow-hidden rounded-[22px] p-4 text-white shadow-glow">
-                <LogoMark
-                  size={130}
-                  rounded={false}
-                  className="pointer-events-none absolute -bottom-7 -right-5 text-white/[0.08]"
-                />
+              <div className="ember relative mt-8 overflow-hidden rounded-[20px] p-4 text-white shadow-glow">
+                <EmberWatermark size={116} position="-right-6 -top-8" />
+                <div className="ember-scrim pointer-events-none absolute inset-0" />
                 <div className="relative">
-                  <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">
+                  <div className="text-[10.5px] font-bold uppercase tracking-[0.13em] text-white/75">
                     Tekshiring
                   </div>
-                  <div className="mt-1.5 text-[19px] font-extrabold tracking-[-0.03em]">{name}</div>
-                  <div className="mt-1 text-[12.5px] text-white/70">
+                  <div className="display mt-1.5 text-[19px] font-extrabold">{name}</div>
+                  <div className="mt-1 text-[12.5px] text-white/75">
                     Ishchilar sizni shu nom bo&apos;yicha qidirib topadi.
                   </div>
                 </div>

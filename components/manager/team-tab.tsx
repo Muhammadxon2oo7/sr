@@ -15,8 +15,8 @@ import {
   EmptyState,
   Icon,
   IconButton,
+  EmberWatermark,
   LoadingScreen,
-  LogoMark,
   Section,
   cx,
 } from '@/components/ui';
@@ -68,25 +68,23 @@ export function TeamTab({ productionId }: { productionId: string }) {
   );
 
   return (
-    <div className="space-y-6 px-4 pb-6 pt-3">
+    <div className="space-y-5 px-4 pb-6 pt-3">
       {/* ── Prodakshn identifikatori ─────────────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={softSpring}
       >
-        <Card tone="ember" className="!p-4">
-          <LogoMark
-            size={140}
-            rounded={false}
-            className="pointer-events-none absolute -bottom-8 -right-6 text-white/[0.07]"
-          />
-          <div className="relative flex items-center gap-3.5">
-            <span className="rounded-[18px] bg-white/15 p-[3px] backdrop-blur-sm">
-              <Avatar name={data.production.name} photoUrl={data.production.photoUrl} size={50} />
+        <Card tone="ember" className="!p-3.5">
+          <EmberWatermark size={124} position="-right-7 -top-9" />
+          <div className="ember-scrim pointer-events-none absolute inset-0" />
+
+          <div className="relative flex items-center gap-3">
+            <span className="rounded-[19px] bg-white/20 p-[3px] ring-1 ring-white/30 backdrop-blur-md">
+              <Avatar name={data.production.name} photoUrl={data.production.photoUrl} size={48} />
             </span>
             <div className="min-w-0 flex-1">
-              <div className="truncate text-[18px] font-extrabold tracking-[-0.025em] text-white">
+              <div className="display truncate text-[17.5px] font-extrabold text-white">
                 {data.production.name}
               </div>
               <div className="mt-1 flex flex-wrap items-center gap-1.5">
@@ -107,9 +105,9 @@ export function TeamTab({ productionId }: { productionId: string }) {
                 setInviteOpen(true);
               }}
               aria-label="Jamoaga qo'shish"
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-brand-deep"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-brand-deep"
             >
-              {Icon.plus({ size: 20, strokeWidth: 2.4 })}
+              {Icon.plus({ size: 19, strokeWidth: 2.6 })}
             </motion.button>
           </div>
         </Card>
@@ -135,11 +133,11 @@ export function TeamTab({ productionId }: { productionId: string }) {
       ) : (
         data.groups.map((g) => (
           <Section key={g.key} title={`${g.label} · ${g.members.length}`}>
-            <AnimatedList className="space-y-2.5">
+            <AnimatedList className="space-y-2">
               {g.members.map((m) => {
                 const isOpen = !collapsed[m.userId];
                 return (
-                  <AnimatedItem key={m.userId} className="mb-2.5">
+                  <AnimatedItem key={m.userId} className="mb-2">
                     <Card className="overflow-hidden !p-0">
                       {/* Ishchi qatori */}
                       <button
@@ -147,13 +145,13 @@ export function TeamTab({ productionId }: { productionId: string }) {
                           haptic('light');
                           setCollapsed((c) => ({ ...c, [m.userId]: !c[m.userId] }));
                         }}
-                        className="w-full px-4 py-3.5 text-left active:bg-sunk/60"
+                        className="w-full px-3.5 py-3 text-left active:bg-sunk/60"
                       >
                         <div className="flex items-center gap-3">
-                          <Avatar name={m.name} photoUrl={m.photoUrl} size={42} />
+                          <Avatar name={m.name} photoUrl={m.photoUrl} size={40} />
 
                           <div className="min-w-0 flex-1">
-                            <div className="truncate text-[16px] font-bold tracking-[-0.02em]">
+                            <div className="truncate text-[15.5px] font-bold tracking-[-0.02em]">
                               {m.name}
                             </div>
                             <div className="truncate text-[12px] text-muted">
@@ -207,7 +205,7 @@ export function TeamTab({ productionId }: { productionId: string }) {
                       </AnimatePresence>
 
                       {isOpen && m.clients.length === 0 && (
-                        <div className="border-t border-line px-4 py-3 text-[13px] text-faint">
+                        <div className="border-t border-line px-3.5 py-2.5 text-[12.5px] text-faint">
                           Klient biriktirilmagan
                         </div>
                       )}
@@ -255,7 +253,7 @@ function ClientLine({ client, onMore }: { client: TeamMemberClientRow; onMore: (
   const overdue = client.deadlineStatus === 'overdue';
 
   return (
-    <div className="flex items-center gap-2.5 px-4 py-2.5">
+    <div className="flex items-center gap-2.5 px-3.5 py-2.5">
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           {overdue && <Dot tone="danger" />}

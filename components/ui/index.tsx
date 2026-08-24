@@ -6,12 +6,12 @@ import { initials } from '@/lib/format';
 import { haptic } from '@/lib/telegram';
 import { AnimatePresence, AnimatedNumber, motion, quick, softSpring, spring } from './motion';
 import { Icon, type IconName } from './icons';
-import { LogoMark } from './brand';
+import { EmberWatermark, LogoMark } from './brand';
 import { cx } from './cx';
 
 export { cx };
 export { Icon, type IconName } from './icons';
-export { LogoMark, Wordmark } from './brand';
+export { LogoMark, Wordmark, EmberWatermark } from './brand';
 
 // ── Card / Section ────────────────────────────────────────────
 
@@ -44,7 +44,7 @@ export function Card({
           : undefined
       }
       className={cx(
-        'relative rounded-[22px] p-4',
+        'relative rounded-[20px] p-3.5',
         tone === 'ember' && 'ember overflow-hidden text-white shadow-glow',
         tone === 'default' && 'hairline bg-surface shadow-card',
         tone === 'flat' && 'bg-sunk',
@@ -69,7 +69,7 @@ export function Section({
   className?: string;
 }) {
   return (
-    <section className={cx('space-y-2.5', className)}>
+    <section className={cx('space-y-2', className)}>
       {(title || action) && (
         <div className="flex items-center justify-between gap-3 px-1">
           {title && <h2 className="eyebrow">{title}</h2>}
@@ -96,13 +96,11 @@ export function PageHeader({
       initial={{ opacity: 0, y: -6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={softSpring}
-      className="flex items-center gap-3 pt-1"
+      className="flex items-center gap-3"
     >
       <div className="min-w-0 flex-1">
-        <h1 className="truncate text-[27px] font-extrabold leading-tight tracking-[-0.035em]">
-          {title}
-        </h1>
-        {subtitle && <p className="mt-0.5 truncate text-[14px] text-muted">{subtitle}</p>}
+        <h1 className="display truncate text-[25px] font-extrabold leading-tight">{title}</h1>
+        {subtitle && <p className="mt-0.5 truncate text-[13.5px] text-muted">{subtitle}</p>}
       </div>
       {right}
     </motion.header>
@@ -133,7 +131,9 @@ export function Button({
   icon?: IconName;
 }) {
   const variants: Record<string, string> = {
-    // Asosiy amal — ember gradienti, logodagi olov
+    // Asosiy amal — ember gradienti, logodagi olov.
+    // Matn va ikonka har doim oq: gradient qorong'i uchdan yorug' uchgacha
+    // o'zgaradi, faqat oq har ikkalasida ham yetarli kontrast beradi.
     primary: 'ember text-white shadow-glow',
     secondary: 'bg-sunk text-ink hairline',
     outline: 'bg-transparent text-brand border border-brand/35',
@@ -142,9 +142,9 @@ export function Button({
     success: 'bg-ok/12 text-ok',
   };
   const sizes: Record<string, string> = {
-    sm: 'px-3.5 py-2 text-[13px] rounded-full gap-1.5',
-    md: 'px-4.5 py-2.5 text-[15px] rounded-2xl gap-2',
-    lg: 'px-5 py-3.5 text-[16px] rounded-2xl w-full gap-2',
+    sm: 'px-3.5 py-2 text-[13px] font-bold rounded-full gap-1.5',
+    md: 'px-4 py-2.5 text-[15px] font-bold rounded-2xl gap-2',
+    lg: 'px-5 py-3.5 text-[16.5px] font-extrabold rounded-[18px] w-full gap-2',
   };
 
   return (
@@ -162,7 +162,7 @@ export function Button({
           : undefined
       }
       className={cx(
-        'inline-flex items-center justify-center font-semibold tracking-[-0.01em] transition-opacity disabled:opacity-40 disabled:shadow-none',
+        'inline-flex items-center justify-center tracking-[-0.015em] transition-opacity disabled:opacity-40 disabled:shadow-none',
         variants[variant],
         sizes[size],
         className,
@@ -172,7 +172,7 @@ export function Button({
         <Spinner />
       ) : (
         <>
-          {icon && Icon[icon]({ size: size === 'sm' ? 15 : 18 })}
+          {icon && Icon[icon]({ size: size === 'sm' ? 15 : 18, strokeWidth: 2.1 })}
           {children}
         </>
       )}
@@ -392,7 +392,7 @@ export function Stat({
   };
   return (
     <motion.div
-      className="hairline relative overflow-hidden rounded-[18px] bg-surface p-3 shadow-card"
+      className="hairline relative overflow-hidden rounded-[16px] bg-surface px-3 py-2.5 shadow-card"
       whileTap={{ scale: 0.98 }}
       transition={spring}
     >
@@ -400,7 +400,7 @@ export function Stat({
         {icon && Icon[icon]({ size: 13 })}
         <span className="truncate text-[11.5px] font-semibold tracking-[0.01em]">{label}</span>
       </div>
-      <div className={cx('nums mt-1 text-[19px] font-extrabold', tones[tone])}>
+      <div className={cx('nums mt-0.5 text-[18px] font-extrabold', tones[tone])}>
         {typeof value === 'number' ? (
           <AnimatedNumber value={value} format={format ?? ((n) => String(Math.round(n)))} />
         ) : (
@@ -465,18 +465,23 @@ export function Chip({
       whileTap={{ scale: 0.94 }}
       transition={spring}
       className={cx(
-        'relative shrink-0 rounded-full px-4 py-2 text-[13px] font-semibold transition-colors',
+        'relative isolate shrink-0 rounded-full px-4 py-2 text-[13px] font-bold transition-colors',
         active ? 'text-white' : 'hairline bg-surface text-muted',
       )}
     >
+      {/*
+        Fon `z-0`da, matn `z-10`da. Avval `-z-10` ishlatilgan edi —
+        gorizontal skroll konteynerida u sahifa ortiga tushib
+        ko'rinmay qolardi.
+      */}
       {active && (
         <motion.span
           layoutId={layoutId}
           transition={spring}
-          className="ember absolute inset-0 -z-10 rounded-full shadow-glow"
+          className="ember absolute inset-0 z-0 rounded-full"
         />
       )}
-      <span className="relative">{children}</span>
+      <span className="relative z-10">{children}</span>
     </motion.button>
   );
 }
@@ -499,24 +504,24 @@ export function EmptyState({
 
   return (
     <motion.div
-      className="flex flex-col items-center px-6 py-12 text-center"
+      className="flex flex-col items-center px-6 py-10 text-center"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={softSpring}
     >
       <motion.div
-        className="relative mb-4 flex h-[72px] w-[72px] items-center justify-center rounded-[26px] bg-brand/10 text-brand"
+        className="relative mb-4 flex h-16 w-16 items-center justify-center rounded-[22px] bg-brand/10 text-brand"
         animate={{ y: [0, -5, 0] }}
         transition={{ repeat: Infinity, duration: 3.4, ease: 'easeInOut' }}
       >
         <span className="absolute inset-0 rounded-[26px] bg-brand/10 blur-xl" />
-        {named ? named({ size: 30 }) : <span className="text-[32px] leading-none">{icon}</span>}
+        {named ? named({ size: 28 }) : <span className="text-[30px] leading-none">{icon}</span>}
       </motion.div>
-      <div className="text-[17px] font-bold tracking-[-0.02em]">{title}</div>
+      <div className="display text-[17px] font-bold">{title}</div>
       {description && (
         <p className="mt-1.5 max-w-xs text-[14px] leading-relaxed text-muted">{description}</p>
       )}
-      {action && <div className="mt-6 w-full max-w-xs">{action}</div>}
+      {action && <div className="mt-5 w-full max-w-xs">{action}</div>}
     </motion.div>
   );
 }
@@ -576,7 +581,7 @@ export function Sheet({
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center">
+        <div data-swipe-ignore className="fixed inset-0 z-50 flex items-end justify-center">
           <motion.div
             className="absolute inset-0 bg-black/55 backdrop-blur-[3px]"
             initial={{ opacity: 0 }}
@@ -606,7 +611,7 @@ export function Sheet({
             <div className="sticky top-0 z-10 glass pt-2.5">
               <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-line-strong" />
               <div className="flex items-center justify-between gap-3 border-b border-line px-4 pb-3">
-                <h3 className="truncate text-[18px] font-bold tracking-[-0.02em]">{title}</h3>
+                <h3 className="display truncate text-[18px] font-bold">{title}</h3>
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={onClose}
@@ -654,7 +659,7 @@ export function Field({
 }
 
 export const inputClass =
-  'w-full rounded-2xl border border-line bg-surface px-4 py-3 text-ink outline-none transition-[border-color,box-shadow] focus:border-brand/60 focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--c-brand)_14%,transparent)]';
+  'w-full rounded-[16px] border border-line bg-surface px-3.5 py-2.5 text-ink outline-none transition-[border-color,box-shadow] focus:border-brand/60 focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--c-brand)_14%,transparent)]';
 
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
