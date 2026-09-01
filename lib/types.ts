@@ -15,6 +15,9 @@ export interface UserDto {
   roleName: string;
   isManager: boolean;
   hasPendingInvite: boolean;
+  /** Admin panelini ko'rish huquqi */
+  isAdmin: boolean;
+  isBlocked: boolean;
 }
 
 export interface ProductionDto {
@@ -360,4 +363,87 @@ export interface IncomingInvite {
     ownerName: string;
     membersCount: number;
   };
+}
+
+// ─── Admin paneli ────────────────────────────────────────────
+
+export type AdminUserStatus = 'active' | 'blocked' | 'deleted' | 'no_role';
+
+export interface AdminUser {
+  id: string;
+  telegramId: string;
+  name: string;
+  username: string | null;
+  photoUrl: string | null;
+  role: Role | null;
+  roleLabel: string;
+  createdAt: string;
+  updatedAt: string;
+
+  status: AdminUserStatus;
+  blockedReason: string | null;
+  blockedAt: string | null;
+  deletedAt: string | null;
+
+  ownedProductions: number;
+  productionName: string | null;
+  memberships: number;
+  assignments: number;
+  completedUnits: number;
+
+  /** Ishlab topgani, olgani va qolgan qarzi */
+  earned: number;
+  paid: number;
+  debt: number;
+
+  premiumInterest: boolean;
+  premiumTaps: number;
+
+  isAdmin: boolean;
+}
+
+export interface AdminUsersResponse {
+  users: AdminUser[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface AdminStats {
+  users: {
+    total: number;
+    active: number;
+    blocked: number;
+    deleted: number;
+    withoutRole: number;
+    managers: number;
+    workers: number;
+    byRole: Record<string, number>;
+    new7Days: number;
+    new30Days: number;
+  };
+  productions: number;
+  clients: number;
+  assignments: number;
+  premium: {
+    /** Nechta odam qiziqish bildirgan — bitta odam bir marta */
+    leads: number;
+    /** Jami bosishlar — qiziqish darajasi */
+    taps: number;
+  };
+}
+
+export interface PremiumLead {
+  user: AdminUser;
+  taps: number;
+  firstTap: string;
+  lastTap: string;
+  isManager: boolean;
+  productionName: string | null;
+  teamSize: number;
+}
+
+export interface PremiumLeadsResponse {
+  leads: PremiumLead[];
+  total: number;
 }

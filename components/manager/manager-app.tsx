@@ -10,13 +10,17 @@ import { HomeTab } from './home-tab';
 import { TeamTab } from './team-tab';
 import { ClientsTab } from './clients-tab';
 import { ProfileTab } from './profile-tab';
+import { AdminApp } from '@/components/admin/admin-app';
+import { useAuth } from '@/lib/auth';
 
-type Tab = 'home' | 'team' | 'clients' | 'profile';
+type Tab = 'home' | 'team' | 'clients' | 'profile' | 'admin';
 
-const ORDER = ['home', 'team', 'clients', 'profile'] as const;
+const BASE_ORDER = ['home', 'team', 'clients', 'profile'] as const;
 
 export function ManagerApp({ production }: { production: ProductionDto }) {
   const [tab, setTab] = useState<Tab>('home');
+  const { me } = useAuth();
+  const isAdmin = me?.user.isAdmin ?? false;
 
   const dashboard = useQuery({
     queryKey: ['dashboard', production.id],
@@ -30,16 +34,19 @@ export function ManagerApp({ production }: { production: ProductionDto }) {
     { key: 'team', label: 'Jamoa', icon: 'team', badge: pendingCount || undefined },
     { key: 'clients', label: 'Klientlar', icon: 'clients' },
     { key: 'profile', label: 'Profil', icon: 'user' },
+    ...(isAdmin ? [{ key: 'admin' as const, label: 'Admin', icon: 'shield' as const }] : []),
   ];
+  const order = isAdmin ? ([...BASE_ORDER, 'admin'] as const) : BASE_ORDER;
 
   return (
     <div className="mx-auto min-h-dvh max-w-lg overflow-x-hidden pb-28">
       {/* Chapga/o'ngga surish bilan ham tab almashadi */}
-      <SwipeTabs order={ORDER} active={tab} onChange={setTab}>
+      <SwipeTabs order={order} active={tab} onChange={setTab}>
         {tab === 'home' && <HomeTab productionId={production.id} />}
         {tab === 'team' && <TeamTab productionId={production.id} />}
         {tab === 'clients' && <ClientsTab productionId={production.id} />}
         {tab === 'profile' && <ProfileTab productionId={production.id} />}
+        {tab === 'admin' && <AdminApp />}
       </SwipeTabs>
 
       <TabBar tabs={tabs} active={tab} onChange={setTab} />

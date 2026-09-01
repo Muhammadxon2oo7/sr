@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import { alertDialog, openLink } from '@/lib/telegram';
+import { openLink } from '@/lib/telegram';
 import type { WorkerDashboard } from '@/lib/types';
 import { useState } from 'react';
 import {
@@ -22,6 +22,7 @@ import {
 import { motion, softSpring } from '@/components/ui/motion';
 import { FindProduction } from '@/components/onboarding/find-production';
 import { DangerZone } from '@/components/account/danger-zone';
+import { PremiumCard } from '@/components/account/premium-card';
 
 /** Rasmiy kanal — `.env` orqali almashtiriladi. */
 const TELEGRAM_CHANNEL = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL ?? 'https://t.me/prodlyapp';
@@ -73,28 +74,7 @@ export function WorkerProfile() {
       </motion.div>
 
       {/* ── Premium ──────────────────────────────────────────── */}
-      <Card tone="ember">
-        <EmberWatermark size={116} position="-bottom-9 -right-6" />
-        <div className="ember-scrim pointer-events-none absolute inset-0" />
-
-        <div className="relative flex items-center gap-3">
-          <div className="glass-on-ember flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] text-white">
-            {Icon.spark({ size: 19 })}
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="display text-[15px] font-extrabold text-white">Prodly Premium</div>
-            <div className="truncate text-[12px] text-white/75">
-              Ko&apos;proq buyurtma, tezroq to&apos;lov
-            </div>
-          </div>
-        </div>
-        <button
-          onClick={() => alertDialog('Premium obuna tez orada.')}
-          className="relative mt-3 w-full rounded-[15px] bg-white py-2.5 text-[15px] font-extrabold text-brand-deep active:opacity-85"
-        >
-          Obuna bo&apos;lish
-        </button>
-      </Card>
+      <PremiumCard subtitle="Ko'proq buyurtma, tezroq to'lov" />
 
       {data && data.groups.length > 0 && (
         <Section title="Prodakshnlar">
