@@ -138,7 +138,7 @@ export function ProfileTab({ productionId }: { productionId: string }) {
             {Icon.spark({ size: 19 })}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="display text-[15px] font-extrabold text-white">Prodakshn Premium</div>
+            <div className="display text-[15px] font-extrabold text-white">Prodly Premium</div>
             <div className="truncate text-[12px] text-white/75">
               Cheksiz klient, analitika, eksport
             </div>

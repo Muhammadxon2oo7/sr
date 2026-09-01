@@ -81,7 +81,7 @@ export function WorkerProfile() {
             {Icon.spark({ size: 19 })}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="display text-[15px] font-extrabold text-white">Prodakshn Premium</div>
+            <div className="display text-[15px] font-extrabold text-white">Prodly Premium</div>
             <div className="truncate text-[12px] text-white/75">
               Ko&apos;proq buyurtma, tezroq to&apos;lov
             </div>

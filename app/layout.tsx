@@ -29,9 +29,9 @@ const grotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'Prodakshn — Studio OS',
+  title: 'Prodly — Studio OS',
   description: 'Prodakshn-studiyalar uchun klient, jamoa va moliya boshqaruvi',
-  appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Prodakshn' },
+  appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Prodly' },
 };
 
 export const viewport: Viewport = {

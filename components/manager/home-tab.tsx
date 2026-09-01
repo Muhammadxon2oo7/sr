@@ -53,7 +53,7 @@ export function HomeTab({ productionId }: { productionId: string }) {
       >
         <LogoMark size={30} />
         <div className="min-w-0 flex-1">
-          <div className="eyebrow">Prodakshn</div>
+          <div className="eyebrow">Prodly</div>
           <div className="display truncate text-[17px] font-bold">Boshqaruv paneli</div>
         </div>
         {urgent > 0 && (

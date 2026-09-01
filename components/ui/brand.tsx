@@ -86,7 +86,7 @@ export function Wordmark({ size = 44 }: { size?: number }) {
       <LogoMark size={size} glow />
       <div className="leading-none">
         <div className="display font-extrabold" style={{ fontSize: size * 0.55 }}>
-          Prodakshn
+          Prodly
         </div>
         <div className="eyebrow mt-1.5">Studio OS</div>
       </div>
