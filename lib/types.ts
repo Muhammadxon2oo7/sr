@@ -27,6 +27,14 @@ export interface ProductionDto {
   createdAt: string;
 }
 
+/** Rolni o'zgartirish mumkinmi va nega yo'q. */
+export interface RoleChange {
+  canChange: boolean;
+  reason: string;
+  /** Menejer uchun: avval prodakshnni o'chirish kerak */
+  mustDeleteProduction: boolean;
+}
+
 export interface MeResponse {
   user: UserDto;
   ownedProductions: ProductionDto[];
@@ -37,6 +45,26 @@ export interface MeResponse {
     production: { id: string; name: string; username: string; photoUrl: string | null };
   }[];
   pendingInvite: { id: string; name: string; username: string } | null;
+  roleChange: RoleChange;
+}
+
+/** Hisobni o'chirishdan oldin nima bo'lishini ko'rsatish. */
+export interface AccountDeletionPreview {
+  canDelete: boolean;
+  reason: string;
+  /** O'chirilgandan keyin ham menejerda qoladigan ish yozuvlari */
+  keptAssignments: number;
+  leavingTeams: number;
+  unpaidAssignments: number;
+}
+
+/** Prodakshnni o'chirishdan oldin nima yo'qolishi. */
+export interface ProductionDeletionPreview {
+  name: string;
+  members: number;
+  clients: number;
+  assignments: number;
+  payments: number;
 }
 
 export interface PendingRequest {
@@ -147,6 +175,8 @@ export interface AssignmentDto {
     photoUrl: string | null;
     roleLabel: string;
     roleName: string;
+    /** Hisob o'chirilgan — tarix qoladi, yangi ish biriktirib bo'lmaydi */
+    isDeleted: boolean;
   };
   unitLabel: string;
   totalUnits: number;
@@ -229,6 +259,7 @@ export interface FinanceResponse {
     name: string;
     roleName: string;
     photoUrl: string | null;
+    isDeleted: boolean;
     owedAmount: number;
     paidAmount: number;
     debt: number;

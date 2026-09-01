@@ -21,6 +21,7 @@ import {
 } from '@/components/ui';
 import { motion, softSpring } from '@/components/ui/motion';
 import { FindProduction } from '@/components/onboarding/find-production';
+import { DangerZone } from '@/components/account/danger-zone';
 
 /** Rasmiy kanal — `.env` orqali almashtiriladi. */
 const TELEGRAM_CHANNEL = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL ?? 'https://t.me/telegram';
@@ -134,9 +135,7 @@ export function WorkerProfile() {
         </Button>
       </div>
 
-      <p className="px-6 text-center text-[11.5px] leading-relaxed text-faint">
-        Rol bir marta tanlanadi va o&apos;zgartirilmaydi.
-      </p>
+      <DangerZone />
 
       <Sheet open={findOpen} onClose={() => setFindOpen(false)} title="Agentlik topish">
         <FindProduction onDone={() => setFindOpen(false)} />

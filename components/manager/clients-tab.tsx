@@ -110,8 +110,9 @@ export function ClientsTab({ productionId }: { productionId: string }) {
 
                     <div className="mt-1 flex items-center justify-between gap-2 text-[12.5px] text-muted">
                       <span className="truncate">
-                        {c.assignments.map((a) => a.worker.name).join(', ') ||
-                          'Ishchi biriktirilmagan'}
+                        {c.assignments
+                          .map((a) => (a.worker.isDeleted ? `${a.worker.name} (o'chirilgan)` : a.worker.name))
+                          .join(', ') || 'Ishchi biriktirilmagan'}
                       </span>
                       <span className="nums shrink-0 font-semibold">
                         {c.completedUnits}/{c.totalUnits}

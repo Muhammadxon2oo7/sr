@@ -24,6 +24,7 @@ import {
 import { AnimatedItem, AnimatedList, motion, softSpring } from '@/components/ui/motion';
 import { InviteSheet } from './invite-sheet';
 import { EditProductionSheet } from './edit-production-sheet';
+import { DangerZone } from '@/components/account/danger-zone';
 
 /** Rasmiy kanal — `.env` orqali almashtiriladi. */
 const TELEGRAM_CHANNEL = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL ?? 'https://t.me/telegram';
@@ -220,8 +221,11 @@ export function ProfileTab({ productionId }: { productionId: string }) {
                     <div className="flex items-center gap-3">
                       <Avatar name={w.name} photoUrl={w.photoUrl} size={38} />
                       <div className="min-w-0">
-                        <div className="truncate text-[15px] font-bold tracking-[-0.02em]">
-                          {w.name}
+                        <div className="flex items-center gap-1.5">
+                          <span className="truncate text-[15px] font-bold tracking-[-0.02em]">
+                            {w.name}
+                          </span>
+                          {w.isDeleted && <Badge tone="neutral">hisob o&apos;chirilgan</Badge>}
                         </div>
                         <div className="nums text-[12px] text-muted">
                           {money(w.paidAmount)} / {money(w.owedAmount)} to&apos;langan
@@ -250,6 +254,8 @@ export function ProfileTab({ productionId }: { productionId: string }) {
           ))}
         </AnimatedList>
       </Section>
+
+      <DangerZone productionId={productionId} />
 
       <InviteSheet
         productionId={productionId}
