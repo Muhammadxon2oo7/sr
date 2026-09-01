@@ -288,8 +288,8 @@ export function ClientWizard({
                     <div className="text-[16px] font-bold tracking-[-0.02em]">{d.name}</div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <Field label="Jami qilinadigan ish soni">
+                  <div className="grid grid-cols-2 items-end gap-2">
+                    <Field label="Ish soni" hint="Jami nechta">
                       <Input
                         type="number"
                         inputMode="numeric"
@@ -300,7 +300,7 @@ export function ClientWizard({
                         }
                       />
                     </Field>
-                    <Field label="Har bir ish narxi">
+                    <Field label="Bir ish narxi" hint="$ hisobida">
                       <Input
                         type="number"
                         inputMode="decimal"

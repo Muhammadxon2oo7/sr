@@ -622,7 +622,12 @@ export function Sheet({
                 </motion.button>
               </div>
             </div>
-            <div className="p-4">{children}</div>
+            {/*
+              `focus-within` — bo'sh joy faqat klaviatura ochilganda
+              qo'shiladi. Doim qo'shilsa oynaning pasti bo'm-bo'sh
+              ko'rinib qolardi.
+            */}
+            <div className="p-4 focus-within:pb-[45vh]">{children}</div>
           </motion.div>
         </div>
       )}
@@ -663,8 +668,31 @@ export const inputClass =
 
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
-    <input {...props} className={cx(inputClass, props.disabled && 'opacity-40', props.className)} />
+    <input
+      {...props}
+      onFocus={(e) => {
+        props.onFocus?.(e);
+        scrollIntoViewOnFocus(e.currentTarget);
+      }}
+      className={cx(inputClass, props.disabled && 'opacity-40', props.className)}
+    />
   );
+}
+
+/**
+ * Klaviatura ochilganda maydonni ko'rinadigan joyga suradi.
+ *
+ * Telegram Mini App'da klaviatura ekranning pastki yarmini egallaydi va
+ * pastdan chiqadigan oynadagi maydon uning ortida qolib ketadi —
+ * foydalanuvchi nima yozayotganini ko'rmaydi.
+ *
+ * Kechikish klaviaturaning ochilish animatsiyasi tugashini kutadi:
+ * darhol surilsa, viewport hali o'zgarmagan bo'ladi va hisob noto'g'ri chiqadi.
+ */
+export function scrollIntoViewOnFocus(el: HTMLElement) {
+  window.setTimeout(() => {
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, 300);
 }
 
 // ── Row ───────────────────────────────────────────────────────

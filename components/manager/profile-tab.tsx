@@ -27,7 +27,7 @@ import { EditProductionSheet } from './edit-production-sheet';
 import { DangerZone } from '@/components/account/danger-zone';
 
 /** Rasmiy kanal — `.env` orqali almashtiriladi. */
-const TELEGRAM_CHANNEL = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL ?? 'https://t.me/telegram';
+const TELEGRAM_CHANNEL = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL ?? 'https://t.me/prodlyapp';
 
 /**
  * Menejer profili: agentlik ma'lumotlari + umumiy moliya jamlanmasi

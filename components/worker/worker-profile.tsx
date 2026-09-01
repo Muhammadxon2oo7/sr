@@ -24,7 +24,7 @@ import { FindProduction } from '@/components/onboarding/find-production';
 import { DangerZone } from '@/components/account/danger-zone';
 
 /** Rasmiy kanal — `.env` orqali almashtiriladi. */
-const TELEGRAM_CHANNEL = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL ?? 'https://t.me/telegram';
+const TELEGRAM_CHANNEL = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL ?? 'https://t.me/prodlyapp';
 
 /** Profil tab'i (TZ 6.3). */
 export function WorkerProfile() {

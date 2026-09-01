@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { haptic, openLink } from '@/lib/telegram';
 import type { UserSearchResult } from '@/lib/types';
-import { Button, ErrorBanner, Icon, Sheet } from '@/components/ui';
+import { Button, ErrorBanner, Icon, Sheet, scrollIntoViewOnFocus } from '@/components/ui';
 import { AnimatePresence } from '@/components/ui/motion';
 
 /**
@@ -82,6 +82,7 @@ export function InviteSheet({
               setSentTo(null);
             }}
             onKeyDown={(e) => e.key === 'Enter' && invite.mutate()}
+            onFocus={(e) => scrollIntoViewOnFocus(e.currentTarget)}
             placeholder="@username"
             autoCapitalize="none"
             autoCorrect="off"

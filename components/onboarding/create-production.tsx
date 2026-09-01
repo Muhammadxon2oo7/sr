@@ -16,13 +16,17 @@ import {
   LogoMark,
 } from '@/components/ui';
 import { AnimatePresence, motion, softSpring, spring, stepVariants } from '@/components/ui/motion';
+import { RoleChangeSheet } from '@/components/account/role-change-sheet';
+import { AccountDeleteSheet } from '@/components/account/danger-zone';
 
 type Step = 0 | 1;
 
 /** Prodakshn yaratish — qadamli master (TZ 4.1). */
 export function CreateProduction() {
-  const { refresh } = useAuth();
+  const { refresh, me } = useAuth();
   const [step, setStep] = useState<Step>(0);
+  const [roleOpen, setRoleOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const dir = useRef(1);
 
   function goStep(next: Step) {
@@ -188,6 +192,32 @@ export function CreateProduction() {
           </div>
         )}
       </AnimatePresence>
+
+      {/*
+        Chiqish yo'li. Menejer prodakshnini o'chirgach shu ekranga
+        tushadi va profilga o'ta olmaydi — rolni o'zgartirish uchun
+        yagona yo'l shu yerda bo'lishi kerak, aks holda "yarat →
+        o'chir → yarat" tsikliga qamalib qoladi.
+      */}
+      {me?.roleChange.canChange && (
+        <div className="mt-8 flex flex-col items-center gap-3">
+          <button
+            onClick={() => setRoleOpen(true)}
+            className="text-[13px] font-semibold text-brand active:opacity-60"
+          >
+            Menejer emasmisiz? Boshqa rolga o&apos;tish
+          </button>
+          <button
+            onClick={() => setDeleteOpen(true)}
+            className="text-[12.5px] font-medium text-faint active:opacity-60"
+          >
+            Hisobni o&apos;chirish
+          </button>
+        </div>
+      )}
+
+      <RoleChangeSheet open={roleOpen} onClose={() => setRoleOpen(false)} />
+      <AccountDeleteSheet open={deleteOpen} onClose={() => setDeleteOpen(false)} />
 
       <div className="fixed inset-x-0 bottom-0 glass border-t border-line p-4 pb-[calc(env(safe-area-inset-bottom)+16px)]">
         <div className="mx-auto flex max-w-lg gap-2">

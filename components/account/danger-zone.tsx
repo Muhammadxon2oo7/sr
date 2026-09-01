@@ -98,7 +98,7 @@ export function DangerZone({ productionId }: { productionId?: string }) {
 
 // ── Hisobni o'chirish ────────────────────────────────────────
 
-function AccountDeleteSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function AccountDeleteSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
 
