@@ -9,7 +9,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { DEMO, api, setToken } from './api';
+import { api, setToken } from './api';
 import { tg } from './telegram';
 import type { MeResponse } from './types';
 
@@ -21,11 +21,6 @@ interface AuthState {
   startParam: string | null;
   refresh: () => Promise<void>;
   setMe: (me: MeResponse) => void;
-  /** Demo rejim: login/parol bilan kirish */
-  demo: boolean;
-  needsLogin: boolean;
-  loginAs: (userId: string) => Promise<void>;
-  logout: () => void;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -35,35 +30,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [me, setMeState] = useState<MeResponse | null>(null);
   const [startParam, setStartParam] = useState<string | null>(null);
-  const [needsLogin, setNeedsLogin] = useState(false);
 
   const refresh = useCallback(async () => {
     const data = await api.get<MeResponse>('/me');
     setMeState(data);
-  }, []);
-
-  const loginAs = useCallback(
-    async (userId: string) => {
-      const { setSession } = await import('./mock/store');
-      setSession(userId);
-      setNeedsLogin(false);
-      setLoading(true);
-      try {
-        await refresh();
-        setError(null);
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [refresh],
-  );
-
-  const logout = useCallback(() => {
-    void import('./mock/store').then(({ setSession }) => setSession(null));
-    setMeState(null);
-    setNeedsLogin(true);
   }, []);
 
   useEffect(() => {
@@ -71,26 +41,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     (async () => {
       try {
-        // ── Demo rejim: server yo'q, login/parol bilan kiriladi ──
-        if (DEMO) {
-          const { getSession } = await import('./mock/store');
-          if (!getSession()) {
-            if (!cancelled) {
-              setNeedsLogin(true);
-              setLoading(false);
-            }
-            return;
-          }
-          await refresh();
-          if (!cancelled) setLoading(false);
-          return;
-        }
-
         const app = tg();
         app?.ready();
         app?.expand();
         app?.disableVerticalSwipes?.();
 
+        // Deep link: `t.me/bot?start=prod_<id>` orqali kelgan taklif
         const url = new URL(window.location.href);
         const param =
           app?.initDataUnsafe?.start_param ??
@@ -100,17 +56,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!cancelled) setStartParam(param);
 
         if (app?.initData) {
+          // Telegram imzosini serverda tekshiramiz — bu yagona
+          // haqiqiy autentifikatsiya yo'li.
           const res = await api.post<{ token: string }>('/auth/telegram', {
             initData: app.initData,
             startParam: param ?? undefined,
           });
           setToken(res.token);
         } else {
-          // Telegram tashqarisida — faqat development uchun
+          // Telegram tashqarisida. Server `ALLOW_DEV_LOGIN=true` bilan
+          // ishlayotgan bo'lsagina `?devId=...` bilan kirish mumkin;
+          // ishlab chiqarishda bu yo'l yopiq.
           const devId = url.searchParams.get('devId');
           if (!devId) {
             throw new Error(
-              'Bu ilova Telegram ichida ochilishi kerak. Botni oching va "Ilovani ochish" tugmasini bosing.',
+              'Bu ilova Telegram ichida ochilishi kerak. @prodlyappbot ni oching va "Ilovani ochish" tugmasini bosing.',
             );
           }
           const res = await api.post<{ token: string }>('/auth/dev', {
@@ -135,19 +95,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   const value = useMemo<AuthState>(
-    () => ({
-      loading,
-      error,
-      me,
-      startParam,
-      refresh,
-      setMe: setMeState,
-      demo: DEMO,
-      needsLogin,
-      loginAs,
-      logout,
-    }),
-    [loading, error, me, startParam, refresh, needsLogin, loginAs, logout],
+    () => ({ loading, error, me, startParam, refresh, setMe: setMeState }),
+    [loading, error, me, startParam, refresh],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

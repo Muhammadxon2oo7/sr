@@ -1,7 +1,6 @@
 'use client';
 
 import { useAuth } from '@/lib/auth';
-import { LoginScreen } from '@/components/demo/login-screen';
 import { EmptyState, LoadingScreen } from '@/components/ui';
 import { RoleSelect } from '@/components/onboarding/role-select';
 import { CreateProduction } from '@/components/onboarding/create-production';
@@ -9,10 +8,7 @@ import { ManagerApp } from '@/components/manager/manager-app';
 import { WorkerApp } from '@/components/worker/worker-app';
 
 export function AppShell() {
-  const { loading, error, me, needsLogin, loginAs } = useAuth();
-
-  // Demo rejim: avval login/parol
-  if (needsLogin) return <LoginScreen onLogin={(id) => void loginAs(id)} />;
+  const { loading, error, me } = useAuth();
 
   if (loading) return <LoadingScreen />;
 

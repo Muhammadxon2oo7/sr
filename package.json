@@ -7,9 +7,7 @@
     "build": "next build",
     "start": "next start -p 3001",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit",
-    "dev:demo": "NEXT_PUBLIC_DEMO_MODE=true next dev -p 3002",
-    "build:demo": "NEXT_PUBLIC_DEMO_MODE=true next build"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.71.5",

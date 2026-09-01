@@ -21,7 +21,7 @@ type Step = 0 | 1;
 
 /** Prodakshn yaratish — qadamli master (TZ 4.1). */
 export function CreateProduction() {
-  const { refresh, demo, logout } = useAuth();
+  const { refresh } = useAuth();
   const [step, setStep] = useState<Step>(0);
   const dir = useRef(1);
 
@@ -188,15 +188,6 @@ export function CreateProduction() {
           </div>
         )}
       </AnimatePresence>
-
-      {demo && (
-        <button
-          onClick={logout}
-          className="mt-6 w-full text-center text-[13px] font-medium text-faint active:opacity-60"
-        >
-          Boshqa akkaunt bilan kirish
-        </button>
-      )}
 
       <div className="fixed inset-x-0 bottom-0 glass border-t border-line p-4 pb-[calc(env(safe-area-inset-bottom)+16px)]">
         <div className="mx-auto flex max-w-lg gap-2">

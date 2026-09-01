@@ -21,7 +21,6 @@ import {
 } from '@/components/ui';
 import { motion, softSpring } from '@/components/ui/motion';
 import { FindProduction } from '@/components/onboarding/find-production';
-import { DemoControls } from '@/components/demo/demo-controls';
 
 /** Rasmiy kanal — `.env` orqali almashtiriladi. */
 const TELEGRAM_CHANNEL = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL ?? 'https://t.me/telegram';
@@ -134,8 +133,6 @@ export function WorkerProfile() {
           Telegram kanalga qo&apos;shilish
         </Button>
       </div>
-
-      <DemoControls />
 
       <p className="px-6 text-center text-[11.5px] leading-relaxed text-faint">
         Rol bir marta tanlanadi va o&apos;zgartirilmaydi.

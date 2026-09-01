@@ -24,7 +24,6 @@ import {
 import { AnimatedItem, AnimatedList, motion, softSpring } from '@/components/ui/motion';
 import { InviteSheet } from './invite-sheet';
 import { EditProductionSheet } from './edit-production-sheet';
-import { DemoControls } from '@/components/demo/demo-controls';
 
 /** Rasmiy kanal — `.env` orqali almashtiriladi. */
 const TELEGRAM_CHANNEL = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL ?? 'https://t.me/telegram';
@@ -251,8 +250,6 @@ export function ProfileTab({ productionId }: { productionId: string }) {
           ))}
         </AnimatedList>
       </Section>
-
-      <DemoControls />
 
       <InviteSheet
         productionId={productionId}

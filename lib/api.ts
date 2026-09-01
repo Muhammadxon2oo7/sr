@@ -1,12 +1,12 @@
 'use client';
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api';
-
 /**
- * Demo rejim: backend yo'q, hamma narsa brauzerdagi localStorage'da ishlaydi.
- * Vercel'ga statik joylashtirish uchun `.env.production` da yoqilgan.
+ * API mijozi.
+ *
+ * Manzil build paytida `NEXT_PUBLIC_API_URL` dan olinadi. Lokal ishlab
+ * chiqishda `.env.local` da boshqa manzil ko'rsatish mumkin.
  */
-export const DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080/api';
 
 let authToken: string | null = null;
 
@@ -34,30 +34,23 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  if (DEMO) {
-    const { mockRequest } = await import('./mock/api');
-    const { MockError } = await import('./mock/store');
-    try {
-      return await mockRequest<T>(
-        (init?.method as 'GET' | 'POST' | 'PATCH' | 'DELETE') ?? 'GET',
-        path,
-        init?.body ? JSON.parse(init.body as string) : undefined,
-      );
-    } catch (err) {
-      if (err instanceof MockError) throw new ApiError(err.message, err.status);
-      throw err;
-    }
-  }
-
   const token = getToken();
-  const res = await fetch(`${BASE}${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(init?.headers ?? {}),
-    },
-  });
+
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}${path}`, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(init?.headers ?? {}),
+      },
+    });
+  } catch {
+    // Tarmoq uzilgan yoki server javob bermayapti — foydalanuvchiga
+    // texnik xato emas, tushunarli sabab ko'rsatiladi.
+    throw new ApiError('Serverga ulanib bo\'lmadi. Internetni tekshiring.', 0);
+  }
 
   if (!res.ok) {
     let message = `Xatolik (${res.status})`;
@@ -84,28 +77,28 @@ export const api = {
   del: <T,>(path: string) => request<T>(path, { method: 'DELETE' }),
 
   async upload(file: File): Promise<{ url: string }> {
-    // Demo rejimda rasm data-URL sifatida localStorage'ga tushadi
-    if (DEMO) {
-      const url = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result));
-        reader.onerror = () => reject(new ApiError("Rasm o'qilmadi", 400));
-        reader.readAsDataURL(file);
-      });
-      return { url };
-    }
-
     const token = getToken();
     const form = new FormData();
     form.append('file', file);
+
     const res = await fetch(`${BASE}/uploads`, {
       method: 'POST',
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       body: form,
     });
-    if (!res.ok) throw new ApiError('Rasm yuklanmadi', res.status);
+    if (!res.ok) {
+      let message = 'Rasm yuklanmadi';
+      try {
+        const body = await res.json();
+        message = body?.message ?? message;
+      } catch {
+        /* javob JSON emas */
+      }
+      throw new ApiError(message, res.status);
+    }
+
     const data = (await res.json()) as { url: string };
-    return { url: data.url.startsWith('http') ? data.url : `${BASE.replace(/\/api$/, '')}${data.url}` };
+    return { url: assetUrl(data.url) ?? data.url };
   },
 };
 
