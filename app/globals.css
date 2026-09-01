@@ -225,11 +225,42 @@
     color: var(--c-faint);
   }
 
-  /* Sana maydonining kalendar ikonkasi mavzuga moslashadi */
+  /*
+    Sana/vaqt maydonlari.
+
+    iOS Safari bularni o'zining ichki kengligi bilan chizadi va CSS
+    `width` ni e'tiborsiz qoldiradi — natijada maydon konteynerdan
+    chiqib ketadi. `appearance: none` bilan brauzer hisoblagan
+    kenglikni bekor qilamiz, ichki qismlarni ham qisqarishga majburlaymiz.
+  */
+  input[type='date'],
+  input[type='datetime-local'],
+  input[type='time'] {
+    -webkit-appearance: none;
+    appearance: none;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* Ichki matn bloki — sukut bo'yicha markazga tekislangan va
+     o'z kengligini talab qiladi */
+  input::-webkit-date-and-time-value {
+    text-align: left;
+    min-width: 0;
+    margin: 0;
+  }
+
+  input::-webkit-datetime-edit {
+    min-width: 0;
+    padding: 0;
+  }
+
+  /* Kalendar ikonkasi mavzuga moslashadi */
   input[type='date']::-webkit-calendar-picker-indicator,
   input[type='datetime-local']::-webkit-calendar-picker-indicator {
     filter: invert(var(--date-icon-invert, 0));
     opacity: 0.55;
+    margin-left: 0;
   }
 
   ::-webkit-scrollbar {

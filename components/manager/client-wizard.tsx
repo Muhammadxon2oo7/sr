@@ -5,7 +5,7 @@ import { AnimatePresence, motion, spring, stepVariants } from '@/components/ui/m
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { haptic } from '@/lib/telegram';
-import { money, toDateTimeInput } from '@/lib/format';
+import { money, toDateInput } from '@/lib/format';
 import type { AssignmentInput, ClientDto, DeadlineType, TeamOption } from '@/lib/types';
 import {
   Avatar,
@@ -104,7 +104,7 @@ export function ClientWizard({
           totalUnits: 1,
           unitPrice: 0,
           deadlineType: 'ONE_TIME',
-          deadlineDate: toDateTimeInput(new Date(Date.now() + 7 * 86400000).toISOString()),
+          deadlineDate: toDateInput(new Date(Date.now() + 7 * 86400000).toISOString()),
         },
       }));
       return [...prev, w.userId];
@@ -156,8 +156,12 @@ export function ClientWizard({
       totalAmount: Number(totalAmount),
       receivedAmount: Number(receivedAmount || 0),
       assignments: activeDrafts.map((d) => {
-        // Bitta datetime maydoni: bir martalik uchun dedlayn, takrorlanuvchi uchun birinchi sana
-        const at = d.deadlineDate ? new Date(d.deadlineDate).toISOString() : undefined;
+        // Kun tanlanadi, vaqt esa peshinga qo'yiladi. Yarim tundagi
+        // dedlayn o'sha kunning o'zida darhol "muddati o'tdi" bo'lib
+        // qolardi — peshin butun kun davomida "bugun" bo'lib turadi.
+        const at = d.deadlineDate
+          ? new Date(`${d.deadlineDate}T12:00:00`).toISOString()
+          : undefined;
         return {
           userId: d.userId,
           unitLabel: d.unitLabel?.trim() || 'ish',
@@ -315,8 +319,14 @@ export function ClientWizard({
 
                   <div className="space-y-2">
                     <div className="eyebrow">Dedlayn</div>
+                    {/*
+                      `date`, `datetime-local` emas: ilova hech qayerda
+                      soatni ko'rsatmaydi (08.09.2026, "8 kun qoldi"),
+                      ya'ni daqiqa aniqligi ortiqcha edi va maydonni
+                      keraksiz kengaytirardi.
+                    */}
                     <Input
-                      type="datetime-local"
+                      type="date"
                       value={d.deadlineDate ?? ''}
                       onChange={(e) => patchDraft(d.userId, { deadlineDate: e.target.value })}
                     />
