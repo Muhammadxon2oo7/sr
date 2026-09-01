@@ -321,48 +321,72 @@ export function ClientWizard({
                       onChange={(e) => patchDraft(d.userId, { deadlineDate: e.target.value })}
                     />
 
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        aria-label="Takrorlanuvchi dedlayn"
-                        onClick={() =>
-                          patchDraft(d.userId, {
-                            deadlineType: (recurring
-                              ? 'ONE_TIME'
-                              : 'RECURRING') as DeadlineType,
-                            intervalDays: recurring ? undefined : (d.intervalDays ?? 2),
-                          })
-                        }
+                    {/*
+                      Takrorlanish alohida qatorda. Avval bu 44px tugma,
+                      "Har", input va "kun" bitta qatorga tiqilgan edi —
+                      input `w-full` bo'lgani uchun "kun" kartadan
+                      chiqib ketardi va tugmaning nima qilishi
+                      tushunarsiz edi.
+                    */}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        patchDraft(d.userId, {
+                          deadlineType: (recurring ? 'ONE_TIME' : 'RECURRING') as DeadlineType,
+                          intervalDays: recurring ? undefined : (d.intervalDays ?? 2),
+                        })
+                      }
+                      className={cx(
+                        'flex w-full items-center gap-3 rounded-[16px] border px-3.5 py-3 text-left transition-colors',
+                        recurring ? 'border-ok bg-ok/8' : 'border-line bg-surface',
+                      )}
+                    >
+                      <span
                         className={cx(
-                          'flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border-2 text-white transition-colors',
+                          'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border-2 text-white transition-colors',
                           recurring ? 'border-ok bg-ok' : 'border-line-strong',
                         )}
                       >
-                        {recurring ? Icon.check({ size: 18, strokeWidth: 3 }) : null}
-                      </button>
-                      <div className="flex flex-1 items-center gap-2">
-                        <span className="text-[15px]">Har</span>
-                        <Input
-                          type="number"
-                          inputMode="numeric"
-                          min={1}
-                          max={365}
-                          disabled={!recurring}
-                          value={d.intervalDays ?? ''}
-                          onChange={(e) =>
-                            patchDraft(d.userId, {
-                              intervalDays: Number(e.target.value) || undefined,
-                            })
-                          }
-                        />
-                        <span className="text-[15px]">kun</span>
-                      </div>
-                    </div>
+                        {recurring ? Icon.check({ size: 13, strokeWidth: 3 }) : null}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[14px] font-bold">Takrorlanuvchi ish</span>
+                        <span className="block text-[12px] text-muted">
+                          Dedlayn har N kuni avtomatik qayta belgilanadi
+                        </span>
+                      </span>
+                    </button>
 
-                    <p className="text-[12.5px] leading-snug text-faint">
-                      O&apos;chiq bo&apos;lsa tanlab bo&apos;lmaydi. Yoniq bo&apos;lsa har N kuni
-                      dedlayn avtomatik belgilanadi.
-                    </p>
+                    <AnimatePresence>
+                      {recurring && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={spring}
+                          className="overflow-hidden"
+                        >
+                          <div className="flex items-center gap-2 pt-1">
+                            <span className="shrink-0 text-[14px] text-muted">Har</span>
+                            {/* min-w-0 flex-1 — aks holda w-full qatorni yorib chiqadi */}
+                            <Input
+                              className="min-w-0 flex-1"
+                              type="number"
+                              inputMode="numeric"
+                              min={1}
+                              max={365}
+                              value={d.intervalDays ?? ''}
+                              onChange={(e) =>
+                                patchDraft(d.userId, {
+                                  intervalDays: Number(e.target.value) || undefined,
+                                })
+                              }
+                            />
+                            <span className="shrink-0 text-[14px] text-muted">kunda</span>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </Card>
               );

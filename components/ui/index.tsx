@@ -663,8 +663,11 @@ export function Field({
   );
 }
 
+// `min-w-0` — muhim: inputning ichki eng kichik kengligi ~20 belgi.
+// Flex qatorda (input + tugma yoki "Har … kun") busiz u qisqara olmaydi
+// va yonidagi elementni konteynerdan itarib chiqaradi.
 export const inputClass =
-  'w-full rounded-[16px] border border-line bg-surface px-3.5 py-2.5 text-ink outline-none transition-[border-color,box-shadow] focus:border-brand/60 focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--c-brand)_14%,transparent)]';
+  'w-full min-w-0 rounded-[16px] border border-line bg-surface px-3.5 py-2.5 text-ink outline-none transition-[border-color,box-shadow] focus:border-brand/60 focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--c-brand)_14%,transparent)]';
 
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
