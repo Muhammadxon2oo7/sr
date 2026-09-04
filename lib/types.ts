@@ -1,4 +1,4 @@
-export type Role = 'MANAGER' | 'VIDEOGRAPHER' | 'EDITOR' | 'DESIGNER' | 'OTHER';
+export type Role = 'MANAGER' | 'PRODUCER' | 'VIDEOGRAPHER' | 'EDITOR' | 'DESIGNER' | 'OTHER';
 export type MemberStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
 export type DeadlineType = 'ONE_TIME' | 'RECURRING';
 export type DeadlineStatus = 'none' | 'upcoming' | 'today' | 'overdue';
@@ -270,6 +270,9 @@ export interface Expense {
   id: string;
   amount: number;
   note: string;
+  /** Sarf shu klient uchun qilingan bo'lsa; null — umumiy chiqim */
+  clientId: string | null;
+  clientName: string | null;
   spentAt: string;
   author: { id: string; name: string; username: string | null; photoUrl: string | null } | null;
   /** Ega hammasini, menejer faqat o'zinikini o'chira oladi */

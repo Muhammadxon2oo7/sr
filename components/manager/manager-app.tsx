@@ -12,6 +12,7 @@ import { ClientsTab } from './clients-tab';
 import { ProfileTab } from './profile-tab';
 import { AdminApp } from '@/components/admin/admin-app';
 import { useAuth } from '@/lib/auth';
+import { AccountBar } from './account-bar';
 
 type Tab = 'home' | 'team' | 'clients' | 'profile' | 'admin';
 
@@ -19,15 +20,16 @@ const BASE_ORDER = ['home', 'team', 'clients', 'profile'] as const;
 
 export function ManagerApp({
   production,
-  onSwitch,
+  onExit,
 }: {
   production: ProductionDto;
-  /** Boshqa ish o'rniga o'tish (bir nechta kontekst bo'lganda) */
-  onSwitch?: () => void;
+  /** Shaxsiy hisobga qaytish */
+  onExit: () => void;
 }) {
   const [tab, setTab] = useState<Tab>('home');
   const { me } = useAuth();
   const isAdmin = me?.user.isAdmin ?? false;
+  const isOwner = me?.user.id === production.ownerId;
 
   const dashboard = useQuery({
     queryKey: ['dashboard', production.id],
@@ -47,12 +49,15 @@ export function ManagerApp({
 
   return (
     <div className="mx-auto min-h-dvh max-w-lg overflow-x-hidden pb-28">
+      {/* Doimiy eslatma: bu shaxsiy hisob emas, agentlik hisobi */}
+      <AccountBar production={production} isOwner={isOwner} onExit={onExit} />
+
       {/* Chapga/o'ngga surish bilan ham tab almashadi */}
       <SwipeTabs order={order} active={tab} onChange={setTab}>
         {tab === 'home' && <HomeTab productionId={production.id} />}
         {tab === 'team' && <TeamTab productionId={production.id} />}
         {tab === 'clients' && <ClientsTab productionId={production.id} />}
-        {tab === 'profile' && <ProfileTab productionId={production.id} onSwitch={onSwitch} />}
+        {tab === 'profile' && <ProfileTab productionId={production.id} onExit={onExit} />}
         {tab === 'admin' && <AdminApp />}
       </SwipeTabs>
 

@@ -21,7 +21,7 @@ import { AnimatePresence } from '@/components/ui/motion';
 import { RoleChangeSheet } from './role-change-sheet';
 
 /**
- * Profilning "xavfli zona" bloki: rolni o'zgartirish, prodakshnni
+ * Profilning "xavfli zona" bloki: kasbni o'zgartirish, prodakshnni
  * o'chirish, hisobni o'chirish.
  *
  * Uchala amal ham ortga qaytmaydi yoki boshqalarga ta'sir qiladi,
@@ -45,11 +45,11 @@ export function DangerZone({ productionId }: { productionId?: string }) {
             {Icon.spark({ size: 17 })}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-[14px] font-bold">Rol: {me.user.roleLabel}</div>
+            <div className="text-[14px] font-bold">Kasbim: {me.user.roleLabel}</div>
             {roleChange.canChange ? (
-              <p className="mt-0.5 text-[12px] text-muted">
-                Hozir o&apos;zgartirsa bo&apos;ladi — jamoaga qo&apos;shilganingizdan
-                keyin qulflanadi.
+              <p className="mt-0.5 text-[12px] leading-relaxed text-muted">
+                Istalgan payt o&apos;zgartirsa bo&apos;ladi — jamoalardagi
+                o&apos;rningizga ta&apos;sir qilmaydi.
               </p>
             ) : (
               <p className="mt-0.5 text-[12px] leading-relaxed text-muted">{roleChange.reason}</p>
@@ -59,7 +59,7 @@ export function DangerZone({ productionId }: { productionId?: string }) {
 
         {roleChange.canChange && (
           <Button variant="secondary" size="sm" icon="edit" onClick={() => setRoleOpen(true)}>
-            Rolni o&apos;zgartirish
+            Kasbni o&apos;zgartirish
           </Button>
         )}
 

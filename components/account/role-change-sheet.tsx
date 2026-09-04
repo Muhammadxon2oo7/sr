@@ -11,26 +11,21 @@ import { AnimatePresence, motion, spring } from '@/components/ui/motion';
 
 type Option = { value: Role; label: string; hint: string; icon: IconName };
 
-const MANAGER: Option = {
-  value: 'MANAGER',
-  label: 'Prodakshn-menejer',
-  hint: 'Klientlar, jamoa va pulni boshqaraman',
-  icon: 'clients',
-};
-
-const WORKERS: Option[] = [
+const ROLES: Option[] = [
+  { value: 'PRODUCER', label: 'Prodyuser', hint: 'Loyihani boshdan oxir olib boraman', icon: 'spark' },
+  { value: 'MANAGER', label: 'Prodakshn-menejer', hint: 'Klientlar, jamoa va pulni boshqaraman', icon: 'clients' },
   { value: 'VIDEOGRAPHER', label: 'Videograf', hint: 'Suratga olaman', icon: 'film' },
   { value: 'EDITOR', label: 'Montajyor', hint: 'Video montaj qilaman', icon: 'edit' },
-  { value: 'DESIGNER', label: 'Dizayner', hint: 'Dizayn va grafika', icon: 'spark' },
+  { value: 'DESIGNER', label: 'Dizayner', hint: 'Dizayn va grafika', icon: 'trend' },
   { value: 'OTHER', label: 'Boshqa', hint: "O'z kasbimni yozaman", icon: 'plus' },
 ];
 
 /**
- * Rolni almashtirish.
+ * Kasbni almashtirish.
  *
- * Server qat'iy shart qo'yadi: jamoada bo'lmaslik va ish tarixi
- * bo'lmasligi kerak. Shu sabab tugma faqat `roleChange.canChange`
- * bo'lganda ko'rsatiladi, aks holda sabab yoziladi.
+ * Bu shunchaki profil ma'lumoti: jamoadagi o'rin `production_members`
+ * da alohida saqlanadi, shuning uchun kasbni almashtirish hech kimning
+ * tarixiga ta'sir qilmaydi va hech qanday shart talab qilmaydi.
  */
 export function RoleChangeSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { me, setMe } = useAuth();
@@ -60,21 +55,15 @@ export function RoleChangeSheet({ open, onClose }: { open: boolean; onClose: () 
   const unchanged = picked === current && !(picked === 'OTHER' && customName.trim() !== (me?.user.customRoleName ?? ''));
 
   return (
-    <Sheet open={open} onClose={onClose} title="Rolni o'zgartirish">
+    <Sheet open={open} onClose={onClose} title="Kasbni o'zgartirish">
       <div className="space-y-3">
         <p className="px-1 text-[13px] leading-relaxed text-muted">
-          Rolni faqat hozir — jamoaga qo&apos;shilmagan va ish biriktirilmagan
-          paytda o&apos;zgartirish mumkin.
+          Bu profilingizdagi kasb. Jamoalardagi o&apos;rningiz va ish
+          tarixingiz o&apos;zgarmaydi.
         </p>
 
         <div className="space-y-2">
-          <RoleRow
-            {...MANAGER}
-            selected={picked === MANAGER.value}
-            onSelect={() => setPicked(MANAGER.value)}
-          />
-          <div className="eyebrow px-1 pb-1 pt-3">Ishchi rollari</div>
-          {WORKERS.map((r) => (
+          {ROLES.map((r) => (
             <RoleRow
               key={r.value}
               {...r}

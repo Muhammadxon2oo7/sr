@@ -21,18 +21,21 @@ import {
 } from '@/components/ui';
 import { motion, softSpring } from '@/components/ui/motion';
 import { FindProduction } from '@/components/onboarding/find-production';
-import { CreateProduction } from '@/components/onboarding/create-production';
 import { DangerZone } from '@/components/account/danger-zone';
 import { PremiumCard } from '@/components/account/premium-card';
+import { BusinessSection } from '@/components/business/business-section';
 
 /** Rasmiy kanal — `.env` orqali almashtiriladi. */
 const TELEGRAM_CHANNEL = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL ?? 'https://t.me/prodlyapp';
 
 /** Profil tab'i (TZ 6.3). */
-export function WorkerProfile({ onSwitch }: { onSwitch?: () => void }) {
+export function WorkerProfile({
+  onOpenBusiness,
+}: {
+  onOpenBusiness: (productionId: string) => void;
+}) {
   const { me } = useAuth();
   const [findOpen, setFindOpen] = useState(false);
-  const [createOpen, setCreateOpen] = useState(false);
 
   const { data } = useQuery({
     queryKey: ['worker-dashboard'],
@@ -75,6 +78,9 @@ export function WorkerProfile({ onSwitch }: { onSwitch?: () => void }) {
         </Card>
       </motion.div>
 
+      {/* ── Biznes ───────────────────────────────────────────── */}
+      <BusinessSection managed={me.managed} onEnter={onOpenBusiness} />
+
       {/* ── Premium ──────────────────────────────────────────── */}
       <PremiumCard subtitle="Ko'proq buyurtma, tezroq to'lov" />
 
@@ -104,20 +110,9 @@ export function WorkerProfile({ onSwitch }: { onSwitch?: () => void }) {
       )}
 
       <div className="space-y-2">
-        {/* Har kim o'z agentligini ocha oladi — kasb bunga to'sqinlik
-            qilmaydi. Ochgan odam o'sha agentlikda menejer bo'ladi,
-            bu yerdagi ishchilik esa saqlanib qoladi. */}
-        <Button size="lg" variant="secondary" icon="plus" onClick={() => setCreateOpen(true)}>
-          O&apos;z agentligingizni ochish
-        </Button>
         <Button size="lg" variant="secondary" icon="search" onClick={() => setFindOpen(true)}>
           Agentlik topish
         </Button>
-        {onSwitch && (
-          <Button size="lg" variant="secondary" icon="team" onClick={onSwitch}>
-            Ish o&apos;rnini almashtirish
-          </Button>
-        )}
         <Button
           size="lg"
           variant="secondary"
@@ -134,9 +129,6 @@ export function WorkerProfile({ onSwitch }: { onSwitch?: () => void }) {
         <FindProduction onDone={() => setFindOpen(false)} />
       </Sheet>
 
-      <Sheet open={createOpen} onClose={() => setCreateOpen(false)} title="Yangi agentlik">
-        <CreateProduction embedded onDone={() => setCreateOpen(false)} />
-      </Sheet>
     </div>
   );
 }

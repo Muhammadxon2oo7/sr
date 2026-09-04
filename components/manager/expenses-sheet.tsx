@@ -5,8 +5,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { money, formatFullDate } from '@/lib/format';
 import { haptic } from '@/lib/telegram';
-import type { ExpensesResponse } from '@/lib/types';
+import type { ClientDto, ExpensesResponse } from '@/lib/types';
 import {
+  Badge,
   Button,
   Card,
   EmptyState,
@@ -19,6 +20,7 @@ import {
   Sheet,
   Skeleton,
   Stat,
+  cx,
 } from '@/components/ui';
 import { AnimatedItem, AnimatedList, AnimatePresence } from '@/components/ui/motion';
 
@@ -42,6 +44,7 @@ export function ExpensesSheet({
   const qc = useQueryClient();
   const [amount, setAmount] = useState<number | undefined>(undefined);
   const [note, setNote] = useState('');
+  const [clientId, setClientId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
@@ -49,6 +52,15 @@ export function ExpensesSheet({
     queryFn: () => api.get<ExpensesResponse>(`/productions/${productionId}/expenses`),
     enabled: open,
   });
+
+  // Sarf aniq bir klient uchun bo'lishi mumkin (o'sha suratga olishga
+  // transport) yoki jamoaning umumiy chiqimi (ijara, texnika).
+  const { data: clients } = useQuery({
+    queryKey: ['clients', productionId],
+    queryFn: () => api.get<ClientDto[]>(`/productions/${productionId}/clients`),
+    enabled: open,
+  });
+  const activeClients = (clients ?? []).filter((c) => !c.archived);
 
   function invalidate() {
     void qc.invalidateQueries({ queryKey: ['expenses', productionId] });
@@ -58,11 +70,16 @@ export function ExpensesSheet({
 
   const add = useMutation({
     mutationFn: () =>
-      api.post(`/productions/${productionId}/expenses`, { amount, note: note.trim() }),
+      api.post(`/productions/${productionId}/expenses`, {
+        amount,
+        note: note.trim(),
+        clientId,
+      }),
     onSuccess: () => {
       haptic('success');
       setAmount(undefined);
       setNote('');
+      setClientId(null);
       setError(null);
       invalidate();
     },
@@ -119,6 +136,28 @@ export function ExpensesSheet({
               maxLength={200}
             />
           </Field>
+
+          {activeClients.length > 0 && (
+            <Field
+              label="Kim uchun"
+              hint="Aniq klient uchun sarflangan bo'lsa tanlang"
+            >
+              <div className="flex flex-wrap gap-1.5">
+                <Chip active={clientId === null} onClick={() => setClientId(null)}>
+                  Jamoa (umumiy)
+                </Chip>
+                {activeClients.map((c) => (
+                  <Chip
+                    key={c.id}
+                    active={clientId === c.id}
+                    onClick={() => setClientId(clientId === c.id ? null : c.id)}
+                  >
+                    {c.name}
+                  </Chip>
+                ))}
+              </div>
+            </Field>
+          )}
           <Button
             size="lg"
             icon="plus"
@@ -156,9 +195,14 @@ export function ExpensesSheet({
                         <div className="truncate text-[15px] font-bold tracking-[-0.02em]">
                           {e.note}
                         </div>
-                        <div className="mt-0.5 truncate text-[12px] text-muted">
-                          {formatFullDate(e.spentAt)}
-                          {e.author && ` · ${e.author.name}`}
+                        <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                          <span className="truncate text-[12px] text-muted">
+                            {formatFullDate(e.spentAt)}
+                            {e.author && ` · ${e.author.name}`}
+                          </span>
+                          <Badge tone={e.clientName ? 'brand' : 'neutral'}>
+                            {e.clientName ?? 'umumiy'}
+                          </Badge>
                         </div>
                       </div>
                     }
@@ -187,5 +231,28 @@ export function ExpensesSheet({
         )}
       </div>
     </Sheet>
+  );
+}
+
+/** Kichik tanlov tugmasi — klient biriktirish uchun. */
+function Chip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cx(
+        'max-w-full truncate rounded-full px-3 py-1.5 text-[12.5px] font-semibold transition-colors',
+        active ? 'ember text-white' : 'hairline bg-surface text-muted active:bg-sunk',
+      )}
+    >
+      {children}
+    </button>
   );
 }

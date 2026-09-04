@@ -17,17 +17,17 @@ import {
 
 type RoleOptionDef = { value: Role; label: string; hint: string; icon: IconName };
 
-const MANAGER: RoleOptionDef = {
-  value: 'MANAGER',
-  label: 'Prodakshn-menejer',
-  hint: 'Klientlar, jamoa va pulni boshqaraman',
-  icon: 'clients',
-};
-
-const WORKERS: RoleOptionDef[] = [
+/**
+ * Kasblar bitta ro'yxatda: bu shunchaki "nima ish qilasiz" degan savol.
+ * Agentlik ochish kasbga bog'liq emas — uni keyin profildagi "Biznesim"
+ * bo'limidan istalgan kasb egasi qila oladi.
+ */
+const ROLES: RoleOptionDef[] = [
+  { value: 'PRODUCER', label: 'Prodyuser', hint: 'Loyihani boshdan oxir olib boraman', icon: 'spark' },
+  { value: 'MANAGER', label: 'Prodakshn-menejer', hint: 'Klientlar, jamoa va pulni boshqaraman', icon: 'clients' },
   { value: 'VIDEOGRAPHER', label: 'Videograf', hint: 'Suratga olaman', icon: 'film' },
   { value: 'EDITOR', label: 'Montajyor', hint: 'Video montaj qilaman', icon: 'edit' },
-  { value: 'DESIGNER', label: 'Dizayner', hint: 'Dizayn va grafika', icon: 'spark' },
+  { value: 'DESIGNER', label: 'Dizayner', hint: 'Dizayn va grafika', icon: 'trend' },
   { value: 'OTHER', label: 'Boshqa', hint: "O'z kasbimni yozaman", icon: 'plus' },
 ];
 
@@ -98,19 +98,7 @@ export function RoleSelect() {
       </AnimatePresence>
 
       <AnimatedList className="mt-6 space-y-2">
-        <AnimatedItem className="mb-2">
-          <RoleOption
-            {...MANAGER}
-            selected={picked === MANAGER.value}
-            onSelect={() => setPicked(MANAGER.value)}
-          />
-        </AnimatedItem>
-
-        <AnimatedItem>
-          <div className="eyebrow px-1 pb-2 pt-4">Ishchi rollari</div>
-        </AnimatedItem>
-
-        {WORKERS.map((r) => (
+        {ROLES.map((r) => (
           <AnimatedItem key={r.value} className="mb-2">
             <RoleOption
               {...r}
@@ -120,6 +108,11 @@ export function RoleSelect() {
           </AnimatedItem>
         ))}
       </AnimatedList>
+
+      <p className="mt-4 px-1 text-[12.5px] leading-relaxed text-faint">
+        Bu shunchaki kasbingiz. Keyinroq istagan vaqtda o&apos;z
+        prodakshningizni ocha olasiz — kasb bunga to&apos;sqinlik qilmaydi.
+      </p>
 
       <AnimatePresence>
         {picked === 'OTHER' && (

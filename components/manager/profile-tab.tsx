@@ -37,11 +37,11 @@ const TELEGRAM_CHANNEL = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL ?? 'https://t.
  */
 export function ProfileTab({
   productionId,
-  onSwitch,
+  onExit,
 }: {
   productionId: string;
-  /** Boshqa ish o'rniga o'tish (bir nechta kontekst bo'lganda) */
-  onSwitch?: () => void;
+  /** Shaxsiy hisobga qaytish */
+  onExit: () => void;
 }) {
   const { me } = useAuth();
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -181,11 +181,9 @@ export function ProfileTab({
       <PremiumCard subtitle="Cheksiz klient, analitika, eksport" />
 
       <div className="space-y-2">
-        {onSwitch && (
-          <Button size="lg" variant="secondary" icon="team" onClick={onSwitch}>
-            Ish o&apos;rnini almashtirish
-          </Button>
-        )}
+        <Button size="lg" variant="secondary" icon="logout" onClick={onExit}>
+          Shaxsiy hisobga qaytish
+        </Button>
         <Button
           size="lg"
           variant="secondary"
