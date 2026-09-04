@@ -5,6 +5,7 @@ import { AnimatePresence, motion, spring, stepVariants } from '@/components/ui/m
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { haptic } from '@/lib/telegram';
+import { useAuth } from '@/lib/auth';
 import { money, toDateInput } from '@/lib/format';
 import type { AssignmentInput, ClientDto, DeadlineType, TeamOption } from '@/lib/types';
 import {
@@ -16,6 +17,7 @@ import {
   Field,
   Icon,
   Input,
+  NumberInput,
   Row,
   Sheet,
   cx,
@@ -38,8 +40,25 @@ export function ClientWizard({
   onCreated?: () => void;
 }) {
   const qc = useQueryClient();
+  const { me } = useAuth();
   const [step, setStep] = useState(0);
   const dir = useRef(1);
+
+  /**
+   * Klient kimga biriktirilsin.
+   *
+   * Faqat ega tanlaydi: menejer ochgan klient baribir o'ziga
+   * biriktiriladi, aks holda u ko'rmaydigan klient yaratib qo'yardi.
+   */
+  const isOwner = Boolean(
+    me?.managed.find((m) => m.production.id === productionId)?.isOwner,
+  );
+  const [managerId, setManagerId] = useState<string | null>(null);
+  const { data: managers } = useQuery({
+    queryKey: ['managers', productionId],
+    queryFn: () => api.get<TeamOption[]>(`/productions/${productionId}/managers`),
+    enabled: open && isOwner,
+  });
 
   function goStep(next: number) {
     dir.current = next > step ? 1 : -1;
@@ -65,6 +84,7 @@ export function ClientWizard({
       totalAmount: number;
       receivedAmount: number;
       assignments: AssignmentInput[];
+      managerId?: string;
     }) =>
       api.post<ClientDto>(`/productions/${productionId}/clients`, payload),
     onSuccess: () => {
@@ -89,6 +109,7 @@ export function ClientWizard({
     setReceivedAmount('');
     setSelected([]);
     setDrafts({});
+    setManagerId(null);
     setError(null);
   }
 
@@ -155,6 +176,7 @@ export function ClientWizard({
       name: name.trim(),
       totalAmount: Number(totalAmount),
       receivedAmount: Number(receivedAmount || 0),
+      managerId: managerId ?? undefined,
       assignments: activeDrafts.map((d) => {
         // Kun tanlanadi, vaqt esa peshinga qo'yiladi. Yarim tundagi
         // dedlayn o'sha kunning o'zida darhol "muddati o'tdi" bo'lib
@@ -268,13 +290,11 @@ export function ClientWizard({
               label="Bitim umumiy summasi ($)"
               hint="Klient bilan kelishilgan summa — hali tushgan pul emas."
             >
-              <Input
-                type="number"
-                inputMode="decimal"
-                value={totalAmount}
-                onChange={(e) => setTotalAmount(e.target.value)}
+              <NumberInput
+                decimal
+                value={totalAmount === '' ? undefined : Number(totalAmount)}
+                onValueChange={(v) => setTotalAmount(v === undefined ? '' : String(v))}
                 placeholder="0"
-                min={0}
                 autoFocus
               />
             </Field>
@@ -294,25 +314,16 @@ export function ClientWizard({
 
                   <div className="grid grid-cols-2 items-end gap-2">
                     <Field label="Ish soni" hint="Jami nechta">
-                      <Input
-                        type="number"
-                        inputMode="numeric"
-                        min={1}
+                      <NumberInput
                         value={d.totalUnits}
-                        onChange={(e) =>
-                          patchDraft(d.userId, { totalUnits: Number(e.target.value) || 0 })
-                        }
+                        onValueChange={(v) => patchDraft(d.userId, { totalUnits: v ?? 0 })}
                       />
                     </Field>
                     <Field label="Bir ish narxi" hint="$ hisobida">
-                      <Input
-                        type="number"
-                        inputMode="decimal"
-                        min={0}
+                      <NumberInput
+                        decimal
                         value={d.unitPrice}
-                        onChange={(e) =>
-                          patchDraft(d.userId, { unitPrice: Number(e.target.value) || 0 })
-                        }
+                        onValueChange={(v) => patchDraft(d.userId, { unitPrice: v ?? 0 })}
                       />
                     </Field>
                   </div>
@@ -379,18 +390,10 @@ export function ClientWizard({
                           <div className="flex items-center gap-2 pt-1">
                             <span className="shrink-0 text-[14px] text-muted">Har</span>
                             {/* min-w-0 flex-1 — aks holda w-full qatorni yorib chiqadi */}
-                            <Input
+                            <NumberInput
                               className="min-w-0 flex-1"
-                              type="number"
-                              inputMode="numeric"
-                              min={1}
-                              max={365}
-                              value={d.intervalDays ?? ''}
-                              onChange={(e) =>
-                                patchDraft(d.userId, {
-                                  intervalDays: Number(e.target.value) || undefined,
-                                })
-                              }
+                              value={d.intervalDays}
+                              onValueChange={(v) => patchDraft(d.userId, { intervalDays: v })}
                             />
                             <span className="shrink-0 text-[14px] text-muted">kunda</span>
                           </div>
@@ -462,6 +465,33 @@ export function ClientWizard({
                 }
               />
             </Card>
+
+            {/* Mas'ul menejer — ixtiyoriy. Tanlanmasa klient faqat
+                egada qoladi va uni keyin ham biriktirish mumkin. */}
+            {isOwner && managers && managers.length > 1 && (
+              <Card tone="flat" className="space-y-2.5">
+                <div className="eyebrow">Mas&apos;ul menejer</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {managers.map((mgr) => {
+                    const active = managerId === mgr.userId;
+                    return (
+                      <button
+                        key={mgr.userId}
+                        onClick={() => setManagerId(active ? null : mgr.userId)}
+                        className={cx(
+                          'rounded-full px-3 py-1.5 text-[12.5px] font-semibold transition-colors',
+                          active
+                            ? 'ember text-white'
+                            : 'hairline bg-surface text-muted active:bg-sunk',
+                        )}
+                      >
+                        {mgr.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </Card>
+            )}
 
             <p className="px-1 text-[12.5px] text-faint">
               Yaratilgach barcha tanlangan ishchilarga bot orqali xabar boradi.

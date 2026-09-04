@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { confirmDialog, haptic } from '@/lib/telegram';
 import { money } from '@/lib/format';
-import type { ClientDto } from '@/lib/types';
+import type { ClientDto, TeamOption } from '@/lib/types';
 import {
   Button,
   Card,
@@ -13,11 +13,13 @@ import {
   Field,
   Input,
   LogoMark,
+  NumberInput,
   Sheet,
   Skeleton,
   cx,
 } from '@/components/ui';
 import { AddWorkerSheet } from './add-worker-sheet';
+import { useAuth } from '@/lib/auth';
 
 /** Klient kartasi: asosiy moliyaviy ko'rsatkichlar (TZ 5.4.2). */
 export function ClientSheet({
@@ -34,6 +36,7 @@ export function ClientSheet({
   const [incomeOpen, setIncomeOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [addWorkerOpen, setAddWorkerOpen] = useState(false);
+  const { me } = useAuth();
 
   const { data: client, isLoading } = useQuery({
     queryKey: ['client', clientId],
@@ -55,6 +58,31 @@ export function ClientSheet({
       haptic('success');
       invalidate();
       onClose();
+    },
+    onError: (err) => setError((err as Error).message),
+  });
+
+  /**
+   * Klientni kimga biriktirish mumkinligi.
+   *
+   * Faqat ega uchun so'raladi: menejer klientni boshqa menejerga
+   * o'tkaza olmaydi (o'ziniki bo'lmagan klientni umuman ko'rmaydi ham).
+   */
+  const isOwner = Boolean(
+    me?.managed.find((m) => m.production.id === productionId)?.isOwner,
+  );
+  const { data: managers } = useQuery({
+    queryKey: ['managers', productionId],
+    queryFn: () => api.get<TeamOption[]>(`/productions/${productionId}/managers`),
+    enabled: Boolean(clientId) && isOwner,
+  });
+
+  const assignManager = useMutation({
+    mutationFn: (managerId: string | null) =>
+      api.put(`/clients/${clientId}/manager`, { managerId }),
+    onSuccess: () => {
+      haptic('success');
+      invalidate();
     },
     onError: (err) => setError((err as Error).message),
   });
@@ -123,6 +151,37 @@ export function ClientSheet({
             <Button size="lg" icon="wallet" onClick={() => setIncomeOpen(true)}>
               Klientdan to&apos;lov qayd etish
             </Button>
+
+            {/* ── Mas'ul menejer ──────────────────────────── */}
+            {isOwner && managers && managers.length > 1 && (
+              <Card tone="flat" className="space-y-2.5">
+                <div className="eyebrow">Mas&apos;ul menejer</div>
+                <p className="text-[12.5px] leading-relaxed text-muted">
+                  Biriktirilgan menejer shu klient bo&apos;yicha jamoaga ish
+                  taqsimlay oladi va uning moliyasini ko&apos;radi.
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {managers.map((mgr) => {
+                    const active = client.managerId === mgr.userId;
+                    return (
+                      <button
+                        key={mgr.userId}
+                        disabled={assignManager.isPending}
+                        onClick={() => assignManager.mutate(active ? null : mgr.userId)}
+                        className={cx(
+                          'rounded-full px-3 py-1.5 text-[12.5px] font-semibold transition-colors',
+                          active
+                            ? 'ember text-white'
+                            : 'hairline bg-surface text-muted active:bg-sunk',
+                        )}
+                      >
+                        {mgr.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </Card>
+            )}
 
             <div className="flex gap-2">
               <Button
@@ -267,12 +326,10 @@ function IncomeSheet({
     <Sheet open={open} onClose={onClose} title="Klientdan tushgan pul">
       <div className="space-y-4">
         <Field label="Summa ($)" hint={`Kelishuv bo'yicha qolgan: ${money(remaining)}`}>
-          <Input
-            type="number"
-            inputMode="decimal"
-            min={0}
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+          <NumberInput
+            decimal
+            value={amount === '' ? undefined : Number(amount)}
+            onValueChange={(v) => setAmount(v === undefined ? '' : String(v))}
             placeholder="0"
             autoFocus
           />
@@ -330,12 +387,10 @@ function EditClientSheet({
           <Input value={name} onChange={(e) => setName(e.target.value)} maxLength={80} />
         </Field>
         <Field label="Umumiy summa ($)">
-          <Input
-            type="number"
-            inputMode="decimal"
-            min={0}
-            value={total}
-            onChange={(e) => setTotal(e.target.value)}
+          <NumberInput
+            decimal
+            value={total === '' ? undefined : Number(total)}
+            onValueChange={(v) => setTotal(v === undefined ? '' : String(v))}
           />
         </Field>
         {error && <ErrorBanner message={error} />}

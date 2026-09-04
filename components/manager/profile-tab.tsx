@@ -26,6 +26,7 @@ import { InviteSheet } from './invite-sheet';
 import { EditProductionSheet } from './edit-production-sheet';
 import { DangerZone } from '@/components/account/danger-zone';
 import { PremiumCard } from '@/components/account/premium-card';
+import { ExpensesSheet } from './expenses-sheet';
 
 /** Rasmiy kanal — `.env` orqali almashtiriladi. */
 const TELEGRAM_CHANNEL = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL ?? 'https://t.me/prodlyapp';
@@ -34,10 +35,18 @@ const TELEGRAM_CHANNEL = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL ?? 'https://t.
  * Menejer profili: agentlik ma'lumotlari + umumiy moliya jamlanmasi
  * (klientlar va ishchilar kesimida).
  */
-export function ProfileTab({ productionId }: { productionId: string }) {
+export function ProfileTab({
+  productionId,
+  onSwitch,
+}: {
+  productionId: string;
+  /** Boshqa ish o'rniga o'tish (bir nechta kontekst bo'lganda) */
+  onSwitch?: () => void;
+}) {
   const { me } = useAuth();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [expensesOpen, setExpensesOpen] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ['finance', productionId],
@@ -47,6 +56,7 @@ export function ProfileTab({ productionId }: { productionId: string }) {
   if (isLoading || !data) return <LoadingScreen />;
 
   const { production, totals, byClient, byWorker } = data;
+  const isOwner = me?.user.id === production.ownerId;
 
   return (
     <div className="space-y-5 px-4 pb-6 pt-3">
@@ -75,29 +85,34 @@ export function ProfileTab({ productionId }: { productionId: string }) {
                 </div>
                 <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                   <Badge tone="onEmber">@{production.username}</Badge>
-                  {me && (
-                    <Badge tone="onEmber" icon="spark">
-                      {me.user.roleLabel}
-                    </Badge>
-                  )}
+                  {/* Yorliq shu agentlikdagi o'rinni ko'rsatadi — global
+                      kasbni emas: odam boshqa joyda montajyor bo'lishi mumkin */}
+                  <Badge tone="onEmber" icon="spark">
+                    {isOwner ? 'Egasi' : 'Menejer'}
+                  </Badge>
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 flex gap-2">
-              <button
-                onClick={() => setEditOpen(true)}
-                className="glass-on-ember flex flex-1 items-center justify-center gap-2 rounded-[15px] py-2.5 text-[14.5px] font-bold text-white ring-1 ring-white/20 active:opacity-80"
-              >
-                {Icon.edit({ size: 16, strokeWidth: 2.1 })} Tahrirlash
-              </button>
-              <button
-                onClick={() => setInviteOpen(true)}
-                className="flex flex-1 items-center justify-center gap-2 rounded-[15px] bg-white py-2.5 text-[14.5px] font-extrabold text-brand-deep active:opacity-85"
-              >
-                {Icon.plus({ size: 16, strokeWidth: 2.6 })} Qo&apos;shish
-              </button>
-            </div>
+            {/* Sozlash va jamoaga odam qo'shish — egalik huquqi.
+                Ko'tarilgan menejer klient va ishlarni boshqaradi,
+                agentlikning o'zini emas. */}
+            {isOwner && (
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={() => setEditOpen(true)}
+                  className="glass-on-ember flex flex-1 items-center justify-center gap-2 rounded-[15px] py-2.5 text-[14.5px] font-bold text-white ring-1 ring-white/20 active:opacity-80"
+                >
+                  {Icon.edit({ size: 16, strokeWidth: 2.1 })} Tahrirlash
+                </button>
+                <button
+                  onClick={() => setInviteOpen(true)}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-[15px] bg-white py-2.5 text-[14.5px] font-extrabold text-brand-deep active:opacity-85"
+                >
+                  {Icon.plus({ size: 16, strokeWidth: 2.6 })} Qo&apos;shish
+                </button>
+              </div>
+            )}
           </div>
         </Card>
       </motion.div>
@@ -128,19 +143,58 @@ export function ProfileTab({ productionId }: { productionId: string }) {
             tone={totals.debtToTeam > 0 ? 'danger' : 'default'}
           />
         </div>
+
+        {/* Harajatlar — foydadan chiqarilgan chiqim. Alohida ko'rsatiladi,
+            chunki menejer "foyda nega kamaydi?" degan savolga shu yerdan
+            javob topadi. */}
+        <button
+          onClick={() => setExpensesOpen(true)}
+          className="mt-2 block w-full text-left active:opacity-85"
+        >
+          <Card tone="flat">
+            <Row
+              left={
+                <div className="flex items-center gap-3">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-[13px] bg-surface text-warn">
+                    {Icon.wallet({ size: 17 })}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="text-[14.5px] font-bold tracking-[-0.02em]">Harajatlar</div>
+                    <div className="text-[12px] text-muted">Sarflar va izohlar</div>
+                  </div>
+                </div>
+              }
+              right={
+                <div className="flex items-center gap-2">
+                  <span className="nums font-extrabold text-danger">
+                    {totals.expenses > 0 ? `−${money(totals.expenses)}` : money(0)}
+                  </span>
+                  <span className="text-faint">{Icon.chevron({ size: 17 })}</span>
+                </div>
+              }
+            />
+          </Card>
+        </button>
       </Section>
 
       {/* ── Premium ──────────────────────────────────────────── */}
       <PremiumCard subtitle="Cheksiz klient, analitika, eksport" />
 
-      <Button
-        size="lg"
-        variant="secondary"
-        icon="send"
-        onClick={() => openLink(TELEGRAM_CHANNEL)}
-      >
-        Telegram kanalga qo&apos;shilish
-      </Button>
+      <div className="space-y-2">
+        {onSwitch && (
+          <Button size="lg" variant="secondary" icon="team" onClick={onSwitch}>
+            Ish o&apos;rnini almashtirish
+          </Button>
+        )}
+        <Button
+          size="lg"
+          variant="secondary"
+          icon="send"
+          onClick={() => openLink(TELEGRAM_CHANNEL)}
+        >
+          Telegram kanalga qo&apos;shilish
+        </Button>
+      </div>
 
       {/* ── Kesimlar ─────────────────────────────────────────── */}
       <Section title="Klientlar bo'yicha">
@@ -235,7 +289,9 @@ export function ProfileTab({ productionId }: { productionId: string }) {
         </AnimatedList>
       </Section>
 
-      <DangerZone productionId={productionId} />
+      {/* Prodakshnni o'chirish — faqat ega. Ko'tarilgan menejer
+          o'zi qurmagan agentlikni yo'q qila olmaydi. */}
+      <DangerZone productionId={isOwner ? productionId : undefined} />
 
       <InviteSheet
         productionId={productionId}
@@ -246,6 +302,11 @@ export function ProfileTab({ productionId }: { productionId: string }) {
         production={production}
         open={editOpen}
         onClose={() => setEditOpen(false)}
+      />
+      <ExpensesSheet
+        productionId={productionId}
+        open={expensesOpen}
+        onClose={() => setExpensesOpen(false)}
       />
     </div>
   );

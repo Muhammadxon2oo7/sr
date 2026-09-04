@@ -31,6 +31,7 @@ import {
 import { RequestsList } from './requests-list';
 import { InviteSheet } from './invite-sheet';
 import { AssignmentMoreSheet } from './assignment-more-sheet';
+import { useAuth } from '@/lib/auth';
 
 /**
  * Jamoa sahifasi: rol bo'yicha guruhlar → ishchi → uning klientlari darhol ko'rinadi.
@@ -38,6 +39,7 @@ import { AssignmentMoreSheet } from './assignment-more-sheet';
  */
 export function TeamTab({ productionId }: { productionId: string }) {
   const qc = useQueryClient();
+  const { me } = useAuth();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [openAssignment, setOpenAssignment] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
@@ -59,7 +61,28 @@ export function TeamTab({ productionId }: { productionId: string }) {
     onError: (err) => alert((err as Error).message),
   });
 
+  /**
+   * A'zoning SHU prodakshndagi rolini o'zgartirish.
+   *
+   * Menejerlikka ko'tarilgan odam o'ziga biriktirilgan klientlar
+   * bo'yicha boshqa ishchilarga vazifa taqsimlay oladi. Rol faqat shu
+   * agentlikda amal qiladi — uning boshqa joydagi o'rniga tegmaydi.
+   */
+  const setRole = useMutation({
+    mutationFn: ({ memberId, role }: { memberId: string; role: string }) =>
+      api.put(`/members/${memberId}/role`, { role }),
+    onSuccess: () => {
+      haptic('success');
+      void qc.invalidateQueries({ queryKey: ['team', productionId] });
+      void qc.invalidateQueries({ queryKey: ['managers', productionId] });
+      void qc.invalidateQueries({ queryKey: ['clients', productionId] });
+    },
+    onError: (err) => alert((err as Error).message),
+  });
+
   if (isLoading || !data) return <LoadingScreen />;
+
+  const isOwner = me?.user.id === data.production.ownerId;
 
   const totalMembers = data.groups.reduce((acc, g) => acc + g.members.length, 0);
   const totalDebt = data.groups.reduce(
@@ -98,22 +121,26 @@ export function TeamTab({ productionId }: { productionId: string }) {
                 )}
               </div>
             </div>
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={() => {
-                haptic('light');
-                setInviteOpen(true);
-              }}
-              aria-label="Jamoaga qo'shish"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-brand-deep"
-            >
-              {Icon.plus({ size: 19, strokeWidth: 2.6 })}
-            </motion.button>
+            {/* Jamoa tarkibi — egalik huquqi. Ko'tarilgan menejer
+                ishlarni taqsimlaydi, odam qo'shib-chiqarmaydi. */}
+            {isOwner && (
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={() => {
+                  haptic('light');
+                  setInviteOpen(true);
+                }}
+                aria-label="Jamoaga qo'shish"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-brand-deep"
+              >
+                {Icon.plus({ size: 19, strokeWidth: 2.6 })}
+              </motion.button>
+            )}
           </div>
         </Card>
       </motion.div>
 
-      {data.pendingRequests.length > 0 && (
+      {isOwner && data.pendingRequests.length > 0 && (
         <Section title={`Kutilayotgan arizalar · ${data.pendingRequests.length}`}>
           <RequestsList requests={data.pendingRequests} productionId={productionId} />
         </Section>
@@ -154,8 +181,15 @@ export function TeamTab({ productionId }: { productionId: string }) {
                             <div className="truncate text-[15.5px] font-bold tracking-[-0.02em]">
                               {m.name}
                             </div>
-                            <div className="truncate text-[12px] text-muted">
-                              {m.clientsCount} klient · shu oyda {m.completedThisMonth} ish
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <span className="truncate text-[12px] text-muted">
+                                {m.clientsCount} klient · shu oyda {m.completedThisMonth} ish
+                              </span>
+                              {m.isManager && (
+                                <Badge tone="brand" icon="spark">
+                                  menejer
+                                </Badge>
+                              )}
                             </div>
                           </div>
 
@@ -210,7 +244,28 @@ export function TeamTab({ productionId }: { productionId: string }) {
                         </div>
                       )}
 
-                      {isOpen && (
+                      {/* Menejerlikka ko'tarish — faqat ega. Menejer o'ziga
+                          teng menejer yaratsa, jamoa tarkibini ham
+                          o'zgartira olardi. */}
+                      {isOpen && isOwner && (
+                        <button
+                          className="w-full border-t border-line py-2.5 text-[12px] font-semibold text-brand active:bg-brand/8"
+                          onClick={async () => {
+                            const warn = m.isManager
+                              ? `${m.name} menejerlikdan olinsinmi? Unga biriktirilgan ${m.managedClients} ta klient sizga qaytadi.`
+                              : `${m.name} menejer qilinsinmi? U o'ziga biriktirilgan klientlar bo'yicha jamoaga ish taqsimlay oladi.`;
+                            if (!(await confirmDialog(warn))) return;
+                            setRole.mutate({
+                              memberId: m.memberId,
+                              role: m.isManager ? (m.role ?? 'OTHER') : 'MANAGER',
+                            });
+                          }}
+                        >
+                          {m.isManager ? 'Menejerlikdan olish' : 'Menejer qilish'}
+                        </button>
+                      )}
+
+                      {isOpen && isOwner && (
                         <button
                           className="w-full border-t border-line py-2.5 text-[12px] font-semibold text-danger active:bg-danger/8"
                           onClick={async () => {

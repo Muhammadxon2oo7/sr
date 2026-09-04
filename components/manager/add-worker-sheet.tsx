@@ -15,6 +15,7 @@ import {
   Field,
   Icon,
   Input,
+  NumberInput,
   Sheet,
   cx,
 } from '@/components/ui';
@@ -164,12 +165,9 @@ export function AddWorkerSheet({
                     />
                   </Field>
                   <Field label="Jami soni">
-                    <Input
-                      type="number"
-                      inputMode="numeric"
-                      min={1}
-                      value={totalUnits}
-                      onChange={(e) => setTotalUnits(e.target.value)}
+                    <NumberInput
+                      value={totalUnits === '' ? undefined : Number(totalUnits)}
+                      onValueChange={(v) => setTotalUnits(v === undefined ? '' : String(v))}
                     />
                   </Field>
                 </div>
@@ -182,12 +180,10 @@ export function AddWorkerSheet({
                       : undefined
                   }
                 >
-                  <Input
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    value={unitPrice}
-                    onChange={(e) => setUnitPrice(e.target.value)}
+                  <NumberInput
+                    decimal
+                    value={unitPrice === '' ? undefined : Number(unitPrice)}
+                    onValueChange={(v) => setUnitPrice(v === undefined ? '' : String(v))}
                     placeholder="0"
                   />
                 </Field>
@@ -235,13 +231,10 @@ export function AddWorkerSheet({
                           </button>
                         ))}
                       </div>
-                      <Input
-                        type="number"
-                        min={1}
-                        max={365}
+                      <NumberInput
                         placeholder="yoki o'z intervalingiz (kun)"
-                        value={intervalDays}
-                        onChange={(e) => setIntervalDays(e.target.value)}
+                        value={intervalDays === '' ? undefined : Number(intervalDays)}
+                        onValueChange={(v) => setIntervalDays(v === undefined ? '' : String(v))}
                       />
                       <Field label="Birinchi dedlayn sanasi">
                         <Input

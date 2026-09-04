@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { money, formatFullDate } from '@/lib/format';
+import { formatFullDate } from '@/lib/format';
 import { haptic } from '@/lib/telegram';
 import type { AdminUser } from '@/lib/types';
 import {
@@ -139,19 +139,6 @@ export function AdminUserSheet({
             <InfoRow label="Bajarilgan" value={String(user.completedUnits)} />
             <InfoRow label="Ro'yxatdan o'tgan" value={formatFullDate(user.createdAt)} />
           </Card>
-
-          {/* ── Pul ───────────────────────────────────────── */}
-          {(user.earned > 0 || user.paid > 0) && (
-            <Card className="divide-y divide-line !p-0">
-              <InfoRow label="Ishlab topgan" value={money(user.earned)} />
-              <InfoRow label="Olgan" value={money(user.paid)} tone="ok" />
-              <InfoRow
-                label="Qolgan qarz"
-                value={money(user.debt)}
-                tone={user.debt > 0 ? 'danger' : 'default'}
-              />
-            </Card>
-          )}
 
           {user.premiumInterest && (
             <Card tone="flat" className="flex items-center gap-3">
@@ -303,30 +290,12 @@ export function AdminUserSheet({
   );
 }
 
-function InfoRow({
-  label,
-  value,
-  tone = 'default',
-}: {
-  label: string;
-  value: string;
-  tone?: 'default' | 'ok' | 'danger';
-}) {
+function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <Row
       className="px-4 py-2.5"
       left={<span className="text-[13px] text-muted">{label}</span>}
-      right={
-        <span
-          className={cx(
-            'nums text-[14px] font-bold',
-            tone === 'ok' && 'text-ok',
-            tone === 'danger' && 'text-danger',
-          )}
-        >
-          {value}
-        </span>
-      }
+      right={<span className="nums text-[14px] font-bold">{value}</span>}
     />
   );
 }

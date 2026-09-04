@@ -14,6 +14,7 @@ import {
   Icon,
   IconButton,
   Input,
+  NumberInput,
   Progress,
   Sheet,
   Skeleton,
@@ -198,12 +199,9 @@ export function AssignmentMoreSheet({
                 ) : (
                   <>
                     <Field label="Har necha kunda">
-                      <Input
-                        type="number"
-                        min={1}
-                        max={365}
-                        value={dlInterval}
-                        onChange={(e) => setDlInterval(e.target.value)}
+                      <NumberInput
+                        value={dlInterval === '' ? undefined : Number(dlInterval)}
+                        onValueChange={(v) => setDlInterval(v === undefined ? '' : String(v))}
                       />
                     </Field>
                     <Field label="Birinchi dedlayn sanasi">
@@ -245,12 +243,9 @@ export function AssignmentMoreSheet({
               <div className="mt-3">
                 <Field label={`Jami necha ${a.unitLabel} kerak`}>
                   <div className="flex gap-2">
-                    <Input
-                      type="number"
-                      inputMode="numeric"
-                      min={Math.max(1, a.completedUnits)}
-                      value={units}
-                      onChange={(e) => setUnits(e.target.value)}
+                    <NumberInput
+                      value={units === '' ? undefined : Number(units)}
+                      onValueChange={(v) => setUnits(v === undefined ? '' : String(v))}
                       autoFocus
                     />
                     <Button loading={saveUnits.isPending} onClick={() => saveUnits.mutate()}>
@@ -274,12 +269,10 @@ export function AssignmentMoreSheet({
 
             {editing === 'price' && (
               <div className="mt-3 flex gap-2">
-                <Input
-                  type="number"
-                  inputMode="decimal"
-                  min={0}
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
+                <NumberInput
+                  decimal
+                  value={price === '' ? undefined : Number(price)}
+                  onValueChange={(v) => setPrice(v === undefined ? '' : String(v))}
                   autoFocus
                 />
                 <Button loading={savePrice.isPending} onClick={() => savePrice.mutate()}>
@@ -316,14 +309,11 @@ export function AssignmentMoreSheet({
 
           {editing === 'pay' ? (
             <div className="flex gap-2">
-              <Input
-                type="number"
-                inputMode="decimal"
-                min={0}
-                max={a.debt}
+              <NumberInput
+                decimal
                 placeholder={`Summa (${money(a.debt)} gacha)`}
-                value={payAmount}
-                onChange={(e) => setPayAmount(e.target.value)}
+                value={payAmount === '' ? undefined : Number(payAmount)}
+                onValueChange={(v) => setPayAmount(v === undefined ? '' : String(v))}
                 autoFocus
               />
               <Button

@@ -38,17 +38,40 @@ export interface RoleChange {
   mustDeleteProduction: boolean;
 }
 
+/**
+ * Foydalanuvchi boshqaradigan agentlik.
+ *
+ * Rol prodakshn ichida belgilanadi, shuning uchun bitta odam bir joyda
+ * menejer, boshqasida montajyor bo'lishi mumkin. Bu ro'yxat menejerlik
+ * kontekstlarini beradi; bittadan ko'p bo'lsa ilova tanlash so'raydi.
+ */
+export interface ManagedProduction {
+  production: ProductionDto;
+  isOwner: boolean;
+  clientsCount: number;
+}
+
+export interface Membership {
+  id: string;
+  status: MemberStatus;
+  joinMethod: string;
+  production: { id: string; name: string; username: string; photoUrl: string | null };
+  /** Shu prodakshndagi rol — global kasbdan mustaqil */
+  role: Role;
+  roleLabel: string;
+  isManager: boolean;
+}
+
 export interface MeResponse {
   user: UserDto;
   ownedProductions: ProductionDto[];
-  memberships: {
-    id: string;
-    status: MemberStatus;
-    joinMethod: string;
-    production: { id: string; name: string; username: string; photoUrl: string | null };
-  }[];
+  memberships: Membership[];
   pendingInvite: { id: string; name: string; username: string } | null;
   roleChange: RoleChange;
+  /** Menejerlik qiladigan agentliklar (o'ziniki + ko'tarilganlari) */
+  managed: ManagedProduction[];
+  /** Oddiy ishchi sifatidagi a'zoliklar soni */
+  worksIn: number;
 }
 
 /** Hisobni o'chirishdan oldin nima bo'lishini ko'rsatish. */
@@ -141,6 +164,10 @@ export interface TeamMemberRow {
   roleLabel: string;
   roleName: string;
   joinMethod: string;
+  /** Shu prodakshnda menejerlik huquqi bormi */
+  isManager: boolean;
+  /** Menejer sifatida nechta klientga mas'ul */
+  managedClients: number;
   clients: TeamMemberClientRow[];
   clientsCount: number;
   completedUnits: number;
@@ -214,6 +241,8 @@ export interface ClientDto {
   plannedToTeam: number;
   debtToTeam: number;
   margin: number;
+  /** Klientga mas'ul menejer (null — faqat ega ko'radi) */
+  managerId: string | null;
   archived: boolean;
   createdAt: string;
   totalUnits: number;
@@ -232,6 +261,25 @@ export interface TeamOption {
   photoUrl: string | null;
   roleLabel: string;
   roleName: string;
+  /** Klientni faqat menejerga biriktirish mumkin */
+  isManager: boolean;
+}
+
+/** Prodakshn harajati: summa + qisqacha izoh. */
+export interface Expense {
+  id: string;
+  amount: number;
+  note: string;
+  spentAt: string;
+  author: { id: string; name: string; username: string | null; photoUrl: string | null } | null;
+  /** Ega hammasini, menejer faqat o'zinikini o'chira oladi */
+  canEdit: boolean;
+}
+
+export interface ExpensesResponse {
+  items: Expense[];
+  total: number;
+  month: number;
 }
 
 export interface FinanceResponse {
@@ -244,6 +292,8 @@ export interface FinanceResponse {
     plannedToTeam: number;
     paidToTeam: number;
     debtToTeam: number;
+    /** Harajatlar foydadan chiqarilgan */
+    expenses: number;
     profit: number;
     expectedProfit: number;
   };
@@ -391,10 +441,8 @@ export interface AdminUser {
   assignments: number;
   completedUnits: number;
 
-  /** Ishlab topgani, olgani va qolgan qarzi */
-  earned: number;
-  paid: number;
-  debt: number;
+  // Pul ataylab yo'q: kim qancha ishlab topgani prodakshn ichidagi
+  // maxfiy ma'lumot va platforma adminiga ko'rinmaydi.
 
   premiumInterest: boolean;
   premiumTaps: number;

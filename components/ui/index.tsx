@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { assetUrl } from '@/lib/api';
 import { initials } from '@/lib/format';
 import { haptic } from '@/lib/telegram';
@@ -692,6 +692,77 @@ export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
  * Kechikish klaviaturaning ochilish animatsiyasi tugashini kutadi:
  * darhol surilsa, viewport hali o'zgarmagan bo'ladi va hisob noto'g'ri chiqadi.
  */
+/**
+ * Raqam maydoni.
+ *
+ * Oddiy `<Input type="number" value={n} onChange={e => setN(Number(e.target.value) || 0)}>`
+ * bilan ikki muammo bor edi:
+ *
+ *  1. Bo'sh satr darhol nolga aylanadi — "0" ni o'chirib bo'lmaydi va
+ *     yangi son yozish uchun uni belgilab olish kerak.
+ *  2. Yozilayotgan oraliq holatlar ("1.", "0.0") yo'qoladi.
+ *
+ * Yechim: ichkarida MATN saqlanadi, tashqariga esa son (yoki bo'sh
+ * bo'lsa undefined) beriladi. Fokusda matn belgilanadi — maydonga
+ * tegib darhol yangi son yozish mumkin.
+ */
+export function NumberInput({
+  value,
+  onValueChange,
+  decimal = false,
+  ...props
+}: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'type'> & {
+  value: number | undefined | null;
+  onValueChange: (value: number | undefined) => void;
+  /** Kasr sonlarga ruxsat (narx uchun) */
+  decimal?: boolean;
+}) {
+  const [text, setText] = useState(value == null ? '' : String(value));
+  const [lastValue, setLastValue] = useState(value);
+
+  // Prop'dan hosila holat (React'ning tavsiya qilgan naqshi).
+  // Tashqaridan qiymat o'zgarganda (masalan forma tozalanganda) matn
+  // yangilanadi; foydalanuvchi yozayotgan oraliq holat esa tegilmaydi.
+  if (value !== lastValue) {
+    setLastValue(value);
+    const parsed = text.trim() === '' ? undefined : Number(text);
+    if (value !== parsed) {
+      setText(value == null ? '' : String(value));
+    }
+  }
+
+  return (
+    <input
+      {...props}
+      type="text"
+      inputMode={decimal ? 'decimal' : 'numeric'}
+      value={text}
+      onFocus={(e) => {
+        // Butun matnni belgilaymiz: "0" turgan maydonga tegib
+        // darhol kerakli sonni yozish mumkin bo'lsin.
+        e.currentTarget.select();
+        scrollIntoViewOnFocus(e.currentTarget);
+      }}
+      onChange={(e) => {
+        const raw = e.target.value;
+        // Faqat raqam va (ruxsat berilsa) bitta nuqta
+        const cleaned = decimal
+          ? raw.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')
+          : raw.replace(/[^0-9]/g, '');
+        setText(cleaned);
+
+        if (cleaned === '' || cleaned === '.') {
+          onValueChange(undefined);
+          return;
+        }
+        const n = Number(cleaned);
+        if (!Number.isNaN(n)) onValueChange(n);
+      }}
+      className={cx(inputClass, props.disabled && 'opacity-40', props.className)}
+    />
+  );
+}
+
 export function scrollIntoViewOnFocus(el: HTMLElement) {
   window.setTimeout(() => {
     el.scrollIntoView({ block: 'center', behavior: 'smooth' });

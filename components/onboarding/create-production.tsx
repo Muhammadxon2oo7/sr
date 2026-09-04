@@ -21,8 +21,21 @@ import { AccountDeleteSheet } from '@/components/account/danger-zone';
 
 type Step = 0 | 1;
 
-/** Prodakshn yaratish — qadamli master (TZ 4.1). */
-export function CreateProduction() {
+/**
+ * Prodakshn yaratish — qadamli master (TZ 4.1).
+ *
+ * `embedded` — panel ichida (Sheet) ochilganda: to'liq ekran chetlari,
+ * pastdagi qotirilgan panel va "boshqa rolga o'tish" chiqish yo'llari
+ * kerak emas, chunki foydalanuvchi bu yerga o'z ixtiyori bilan kelgan
+ * va panelni yopib chiqib keta oladi.
+ */
+export function CreateProduction({
+  embedded = false,
+  onDone,
+}: {
+  embedded?: boolean;
+  onDone?: () => void;
+} = {}) {
   const { refresh, me } = useAuth();
   const [step, setStep] = useState<Step>(0);
   const [roleOpen, setRoleOpen] = useState(false);
@@ -63,6 +76,7 @@ export function CreateProduction() {
       });
       haptic('success');
       await refresh();
+      onDone?.();
     } catch (err) {
       haptic('error');
       setError((err as Error).message);
@@ -73,7 +87,11 @@ export function CreateProduction() {
   }
 
   return (
-    <div className="mx-auto min-h-dvh max-w-lg px-4 pb-32 pt-8">
+    <div
+      className={
+        embedded ? 'pb-2' : 'mx-auto min-h-dvh max-w-lg px-4 pb-32 pt-8'
+      }
+    >
       {/* Qadam indikatori */}
       <div className="mb-7 flex items-center gap-2.5">
         <LogoMark size={30} />
@@ -199,7 +217,7 @@ export function CreateProduction() {
         yagona yo'l shu yerda bo'lishi kerak, aks holda "yarat →
         o'chir → yarat" tsikliga qamalib qoladi.
       */}
-      {me?.roleChange.canChange && (
+      {!embedded && me?.roleChange.canChange && (
         <div className="mt-8 flex flex-col items-center gap-3">
           <button
             onClick={() => setRoleOpen(true)}
@@ -219,8 +237,14 @@ export function CreateProduction() {
       <RoleChangeSheet open={roleOpen} onClose={() => setRoleOpen(false)} />
       <AccountDeleteSheet open={deleteOpen} onClose={() => setDeleteOpen(false)} />
 
-      <div className="fixed inset-x-0 bottom-0 glass border-t border-line p-4 pb-[calc(env(safe-area-inset-bottom)+16px)]">
-        <div className="mx-auto flex max-w-lg gap-2">
+      <div
+        className={
+          embedded
+            ? 'mt-6'
+            : 'fixed inset-x-0 bottom-0 glass border-t border-line p-4 pb-[calc(env(safe-area-inset-bottom)+16px)]'
+        }
+      >
+        <div className={embedded ? 'flex gap-2' : 'mx-auto flex max-w-lg gap-2'}>
           {step > 0 && (
             <Button variant="secondary" size="lg" onClick={() => goStep((step - 1) as Step)}>
               Orqaga

@@ -12,7 +12,7 @@ type Tab = 'home' | 'profile' | 'admin';
 
 const BASE_ORDER = ['home', 'profile'] as const;
 
-export function WorkerApp() {
+export function WorkerApp({ onSwitch }: { onSwitch?: () => void }) {
   const [tab, setTab] = useState<Tab>('home');
   const { me } = useAuth();
   const isAdmin = me?.user.isAdmin ?? false;
@@ -29,7 +29,7 @@ export function WorkerApp() {
       {/* Chapga/o'ngga surish bilan ham tab almashadi */}
       <SwipeTabs order={order} active={tab} onChange={setTab}>
         {tab === 'home' && <WorkerHome />}
-        {tab === 'profile' && <WorkerProfile />}
+        {tab === 'profile' && <WorkerProfile onSwitch={onSwitch} />}
         {tab === 'admin' && <AdminApp />}
       </SwipeTabs>
 

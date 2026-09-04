@@ -17,7 +17,14 @@ type Tab = 'home' | 'team' | 'clients' | 'profile' | 'admin';
 
 const BASE_ORDER = ['home', 'team', 'clients', 'profile'] as const;
 
-export function ManagerApp({ production }: { production: ProductionDto }) {
+export function ManagerApp({
+  production,
+  onSwitch,
+}: {
+  production: ProductionDto;
+  /** Boshqa ish o'rniga o'tish (bir nechta kontekst bo'lganda) */
+  onSwitch?: () => void;
+}) {
   const [tab, setTab] = useState<Tab>('home');
   const { me } = useAuth();
   const isAdmin = me?.user.isAdmin ?? false;
@@ -45,7 +52,7 @@ export function ManagerApp({ production }: { production: ProductionDto }) {
         {tab === 'home' && <HomeTab productionId={production.id} />}
         {tab === 'team' && <TeamTab productionId={production.id} />}
         {tab === 'clients' && <ClientsTab productionId={production.id} />}
-        {tab === 'profile' && <ProfileTab productionId={production.id} />}
+        {tab === 'profile' && <ProfileTab productionId={production.id} onSwitch={onSwitch} />}
         {tab === 'admin' && <AdminApp />}
       </SwipeTabs>
 
